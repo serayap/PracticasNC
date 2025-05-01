@@ -136,6 +136,17 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // Esto te mostrará en la consola todos los documentos y sus datos en 'usuarios_autorizados'
+        db.collection('usuarios_autorizados').get().then((allDocs) => {
+            allDocs.forEach(doc => {
+                console.log("ID:", doc.id, "Datos:", doc.data());
+                alert("ID: " + doc.id + "\nDatos: " + JSON.stringify(doc.data(), null, 2));
+            });
+        }).catch((error) => {
+            console.error("Error al recuperar documentos:", error);
+            alert("Error al recuperar documentos: " + error.message);
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             alert("Submit ejecutado");
@@ -152,11 +163,7 @@
 
                 alert("Usuario autenticado: " + userCredential.user.email);
                 alert("email formulario: " + email);
-
-                const allDocs = await db.collection('usuarios_autorizados').get();
-                allDocs.forEach(doc => {
-                    alert("Firestore:", doc.data());
-                });
+                             
 
                 // Chequea en Firestore si el usuario está autorizado
                 const snapshot = await db.collection('usuarios_autorizados')
