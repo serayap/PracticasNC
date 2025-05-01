@@ -52,7 +52,9 @@
 <body>
     <div class="container">
         <div class="icon">🚗</div>
+        <div id="Nombre">, </div>
         <h1>Bienvenido/a a las Reservas de Clases Prácticas</h1>
+
         <p>
             Gestiona fácilmente tus <strong>clases prácticas de conducción</strong> en nuestra autoescuela.<br>
             Reserva, consulta o cancela tus prácticas de forma rápida, sencilla y segura.<br>
@@ -60,5 +62,10 @@
         </p>
         <a href="calendario.html" class="cta-btn">Reservar una clase</a>
     </div>
+    <script>
+        const nombre = localStorage.getItem('nombre');
+        const email = localStorage.getItem('email');
+        document.getElementById('Nombre').textContent = `¡Bienvenido, ${nombre}!`;
+    </script>
 </body>
 </html>

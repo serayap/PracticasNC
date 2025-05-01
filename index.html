@@ -136,18 +136,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Esto te mostrará en la consola todos los documentos y sus datos en 'usuarios_autorizados'
-        db.collection('usuarios_registrados').get().then((allDocs) => {
-            allDocs.forEach(doc => {
-                //console.log("ID:", doc.id, "Datos:", doc.data());
-                //alert("ID: " + doc.id + "\nDatos: " + JSON.stringify(doc.data(), null, 2));
-                alert("email storage: " + doc.email);
-            });
-        }).catch((error) => {
-            console.error("Error al recuperar documentos: ", error);
-            alert("Error al recuperar documentos: " + error.message);
-        });
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             alert("Submit ejecutado");
@@ -162,8 +150,8 @@
                 // Login con Firebase Auth
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
 
-                alert("Usuario autenticado: " + userCredential.user.email);
-                alert("email formulario: " + email);
+                //alert("Usuario autenticado: " + userCredential.user.email);
+                //alert("email formulario: " + email);
                              
 
                 // Chequea en Firestore si el usuario está autorizado
@@ -173,7 +161,7 @@
                     .get();
 
                 // Muestra cuántos documentos encontró
-                alert("Documentos encontrados: " + snapshot.size);
+                //alert("Documentos encontrados: " + snapshot.size);
                 
                 if (snapshot.empty) {
                     await auth.signOut();
@@ -187,6 +175,8 @@
                     });
                 }
                 // Usuario autorizado, continúa
+                localStorage.setItem('nombre', nombre);
+                localStorage.setItem('email', email);
                 window.location.href = "Bienvenida.html";
             } catch (error) {
                 errorMsg.textContent = "Usuario o contraseña incorrectos.";
