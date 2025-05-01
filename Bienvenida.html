@@ -91,22 +91,21 @@
 <body>
     <div class="container">
         <div class="icon">🚗</div>
-        <div class="bienvenida" id="saludo">¡Bienvenido!<div id="Nombre">, </div></div>
-        <div class="user-email" id="userEmail"></div>
-        <div class="subtitulo">Autoescuela Nuevos Conductores</div>
-        <div class="info">
-            Gestiona fácilmente tus <strong>clases prácticas de conducción</strong>.<br>
-            Reserva, consulta o cancela tus prácticas de forma rápida, sencilla y segura.<br>
-            ¡Da el siguiente paso hacia tu carnet de conducir!
-        </div>        
-    </div>
-
-    <h1>Bienvenido/a </h1> <div id="Nombre">, </div> <h1> a las Reservas de Clases Prácticas</h1>
-
-    <script>
-        const nombre = localStorage.getItem('nombre');
-        const email = localStorage.getItem('email');
-        document.getElementById('Nombre').textContent = `¡Bienvenido, ${nombre}!`;
-    </script>
+        <div class="bienvenida" id="saludo">¡Bienvenido!</div>
+        <div class="info"> a las Reservas de Clases Prácticas</div>
+            <div class="user-email" id="userEmail"></div>
+            <div class="subtitulo">Autoescuela Nuevos Conductores</div>
+            <div class="info">
+                Gestiona fácilmente tus <strong>clases prácticas de conducción</strong>.<br>
+                Reserva, consulta o cancela tus prácticas de forma rápida, sencilla y segura.<br>
+                ¡Da el siguiente paso hacia tu carnet de conducir!
+            </div>
+        </div>
+        <script>
+            const nombre = localStorage.getItem('nombre') || "";
+            const email = localStorage.getItem('email') || "";
+            document.getElementById('saludo').textContent = nombre ? `¡Bienvenido, ${nombre}!` : "¡Bienvenido!";
+            document.getElementById('userEmail').textContent = email;
+        </script>
 </body>
 </html>
