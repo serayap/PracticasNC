@@ -139,8 +139,8 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             alert("Submit ejecutado");
-            const nombre = document.getElementById('nombre').value.trim();
-            const email = document.getElementById('email').value.trim();
+            const nombre = document.getElementById('nombre').value.trim().toLowerCase();
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const errorMsg = document.getElementById('errorMsg');
             errorMsg.textContent = "";
@@ -157,6 +157,9 @@
                     .where('nombre', '==', nombre)
                     .get();
 
+                // Muestra cuántos documentos encontró
+                alert("Documentos encontrados: " + snapshot.size);
+                
                 if (snapshot.empty) {
                     await auth.signOut();
                     errorMsg.textContent = "Nombre y/o correo electrónico no autorizado.";
