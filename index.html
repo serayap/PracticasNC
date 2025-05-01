@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Acceso a Reservas</title>
+</head>
+<body>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Correo electrónico" required>
+    <button type="submit">Entrar</button>
+  </form>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const scriptUrl = 'URL_DE_TU_WEB_APP_DE_GOOGLE_APPS_SCRIPT'; // Reemplaza esto
+
+      try {
+        const response = await fetch(`${scriptUrl}?email=${encodeURIComponent(email)}`);
+        const data = await response.json();
+
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        // Redirige a la URL dinámica
+        window.location.href = data.url;
+      } catch (error) {
+        alert('Error al validar el usuario');
+      }
+    });
+  </script>
+</body>
+</html>
