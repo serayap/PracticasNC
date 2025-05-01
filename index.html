@@ -111,7 +111,7 @@
         </div>
         <div class="error" id="errorMsg"></div>
         <form id="loginForm">
-            <input type="text" id="nombre" placeholder="Nombre completo" required>
+           <!--<input type="text" id="nombre" placeholder="Nombre completo" required>-->
             <input type="email" id="email" placeholder="Correo electrónico" required>
             <input type="password" id="password" placeholder="Contraseña" required>
             <button type="submit">Entrar</button>
@@ -140,7 +140,7 @@
             e.preventDefault();
             alert("Submit ejecutado");
 
-            const nombre = document.getElementById('nombre').value.trim().toLowerCase();
+            //const nombre = document.getElementById('nombre').value.trim().toLowerCase();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const errorMsg = document.getElementById('errorMsg');
@@ -151,11 +151,17 @@
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
 
                 alert("Usuario autenticado: " + userCredential.user.email);
-                alert("nombre formulario" + nombre + "\n" + "email formulario" + email);
+                alert("email formulario: " + email);
+
+                const allDocs = await db.collection('usuarios_autorizados').get();
+                allDocs.forEach(doc => {
+                    alert("Firestore:", doc.data());
+                });
+
                 // Chequea en Firestore si el usuario está autorizado
                 const snapshot = await db.collection('usuarios_autorizados')
                     .where('email', '==', email)
-                    .where('nombre', '==', nombre)
+                    //.where('nombre', '==', nombre)
                     .get();
 
                 // Muestra cuántos documentos encontró
@@ -163,13 +169,13 @@
                 
                 if (snapshot.empty) {
                     await auth.signOut();
-                    errorMsg.textContent = "Nombre y/o correo electrónico no autorizado.";
+                    errorMsg.textContent = "Acceso no autorizado.";
                     errorMsg.style.display = 'block';
                     return;
                 } else {
                     // Puedes mostrar los datos del documento Firestore si quieres
                     snapshot.forEach(doc => {
-                        alert("Usuario Firestore: " + doc.data().nombre + "\nEmail: " + doc.data().email);
+                        alert("Email: " + doc.data().email);
                     });
                 }
                 // Usuario autorizado, continúa
