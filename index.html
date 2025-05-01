@@ -166,30 +166,5 @@
             Solo usuarios registrados pueden acceder.
         </div>
     </div>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nombre = document.getElementById('nombre').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const scriptUrl = 'URL_DE_TU_WEB_APP_DE_GOOGLE_APPS_SCRIPT'; // Sustituye por tu URL real
-
-            try {
-                const response = await fetch(`${scriptUrl}?email=${encodeURIComponent(email)}`);
-                const data = await response.json();
-
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
-
-                // Puedes guardar el nombre en localStorage si lo necesitas
-                // localStorage.setItem('nombre', nombre);
-
-                window.location.href = data.url;
-            } catch (error) {
-                alert('Error al validar el usuario');
-            }
-        });
-    </script>
 </body>
 </html>
