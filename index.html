@@ -125,6 +125,8 @@
                 // Login con Firebase Auth
                 await auth.signInWithEmailAndPassword(email, password);
 
+                alert("Usuario autenticado: " + userCredential.user.email + \n + "Password: " + userCredential.user.password);
+
                 // Chequea en Firestore si el usuario está autorizado
                 const snapshot = await db.collection('usuarios_autorizados')
                     .where('email', '==', email)
@@ -135,6 +137,8 @@
                     await auth.signOut();
                     errorMsg.textContent = "Nombre y/o correo electrónico no autorizado.";
                     return;
+                } else {
+                    alert("Usuario firestore: " + auth.nombre + \n + "Email: " + auth.email);
                 }
                 // Usuario autorizado, continúa
                 window.location.href = "Bienvenida.html";
@@ -148,7 +152,7 @@
 <body>
     <div class="central-box">
         <div class="logo-text">
-            <span class="red">A</span>utoescuela <span class="red">N</span>uevos <span class="red">C</span>onductores
+            <span class="red">N</span>uevos <span class="red">C</span>onductores <span class="red">A</span>utoescuela
         </div>
         <div class="subtitle">
             Accede a tu área de reservas de clases prácticas.<br>
