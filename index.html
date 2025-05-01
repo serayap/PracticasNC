@@ -123,9 +123,9 @@
 
             try {
                 // Login con Firebase Auth
-                await auth.signInWithEmailAndPassword(email, password);
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
 
-                alert("Usuario autenticado: " + userCredential.user.email + \n + "Password: " + userCredential.user.password);
+                alert("Usuario autenticado: " + userCredential.user.email);
 
                 // Chequea en Firestore si el usuario está autorizado
                 const snapshot = await db.collection('usuarios_autorizados')
@@ -136,18 +136,24 @@
                 if (snapshot.empty) {
                     await auth.signOut();
                     errorMsg.textContent = "Nombre y/o correo electrónico no autorizado.";
+                    errorMsg.style.display = 'block';
                     return;
                 } else {
-                    alert("Usuario firestore: " + auth.nombre + \n + "Email: " + auth.email);
+                    // Puedes mostrar los datos del documento Firestore si quieres
+                    snapshot.forEach(doc => {
+                        alert("Usuario Firestore: " + doc.data().nombre + "\nEmail: " + doc.data().email);
+                    });
                 }
                 // Usuario autorizado, continúa
                 window.location.href = "Bienvenida.html";
             } catch (error) {
                 errorMsg.textContent = "Usuario o contraseña incorrectos.";
+                errorMsg.style.display = 'block';
+                console.error(error.code, error.message);
             }
         });
-
     </script>
+
 </head>
 <body>
     <div class="central-box">
