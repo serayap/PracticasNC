@@ -1,35 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Acceso a Reservas</title>
-</head>
-<body>
-  <form id="loginForm">
-    <input type="email" id="email" placeholder="Correo electrónico" required>
-    <button type="submit">Entrar</button>
-  </form>
-
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const scriptUrl = 'URL_DE_TU_WEB_APP_DE_GOOGLE_APPS_SCRIPT'; // Reemplaza esto
-
-      try {
-        const response = await fetch(`${scriptUrl}?email=${encodeURIComponent(email)}`);
-        const data = await response.json();
-
-        if (data.error) {
-          alert(data.error);
-          return;
+    <meta charset="UTF-8">
+    <title>Acceso a Reservas - Autoescuela Nuevos Conductores</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: #f4f6fa;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
 
-        // Redirige a la URL dinámica
-        window.location.href = data.url;
-      } catch (error) {
-        alert('Error al validar el usuario');
-      }
-    });
-  </script>
+        .central-box {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            padding: 36px 32px 28px 32px;
+            width: 100%;
+            max-width: 370px;
+            text-align: center;
+        }
+
+        .logo-text {
+            font-size: 1.7em;
+            font-weight: bold;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            color: #222;
+        }
+
+            .logo-text .red {
+                color: #d32f2f;
+                font-size: 1.3em;
+                vertical-align: middle;
+            }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.02em;
+            margin-bottom: 28px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"], input[type="email"] {
+            padding: 11px 12px;
+            border: 1.5px solid #d0d4da;
+            border-radius: 6px;
+            font-size: 1em;
+            outline: none;
+            transition: border 0.2s;
+            background: #f8fafc;
+        }
+
+            input[type="text"]:focus, input[type="email"]:focus {
+                border-color: #1976d2;
+            }
+
+        button {
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 6px;
+        }
+
+            button:hover {
+                background: #1258a8;
+            }
+
+        .note {
+            font-size: 0.97em;
+            color: #888;
+            margin-top: 12px;
+        }
+    </style>
+    <!-- En el <head> de tu HTML -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
+            authDomain: "reservaspracticasnc.firebaseapp.com",
+            projectId: "reservaspracticasnc",
+            storageBucket: "reservaspracticasnc.firebasestorage.app",
+            messagingSenderId: "742403879145",
+            appId: "1:742403879145:web:2f64807672793aaa348078",
+            measurementId: "G-J5K20YE6WB"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        async function cargarWhitelist() {
+            const response = await fetch('https://serayap.github.io/PracticasNC/whitelist.json');
+            return await response.json();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value.trim().toLowerCase();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.style.display = 'none';
+
+            const whitelist = await cargarWhitelist();
+            const usuarioPermitido = whitelist.find(
+                user =>
+                    user.email.toLowerCase() === email &&
+                    user.nombre.toLowerCase() === nombre
+            );
+            if (!usuarioPermitido) {
+                errorMsg.textContent = "Nombre y/o correo electrónico no autorizado.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Aquí sigue tu lógica de login con Firebase
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                window.location.href = "bienvenida.html";
+            } catch (error) {
+                errorMsg.textContent = "Usuario o contraseña incorrectos.";
+                errorMsg.style.display = 'block';
+            }
+        });
+
+             
+
+    </script>
+
+</head>
+<body>
+    <div class="central-box">
+        <div class="logo-text">
+            <span class="red">A</span>utoescuela <span class="red">N</span>uevos <span class="red">C</span>onductores
+        </div>
+        <div class="subtitle">
+            Accede a tu área de reservas de clases prácticas.<br>
+            Introduce tus datos para continuar.
+        </div>
+        <form id="loginForm" autocomplete="off">
+            <input type="text" id="nombre" placeholder="Nombre completo" required>
+            <input type="email" id="email" placeholder="Correo electrónico" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <div class="note">
+            Solo usuarios registrados pueden acceder.
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const scriptUrl = 'URL_DE_TU_WEB_APP_DE_GOOGLE_APPS_SCRIPT'; // Sustituye por tu URL real
+
+            try {
+                const response = await fetch(`${scriptUrl}?email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Puedes guardar el nombre en localStorage si lo necesitas
+                // localStorage.setItem('nombre', nombre);
+
+                window.location.href = data.url;
+            } catch (error) {
+                alert('Error al validar el usuario');
+            }
+        });
+    </script>
 </body>
 </html>
