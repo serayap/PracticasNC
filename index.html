@@ -96,49 +96,53 @@
             display: none;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
     <script>
-        async function cargarWhitelist() {
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
+            authDomain: "reservaspracticasnc.firebaseapp.com",
+            projectId: "reservaspracticasnc",
+            storageBucket: "reservaspracticasnc.appspot.com",
+            messagingSenderId: "742403879145",
+            appId: "1:742403879145:web:2f64807672793aaa348078",
+            measurementId: "G-J5K20YE6WB"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = "";
+
             try {
-                const response = await fetch('https://serayap.github.io/PracticasNC/whitelist.json');
-                if (!response.ok) throw new Error('No se pudo cargar la lista blanca.');
-                return await response.json();
-            } catch (err) {
-                throw new Error('No se pudo cargar la lista blanca');
-            }
-        }
+                // Login con Firebase Auth
+                await auth.signInWithEmailAndPassword(email, password);
 
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const nombre = document.getElementById('nombre').value.trim().toLowerCase();
-                const email = document.getElementById('email').value.trim().toLowerCase();
-                const errorMsg = document.getElementById('errorMsg');
-                errorMsg.style.display = 'none';
+                // Chequea en Firestore si el usuario está autorizado
+                const snapshot = await db.collection('usuarios_autorizados')
+                    .where('email', '==', email)
+                    .where('nombre', '==', nombre)
+                    .get();
 
-                let whitelist;
-                try {
-                    whitelist = await cargarWhitelist();
-                } catch (err) {
-                    errorMsg.textContent = "No se pudo cargar la lista blanca.";
-                    errorMsg.style.display = 'block';
-                    return;
-                }
-
-                const usuarioPermitido = whitelist.find(
-                    user =>
-                        user.email.toLowerCase() === email &&
-                        user.nombre.toLowerCase() === nombre
-                );
-                if (!usuarioPermitido) {
+                if (snapshot.empty) {
+                    await auth.signOut();
                     errorMsg.textContent = "Nombre y/o correo electrónico no autorizado.";
-                    errorMsg.style.display = 'block';
                     return;
                 }
-
-                // Acceso permitido: redirige o muestra la página de bienvenida personalizada
-                window.location.href = "bienvenida.html";
-            });
+                // Usuario autorizado, continúa
+                window.location.href = "Bienvenida.html";
+            } catch (error) {
+                errorMsg.textContent = "Usuario o contraseña incorrectos.";
+            }
         });
+
     </script>
 </head>
 <body>
@@ -151,11 +155,14 @@
             Introduce tus datos para continuar.
         </div>
         <div class="error" id="errorMsg"></div>
-        <form id="loginForm" autocomplete="off">
+        <form id="loginForm">
             <input type="text" id="nombre" placeholder="Nombre completo" required>
             <input type="email" id="email" placeholder="Correo electrónico" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
             <button type="submit">Entrar</button>
         </form>
+        <div id="errorMsg"></div>
+
         <div class="note">
             Solo usuarios autorizados pueden acceder.
         </div>
