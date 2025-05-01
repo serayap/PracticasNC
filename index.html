@@ -161,7 +161,7 @@
                     .get();
 
                 // Muestra cuántos documentos encontró
-                //alert("Documentos encontrados: " + snapshot.size);
+                alert("Documentos encontrados: " + snapshot.size);
                 
                 if (snapshot.empty) {
                     await auth.signOut();
@@ -175,8 +175,8 @@
                     });
                 }
                 // Usuario autorizado, continúa
-                localStorage.setItem('nombre', nombre);
-                localStorage.setItem('email', email);
+                localStorage.setItem('nombre', snapshot.data().email);
+                localStorage.setItem('email', snapshot.data().email);
                 window.location.href = "Bienvenida.html";
             } catch (error) {
                 errorMsg.textContent = "Usuario o contraseña incorrectos.";
