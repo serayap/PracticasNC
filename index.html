@@ -117,11 +117,11 @@
             e.preventDefault();
             const nombre = document.getElementById('nombre').value.trim().toLowerCase();
             const email = document.getElementById('email').value.trim().toLowerCase();
-            const password = document.getElementById('password').value;
+            //const password = document.getElementById('password').value;
             const errorMsg = document.getElementById('errorMsg');
             errorMsg.style.display = 'none';
 
-            const whitelist = await cargarWhitelist();
+            const whitelist = await cargarWhitelist('whitelist.json');
             const usuarioPermitido = whitelist.find(
                 user =>
                     user.email.toLowerCase() === email &&
@@ -157,6 +157,7 @@
             Accede a tu área de reservas de clases prácticas.<br>
             Introduce tus datos para continuar.
         </div>
+        <div class="error" id="errorMsg"></div>
         <form id="loginForm" autocomplete="off">
             <input type="text" id="nombre" placeholder="Nombre completo" required>
             <input type="email" id="email" placeholder="Correo electrónico" required>
