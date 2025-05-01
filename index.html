@@ -170,7 +170,7 @@
                     return;
                 } else {
                     // Puedes mostrar los datos del documento Firestore si quieres
-                    alert(snapshot.document.data().nombre);
+                    //alert(snapshot.document.data().nombre);
                     snapshot.forEach(doc => {
                         //alert("Email: " + doc.data().email);
                         localStorage.setItem('nombre', doc.data().nombre);
