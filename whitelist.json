@@ -1,4 +1,3 @@
-json
 [
   { "nombre": "Juan Pérez", "email": "juan@email.com" },
   { "nombre": "Ana González", "email": "ana@email.com" },
