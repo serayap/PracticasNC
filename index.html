@@ -175,8 +175,8 @@
                     });
                 }
                 // Usuario autorizado, continúa
-                localStorage.setItem('nombre', snapshot.data().email);
-                localStorage.setItem('email', snapshot.data().email);
+                //localStorage.setItem('nombre', snapshot.data().email);
+                //localStorage.setItem('email', snapshot.data().email);
                 window.location.href = "Bienvenida.html";
             } catch (error) {
                 errorMsg.textContent = "Usuario o contraseña incorrectos.";
