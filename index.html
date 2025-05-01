@@ -170,17 +170,18 @@
                     return;
                 } else {
                     // Puedes mostrar los datos del documento Firestore si quieres
+                    alert(snapshot.data().nombre);
                     snapshot.forEach(doc => {
                         //alert("Email: " + doc.data().email);
-                        //localStorage.setItem('nombre', doc.data().email);
-                        //localStorage.setItem('email', doc.data().email);
-                        const datos = doc.data();
+                        localStorage.setItem('nombre', doc.data().nombre);
+                        localStorage.setItem('email', doc.data().email);
+                        /*const datos = doc.data();
                         for(const clave in datos) {
                             if (datos.hasOwnProperty(clave)) {
                                 alert(clave + ": " + datos[clave]);
                                 // O puedes hacer cualquier otra operación con los datos
                             }
-                        }
+                        }*/
                     });
                 }
                 // Usuario autorizado, continúa
