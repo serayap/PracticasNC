@@ -88,26 +88,20 @@
             color: #888;
             margin-top: 12px;
         }
-    </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
-            authDomain: "reservaspracticasnc.firebaseapp.com",
-            projectId: "reservaspracticasnc",
-            storageBucket: "reservaspracticasnc.appspot.com",
-            messagingSenderId: "742403879145",
-            appId: "1:742403879145:web:2f64807672793aaa348078",
-            measurementId: "G-J5K20YE6WB"
-        };
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
 
+        .error {
+            color: #d32f2f;
+            margin-bottom: 10px;
+            font-size: 1em;
+            display: none;
+        }
+    </style>
+    <script>
         async function cargarWhitelist() {
-            // Usa ruta relativa si el JSON está en el mismo directorio
             const response = await fetch('whitelist.json');
+            if (!response.ok) {
+                throw new Error('No se pudo cargar la lista blanca.');
+            }
             return await response.json();
         }
 
@@ -116,7 +110,6 @@
                 e.preventDefault();
                 const nombre = document.getElementById('nombre').value.trim().toLowerCase();
                 const email = document.getElementById('email').value.trim().toLowerCase();
-                const password = document.getElementById('password').value;
                 const errorMsg = document.getElementById('errorMsg');
                 errorMsg.style.display = 'none';
 
@@ -140,14 +133,8 @@
                     return;
                 }
 
-                // Login con Firebase Auth
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                    window.location.href = "bienvenida.html";
-                } catch (error) {
-                    errorMsg.textContent = "Usuario o contraseña incorrectos.";
-                    errorMsg.style.display = 'block';
-                }
+                // Acceso permitido: redirige o muestra la página de bienvenida personalizada
+                window.location.href = "bienvenida.html";
             });
         });
     </script>
@@ -165,11 +152,10 @@
         <form id="loginForm" autocomplete="off">
             <input type="text" id="nombre" placeholder="Nombre completo" required>
             <input type="email" id="email" placeholder="Correo electrónico" required>
-            <input type="password" id="password" placeholder="Contraseña" required>
             <button type="submit">Entrar</button>
         </form>
         <div class="note">
-            Solo usuarios registrados pueden acceder.
+            Solo usuarios autorizados pueden acceder.
         </div>
     </div>
 </body>
