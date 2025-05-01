@@ -174,7 +174,8 @@
                         //alert("Email: " + doc.data().email);
                         //localStorage.setItem('nombre', doc.data().email);
                         //localStorage.setItem('email', doc.data().email);
-                        for(const clave in doc.data()) {
+                        const datos = doc.data();
+                        for(const clave in datos) {
                             if (datos.hasOwnProperty(clave)) {
                                 alert(clave + ": " + datos[clave]);
                                 // O puedes hacer cualquier otra operación con los datos
