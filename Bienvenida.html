@@ -2,66 +2,107 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reservas de Clases Prácticas - Autoescuela de Conductores</title>
+    <title>Reservas de Clases Prácticas - Autoescuela Nuevos Conductores</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            background: #f4f8fb;
+            background: linear-gradient(135deg, #e3f0ff 0%, #f9fbfc 100%);
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 0;
+            min-height: 100vh;
         }
+
         .container {
-            max-width: 480px;
-            margin: 60px auto;
+            max-width: 420px;
+            margin: 64px auto;
             background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-            padding: 32px 24px;
+            border-radius: 18px;
+            box-shadow: 0 6px 32px rgba(25, 103, 210, 0.10);
+            padding: 36px 28px 32px 28px;
             text-align: center;
         }
-        h1 {
-            color: #1967d2;
-            margin-bottom: 16px;
-        }
-        p {
-            color: #333;
-            font-size: 1.1em;
-            margin-bottom: 30px;
-        }
-        .cta-btn {
-            display: inline-block;
-            background: #1967d2;
-            color: #fff;
-            text-decoration: none;
-            padding: 12px 32px;
-            border-radius: 6px;
-            font-size: 1em;
-            transition: background 0.2s;
-        }
-        .cta-btn:hover {
-            background: #1451a0;
-        }
+
         .icon {
-            font-size: 48px;
+            font-size: 56px;
             color: #1967d2;
             margin-bottom: 18px;
+            filter: drop-shadow(0 2px 8px #1967d221);
+        }
+
+        .bienvenida {
+            font-size: 1.35em;
+            font-weight: 600;
+            color: #1967d2;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitulo {
+            font-size: 1.08em;
+            color: #333;
+            margin-bottom: 24px;
+        }
+
+        .info {
+            color: #555;
+            font-size: 1.05em;
+            margin-bottom: 36px;
+            line-height: 1.7;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: linear-gradient(90deg, #1967d2 70%, #3ab3ff 100%);
+            color: #fff;
+            text-decoration: none;
+            padding: 14px 36px;
+            border-radius: 8px;
+            font-size: 1.08em;
+            font-weight: 600;
+            box-shadow: 0 2px 12px rgba(25,103,210,0.08);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+            .cta-btn:hover {
+                background: linear-gradient(90deg, #1451a0 70%, #1e9fff 100%);
+                box-shadow: 0 4px 16px rgba(25,103,210,0.13);
+            }
+
+        .user-email {
+            color: #888;
+            font-size: 0.98em;
+            margin-bottom: 18px;
+            word-break: break-all;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 24px 8px;
+                padding: 24px 8px;
+            }
+
+            .icon {
+                font-size: 44px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="icon">🚗</div>
-        
-        <h1>Bienvenido/a </h1> <div id="Nombre">, </div> <h1> a las Reservas de Clases Prácticas</h1>
-
-        <p>
-            Gestiona fácilmente tus <strong>clases prácticas de conducción</strong> en nuestra autoescuela.<br>
+        <div class="bienvenida" id="saludo">¡Bienvenido!<div id="Nombre">, </div></div>
+        <div class="user-email" id="userEmail"></div>
+        <div class="subtitulo">Autoescuela Nuevos Conductores</div>
+        <div class="info">
+            Gestiona fácilmente tus <strong>clases prácticas de conducción</strong>.<br>
             Reserva, consulta o cancela tus prácticas de forma rápida, sencilla y segura.<br>
             ¡Da el siguiente paso hacia tu carnet de conducir!
-        </p>
-        <a href="calendario.html" class="cta-btn">Reservar una clase</a>
+        </div>        
     </div>
+
+    <h1>Bienvenido/a </h1> <div id="Nombre">, </div> <h1> a las Reservas de Clases Prácticas</h1>
+
     <script>
         const nombre = localStorage.getItem('nombre');
         const email = localStorage.getItem('email');
