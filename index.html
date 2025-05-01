@@ -171,12 +171,18 @@
                 } else {
                     // Puedes mostrar los datos del documento Firestore si quieres
                     snapshot.forEach(doc => {
-                        alert("Email: " + doc.data().email);
+                        //alert("Email: " + doc.data().email);
+                        //localStorage.setItem('nombre', doc.data().email);
+                        //localStorage.setItem('email', doc.data().email);
+                        for(const clave in doc.data()) {
+                            if (datos.hasOwnProperty(clave)) {
+                                alert(clave + ": " + datos[clave]);
+                                // O puedes hacer cualquier otra operación con los datos
+                            }
+                        }
                     });
                 }
                 // Usuario autorizado, continúa
-                //localStorage.setItem('nombre', snapshot.data().email);
-                //localStorage.setItem('email', snapshot.data().email);
                 window.location.href = "Bienvenida.html";
             } catch (error) {
                 errorMsg.textContent = "Usuario o contraseña incorrectos.";
