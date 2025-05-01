@@ -139,6 +139,7 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             alert("Submit ejecutado");
+
             const nombre = document.getElementById('nombre').value.trim().toLowerCase();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
@@ -150,7 +151,7 @@
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
 
                 alert("Usuario autenticado: " + userCredential.user.email);
-
+                alert("nombre formulario" + nombre + "\n" + "email formulario" + email);
                 // Chequea en Firestore si el usuario está autorizado
                 const snapshot = await db.collection('usuarios_autorizados')
                     .where('email', '==', email)
