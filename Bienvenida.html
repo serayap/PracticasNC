@@ -104,9 +104,9 @@
             <a href="calendario.html" class="cta-btn">Reservar una clase</a>
         </div>
         <script>
-            const nombre = localStorage.getItem('nombre') || "";
+            const nombre = capitalizarPrimeraLetra(localStorage.getItem('nombre') || "");
             const email = localStorage.getItem('email') || "";
-            document.getElementById('saludo').textContent = nombre ? `¡Bienvenido, ${capitalizarPrimeraLetra(nombre);}!` : "¡Bienvenido!";
+            document.getElementById('saludo').textContent = nombre ? `¡Bienvenido, ${nombre}!` : "¡Bienvenido!";
             document.getElementById('userEmail').textContent = email;
 
             function capitalizarPrimeraLetra(str) {
