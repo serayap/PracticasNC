@@ -189,7 +189,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const settings = { experimentalForceLongPolling: true };
+        const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
         const auth = firebase.auth();
 
@@ -241,10 +241,11 @@
             }
         }
 
-        // Inicializar FullCalendar        
+        // Inicializar FullCalendar  
+        let calendar;
         function inicializarCalendario() {
             const calendarEl = document.getElementById('calendar');
-            const calendar = new FullCalendar.Calendar(calendarEl, {
+            calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
                 height: 500,
@@ -306,8 +307,8 @@
                 reservasTodas = [];
                 snapshot.forEach(doc => {
                     const reserva = doc.data();
-                    if (reserva.fecha?.toDate) { // Validación con optional chaining
-                        reservasTodas.push({ // <-- Corrige el nombre del array
+                    if (reserva.fecha?.toDate) {
+                        reservasTodas.push({ 
                             id: doc.id,
                             title: reserva.usuarioNombre,
                             start: reserva.fecha.toDate().toISOString(),

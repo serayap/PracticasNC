@@ -135,6 +135,8 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const settings = { experimentalForceLongPolling: true, merge: true };
+        db.settings(settings);
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
