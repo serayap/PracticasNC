@@ -178,9 +178,23 @@
                 alert("No se encontró el div con id 'calendar'");
                 return;
             }
+
+            const fechaActual = new Date(); // O fija la fecha si es para pruebas
+            const year = fechaActual.getFullYear();
+            const month = fechaActual.getMonth(); // 0-indexed
+
+            // Primer día del mes actual
+            const start = new Date(year, month, 1);
+            // Último día del mes siguiente
+            const end = new Date(year, month + 2, 0); // Día 0 del mes+2 es el último del mes+1
+
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
+                validRange: {
+                    start: start.toISOString().split('T')[0],
+                    end: end.toISOString().split('T')[0]
+                },
                 height: 500,
                 events: [],
                 eventDidMount: function (info) {
