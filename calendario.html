@@ -382,9 +382,14 @@
                 return;
             }
             usuarioActual = user;
-            var c="";
+            var c = "";
             Object.keys(usuarioActual).forEach(function (prop) {
-                c = c + ":" + prop + " = " + usuarioActual[prop];
+                let valor = usuarioActual[prop];
+                // Si el valor es un objeto, conviértelo a string legible
+                if (typeof valor === "object" && valor !== null) {
+                    valor = JSON.stringify(valor, null, 2);
+                }
+                c += `\n${prop} = ${valor}`;
             });
             alert(c);
 
