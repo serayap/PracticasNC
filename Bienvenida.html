@@ -116,13 +116,12 @@
                 messagingSenderId: "742403879145",
                 appId: "1:742403879145:web:2f64807672793aaa348078"
             };
-            alert("hola");
+            
             firebase.initializeApp(firebaseConfig);
             const auth = firebase.auth();
-            alert("hola1");
+            
             // Autenticación y carga inicial
-            auth.onAuthStateChanged(user => {
-                alert("Hola2");
+            auth.onAuthStateChanged(user => {                
                 if (!user) {
                     // Redirige sin alertas bloqueantes
                     window.location.href = "index.html";
