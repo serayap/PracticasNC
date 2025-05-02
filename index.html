@@ -168,21 +168,14 @@
                     errorMsg.textContent = "Acceso no autorizado.";
                     errorMsg.style.display = 'block';
                     return;
-                } else {
-                    // Puedes mostrar los datos del documento Firestore si quieres
-                    //const user = auth.currentUser;
-                    
-                    snapshot.forEach(doc => {
-                        localStorage.setItem('nombre', doc.data().nombre);
-                        localStorage.setItem('email', doc.data().email); 
+                } 
 
-                        /*if (user) {
-                            await user.updateProfile({ displayName: doc.data().nombre });
-                            await user.updateEmail(doc.data().email);
-                            await user.reload();
-                        }*/
-                    });
-                }
+                const doc = snapshot.docs[0];
+                const nombreFirestore = doc.data().nombre;
+
+                await user.updateProfile({ displayName: nombreFirestore });
+                await user.reload(); 
+
                 // Usuario autorizado, continúa
                 window.location.href = "Bienvenida.html";
             } catch (error) {
