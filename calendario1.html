@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Distribución Formulario + Calendario + Listado</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+  <style>
+    .container {
+      display: flex;
+      flex-direction: column;
+      max-width: 1100px;
+      margin: 0 auto;
+      gap: 0;
+    }
+    .arriba {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      width: 100%;
+    }
+    .form-reserva {
+      flex: 1 1 40%;
+      min-width: 300px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      margin-bottom: 0;
+    }
+    #calendar {
+      flex: 1 1 55%;
+      min-width: 300px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      margin-bottom: 0;
+      min-height: 500px;
+    }
+    .reservas-container {
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      margin-top: 30px;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    @media (max-width: 900px) {
+      .arriba {
+        flex-direction: column;
+        gap: 0;
+      }
+      #calendar, .form-reserva {
+        min-width: 0;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="arriba">
+      <div class="form-reserva">
+        <h2>Formulario de reserva</h2>
+        <!-- Aquí tu formulario -->
+      </div>
+      <div id="calendar"></div>
+    </div>
+    <div class="reservas-container">
+      <h2>Listado de reservas</h2>
+      <!-- Aquí tu listado -->
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        events: [
+          { title: 'Evento de prueba', start: new Date() }
+        ]
+      });
+      calendar.render();
+    });
+  </script>
+</body>
+</html>
