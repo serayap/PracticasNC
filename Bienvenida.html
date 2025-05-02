@@ -104,6 +104,18 @@
             <a href="calendario.html" class="cta-btn">Reservar una clase</a>
         </div>
         <script>
+            // Configuración de Firebase
+            const firebaseConfig = {
+                apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
+                authDomain: "reservaspracticasnc.firebaseapp.com",
+                projectId: "reservaspracticasnc",
+                storageBucket: "reservaspracticasnc.appspot.com",
+                messagingSenderId: "742403879145",
+                appId: "1:742403879145:web:2f64807672793aaa348078"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+
             const nombre = capitalizarPrimeraLetra(localStorage.getItem('nombre') || "");
             const email = localStorage.getItem('email') || "";
             document.getElementById('saludo').textContent = nombre ? `¡Bienvenido, ${nombre}!` : "¡Bienvenido!";
