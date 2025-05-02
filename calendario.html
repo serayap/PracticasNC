@@ -4,21 +4,10 @@
     <meta charset="UTF-8">
     <title>Calendario de Reservas - Autoescuela Nuevos Conductores</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- FullCalendar -->
-    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.css' rel='stylesheet' />
-    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.css' rel='stylesheet' />
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.css" rel="stylesheet" />
     <style>
-        :root {
-            --color-primario: #1967d2;
-            --color-secundario: #3ab3ff;
-        }
-
         body {
             background: #f8fafd;
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -27,11 +16,10 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
-        /* Calendario */
         #calendar {
             background: #fff;
             border-radius: 12px;
@@ -40,60 +28,111 @@
             margin-bottom: 30px;
         }
 
-        /* Listado de reservas */
         .reservas-container {
             background: #fff;
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
             margin-bottom: 30px;
-            max-height: 400px;
+            max-height: 340px;
             overflow-y: auto;
         }
 
         .reserva-item {
-            padding: 15px;
+            padding: 13px 0;
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 1.05em;
         }
 
-        .reserva-item.pendiente {
-            border-left: 4px solid #ff9800;
-        }
+            .reserva-item.pendiente {
+                border-left: 4px solid #ff9800;
+            }
 
-        .reserva-item.confirmada {
-            border-left: 4px solid #4caf50;
-        }
+            .reserva-item.confirmada {
+                border-left: 4px solid #4caf50;
+            }
 
-        /* Formulario */
         .form-reserva {
             background: #fff;
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
         }
 
-        .horarios-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
+            .form-reserva h2 {
+                margin-top: 0;
+            }
+
+        .form-row {
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
         }
 
-        .bloque-hora {
-            background: #f5f5f5;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
+        label {
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        select, input[type="time"] {
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1.2px solid #bbb;
+            font-size: 1em;
+        }
+
+        .block-week {
+            margin-left: 8px;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: linear-gradient(90deg, #1967d2 70%, #3ab3ff 100%);
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 36px;
+            border-radius: 8px;
+            font-size: 1.08em;
+            font-weight: 600;
+            box-shadow: 0 2px 12px rgba(25,103,210,0.08);
+            border: none;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, box-shadow 0.2s;
         }
 
-        .bloque-hora.seleccionado {
-            background: var(--color-primario);
-            color: white;
+            .cta-btn:hover {
+                background: linear-gradient(90deg, #1451a0 70%, #1e9fff 100%);
+                box-shadow: 0 4px 16px rgba(25,103,210,0.13);
+            }
+
+        .estado-confirmada {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .estado-pendiente {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                max-width: 98vw;
+            }
+
+            #calendar {
+                padding: 2vw;
+            }
+
+            .form-reserva, .reservas-container {
+                padding: 2vw;
+            }
         }
     </style>
 </head>
@@ -108,17 +147,33 @@
 
         <div class="form-reserva">
             <h2>Nueva Reserva</h2>
-            <div id="selector-fechas"></div>
-            <div class="horarios-grid" id="horarios"></div>
-            <button id="btn-reservar" class="cta-btn">Reservar selección</button>
+            <form id="formReserva">
+                <div class="form-row">
+                    <label for="dia">Día:</label>
+                    <select id="dia" required></select>
+                </div>
+                <div class="form-row">
+                    <label for="hora">Hora:</label>
+                    <select id="hora" required></select>
+                </div>
+                <div class="form-row">
+                    <input type="checkbox" id="bloqueSemana" class="block-week">
+                    <label for="bloqueSemana">Reservar este horario para toda la semana</label>
+                </div>
+                <button type="submit" class="cta-btn">Reservar selección</button>
+            </form>
+            <div id="reservaMsg" style="color:#d32f2f; margin-top:10px;"></div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales/es.min.js'></script>
-    
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales/es.min.js"></script>
+    <!-- Firebase (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
@@ -133,151 +188,207 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Variables globales
-        let calendario;
-        let reservas = [];
-        let seleccionActual = [];
+        let calendar;
+        let reservasTodas = [];
+        let reservasUsuario = [];
+        let usuarioActual = null;
 
-        // Inicializar calendario
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Configurar FullCalendar
-            calendario = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        // Utilidad: formato YYYY-MM-DD
+        function toISODate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Cargar días de la semana actual y la siguiente
+        function cargarDias() {
+            const selectDia = document.getElementById('dia');
+            selectDia.innerHTML = "";
+            const hoy = new Date();
+            for (let i = 0; i < 14; i++) {
+                const fecha = new Date(hoy);
+                fecha.setDate(hoy.getDate() + i);
+                const fechaISO = toISODate(fecha);
+                const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+                const option = document.createElement('option');
+                option.value = fechaISO;
+                option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+                selectDia.appendChild(option);
+            }
+        }
+
+        // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
+        function cargarHoras() {
+            const selectHora = document.getElementById('hora');
+            selectHora.innerHTML = "";
+            for (let hora = 9; hora <= 20; hora++) {
+                for (let min of [0, 30]) {
+                    const horaStr = `${hora.toString().padStart(2, '0')}:${min === 0 ? '00' : '30'}`;
+                    const option = document.createElement('option');
+                    option.value = horaStr;
+                    option.textContent = horaStr;
+                    selectHora.appendChild(option);
+                }
+            }
+        }
+
+        // Inicializar FullCalendar
+        function inicializarCalendario() {
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth',
                 locale: 'es',
+                height: 500,
                 events: [],
-                eventDidMount: (info) => {
+                eventDidMount: function (info) {
+                    // Colores según estado
                     if (info.event.extendedProps.estado === 'pendiente') {
                         info.el.style.backgroundColor = '#ff9800';
+                        info.el.style.borderColor = '#ff9800';
+                    }
+                    if (info.event.extendedProps.estado === 'confirmada') {
+                        info.el.style.backgroundColor = '#4caf50';
+                        info.el.style.borderColor = '#4caf50';
                     }
                 }
             });
-            calendario.render();
+            calendar.render();
+        }
 
-            // Cargar reservas
-            await cargarReservas();
-            cargarFormulario();
-        });
+        // Mostrar todas las reservas en el calendario
+        function mostrarReservasCalendario() {
+            calendar.removeAllEvents();
+            const eventos = reservasTodas.map(r => ({
+                title: r.usuarioNombre + " (" + r.hora + ")",
+                start: r.fecha,
+                color: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
+                extendedProps: { estado: r.estado }
+            }));
+            calendar.addEventSource(eventos);
+        }
+
+        // Mostrar reservas del usuario autenticado
+        function mostrarReservasUsuario() {
+            const lista = document.getElementById('lista-reservas');
+            lista.innerHTML = "";
+            if (reservasUsuario.length === 0) {
+                lista.innerHTML = "<em>No tienes reservas aún.</em>";
+                return;
+            }
+            reservasUsuario
+                .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+                .forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = `reserva-item ${r.estado}`;
+                    div.innerHTML = `
+                            <div>
+                                <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
+                                &nbsp;${r.hora}
+                            </div>
+                            <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
+                        `;
+                    lista.appendChild(div);
+                });
+        }
 
         // Cargar reservas desde Firestore
         async function cargarReservas() {
-            // Todas las reservas (para el calendario)
-            db.collection('reservas').onSnapshot((snapshot) => {
-                reservas = [];
+            // Todas las reservas para el calendario
+            db.collection('reservas').onSnapshot(snapshot => {
+                reservasTodas = [];
                 snapshot.forEach(doc => {
-                    const reserva = doc.data();
-                    reservas.push({
-                        id: doc.id,
-                        title: reserva.usuarioNombre,
-                        start: reserva.fecha.toDate().toISOString(),
-                        color: reserva.estado === 'confirmada' ? '#4caf50' : '#ff9800',
-                        extendedProps: {
-                            estado: reserva.estado
-                        }
+                    const d = doc.data();
+                    reservasTodas.push({
+                        ...d,
+                        fecha: d.fecha.toDate ? d.fecha.toDate().toISOString().split('T')[0] : d.fecha,
+                        id: doc.id
                     });
                 });
-                calendario.removeAllEvents();
-                calendario.addEventSource(reservas);
+                mostrarReservasCalendario();
             });
 
-            // Reservas del usuario actual
-            const usuario = auth.currentUser;
+            // Reservas del usuario autenticado
             db.collection('reservas')
-                .where('usuarioId', '==', usuario.uid)
-                .onSnapshot((snapshot) => {
-                    const lista = document.getElementById('lista-reservas');
-                    lista.innerHTML = '';
+                .where('usuarioId', '==', usuarioActual.uid)
+                .onSnapshot(snapshot => {
+                    reservasUsuario = [];
                     snapshot.forEach(doc => {
-                        const reserva = doc.data();
-                        const item = document.createElement('div');
-                        item.className = `reserva-item ${reserva.estado}`;
-                        item.innerHTML = `
-                            <div>
-                                <strong>${reserva.fecha.toDate().toLocaleDateString('es')}</strong>
-                                ${reserva.hora}
-                            </div>
-                            <div>${reserva.estado.toUpperCase()}</div>
-                        `;
-                        lista.appendChild(item);
+                        const d = doc.data();
+                        reservasUsuario.push({
+                            ...d,
+                            fecha: d.fecha.toDate ? d.fecha.toDate().toISOString().split('T')[0] : d.fecha,
+                            id: doc.id
+                        });
                     });
+                    mostrarReservasUsuario();
                 });
         }
 
-        // Generar selector de fechas y horas
-        function cargarFormulario() {
-            const hoy = new Date();
-            const selectorFechas = document.getElementById('selector-fechas');
-            
-            // Generar próximos 14 días
-            for (let i = 0; i < 14; i++) {
-                const fecha = new Date();
-                fecha.setDate(hoy.getDate() + i);
-                const fechaStr = fecha.toISOString().split('T')[0];
-                
-                const divFecha = document.createElement('div');
-                divFecha.className = 'fecha-dia';
-                divFecha.innerHTML = `<h3>${fecha.toLocaleDateString('es', { weekday: 'long', day: 'numeric' })}</h3>`;
-                selectorFechas.appendChild(divFecha);
+        // Crear reservas (una o bloque semanal)
+        async function crearReserva(e) {
+            e.preventDefault();
+            const reservaMsg = document.getElementById('reservaMsg');
+            reservaMsg.textContent = "";
+            const dia = document.getElementById('dia').value;
+            const hora = document.getElementById('hora').value;
+            const bloque = document.getElementById('bloqueSemana').checked;
+            let fechas = [dia];
 
-                // Generar horas de 9:00 a 20:00 cada 30 minutos
-                const horarios = document.getElementById('horarios');
-                for (let hora = 9; hora <= 20; hora++) {
-                    for (let minuto of ['00', '30']) {
-                        const horaCompleta = `${hora.toString().padStart(2, '0')}:${minuto}`;
-                        const bloque = document.createElement('div');
-                        bloque.className = 'bloque-hora';
-                        bloque.textContent = horaCompleta;
-                        bloque.dataset.fecha = fechaStr;
-                        bloque.dataset.hora = horaCompleta;
-                        bloque.addEventListener('click', () => seleccionarHora(bloque));
-                        horarios.appendChild(bloque);
+            // Si es bloque semanal, busca todos los días iguales (ej: todos los lunes) en las dos semanas
+            if (bloque) {
+                const fechaInicial = new Date(dia);
+                const diaSemana = fechaInicial.getDay();
+                fechas = [];
+                for (let i = 0; i < 14; i++) {
+                    const f = new Date();
+                    f.setDate(fechaInicial.getDate() + (i - fechaInicial.getDay() + diaSemana));
+                    if (f >= fechaInicial && f.getDay() === diaSemana) {
+                        fechas.push(toISODate(f));
                     }
                 }
             }
-        }
 
-        // Manejar selección de horas
-        function seleccionarHora(elemento) {
-            elemento.classList.toggle('seleccionado');
-            const fecha = elemento.dataset.fecha;
-            const hora = elemento.dataset.hora;
-
-            if (seleccionActual.some(r => r.fecha === fecha && r.hora === hora)) {
-                seleccionActual = seleccionActual.filter(r => !(r.fecha === fecha && r.hora === hora));
-            } else {
-                seleccionActual.push({ fecha, hora });
-            }
-        }
-
-        // Reservar horas seleccionadas
-        document.getElementById('btn-reservar').addEventListener('click', async () => {
-            const usuario = auth.currentUser;
-            
-            for (const { fecha, hora } of seleccionActual) {
-                // Verificar disponibilidad
+            // Verifica disponibilidad y crea reservas
+            for (const fecha of fechas) {
+                // Comprobar si ya existe reserva para ese día y hora
                 const existe = await db.collection('reservas')
                     .where('fecha', '==', new Date(fecha))
                     .where('hora', '==', hora)
                     .get();
-
                 if (!existe.empty) {
-                    alert(`La hora ${hora} del ${fecha} ya está reservada.`);
+                    reservaMsg.textContent = `Ya existe una reserva para el ${fecha} a las ${hora}.`;
                     return;
                 }
+            }
 
-                // Crear reserva
+            // Crear reservas
+            for (const fecha of fechas) {
                 await db.collection('reservas').add({
-                    usuarioId: usuario.uid,
-                    usuarioNombre: localStorage.getItem('nombre'),
+                    usuarioId: usuarioActual.uid,
+                    usuarioNombre: localStorage.getItem('nombre') || usuarioActual.email,
                     fecha: new Date(fecha),
                     hora: hora,
                     estado: 'pendiente',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
+            reservaMsg.style.color = "#388e3c";
+            reservaMsg.textContent = "Reserva(s) solicitada(s) correctamente.";
+            document.getElementById('formReserva').reset();
+        }
 
-            seleccionActual = [];
-            alert('Reserva(s) solicitadas correctamente.');
+        // Autenticación y carga inicial
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                alert("Debes iniciar sesión para acceder al calendario.");
+                window.location.href = "index.html";
+                return;
+            }
+            usuarioActual = user;
+            inicializarCalendario();
+            cargarDias();
+            cargarHoras();
+            cargarReservas();
+            document.getElementById('formReserva').addEventListener('submit', crearReserva);
         });
     </script>
 </body>
 </html>
+
