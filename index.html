@@ -177,9 +177,7 @@
                 await user.reload(); 
 
                 // Usuario autorizado, continúa
-                setTimeout(() => {
-                    window.location.href = "Bienvenida.html";
-                }, 500);
+                window.location.href = "Bienvenida.html";
             } catch (error) {
                 errorMsg.textContent = "Usuario o contraseña incorrectos.";
                 errorMsg.style.display = 'block';
