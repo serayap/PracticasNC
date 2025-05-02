@@ -71,6 +71,7 @@
 </head>
 <body>
     <div class="container">
+        <h2 id="tituloReservas"></h2>
         <div class="arriba">
             <div class="form-reserva">
                 <h2>Formulario de reserva</h2>
@@ -298,7 +299,7 @@
                 await db.collection('reservas').add({
                     usuarioId: usuarioActual.uid,
                     usuarioNombre: localStorage.getItem('nombre') || usuarioActual.email,
-                    fecha: new Date(fecha),
+                    fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
                     hora: hora,
                     estado: 'pendiente',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
