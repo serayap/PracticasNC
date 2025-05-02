@@ -193,6 +193,12 @@
         let reservasUsuario = [];
         let usuarioActual = null;
 
+        function capitalizarPrimeraLetra(str) {
+            return str.replace(/\b\w/g, function (char) {
+                return char.toUpperCase();
+            });
+        }
+
         // Utilidad: formato YYYY-MM-DD
         function toISODate(date) {
             return date.toISOString().split('T')[0];
