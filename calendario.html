@@ -191,6 +191,7 @@
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
+                firstDay: 1,
                 validRange: {
                     start: start.toISOString().split('T')[0],
                     end: end.toISOString().split('T')[0]
