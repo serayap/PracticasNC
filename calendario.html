@@ -17,113 +17,68 @@
 
         .container {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
+            max-width: 1100px;
+            margin: 0 auto;
+            gap: 0;
+        }
+
+        /* Fila superior: formulario y calendario */
+        .arriba {
+            display: flex;
+            flex-direction: row;
             gap: 20px;
+            width: 100%;
         }
 
-        #calendar {
-            flex: 1 1 55%; /* Ocupa aproximadamente el 55% del ancho */
-            min-width: 300px;
-        }
-
-        .reservas-container {
-            flex-basis: 100%; /* Ocupa todo el ancho, se sitúa debajo */
-            margin-top: 20px;
-        }
-
-        .reserva-item {
-            padding: 13px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.05em;
-        }
-
-            .reserva-item.pendiente {
-                border-left: 4px solid #ff9800;
-            }
-
-            .reserva-item.confirmada {
-                border-left: 4px solid #4caf50;
-            }
-
+        /* Formulario a la izquierda */
         .form-reserva {
-            flex: 1 1 40%; /* Ocupa aproximadamente el 40% del ancho */
+            flex: 1 1 40%;
             min-width: 300px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin-bottom: 0;
         }
 
-            .form-reserva h2 {
-                margin-top: 0;
+        /* Calendario a la derecha */
+        #calendar {
+            flex: 1 1 55%;
+            min-width: 300px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin-bottom: 0;
+        }
+
+        /* Listado de reservas debajo */
+        .reservas-container {
+            width: 100%;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin-top: 30px;
+            max-height: 340px;
+            overflow-y: auto;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 900px) {
+            .arriba {
+                flex-direction: column;
+                gap: 0;
             }
 
-        .form-row {
-            margin-bottom: 16px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
-        }
-
-        label {
-            font-weight: 500;
-            margin-right: 8px;
-        }
-
-        select, input[type="time"] {
-            padding: 6px 8px;
-            border-radius: 5px;
-            border: 1.2px solid #bbb;
-            font-size: 1em;
-        }
-
-        .block-week {
-            margin-left: 8px;
-        }
-
-        .cta-btn {
-            display: inline-block;
-            background: linear-gradient(90deg, #1967d2 70%, #3ab3ff 100%);
-            color: #fff;
-            text-decoration: none;
-            padding: 12px 36px;
-            border-radius: 8px;
-            font-size: 1.08em;
-            font-weight: 600;
-            box-shadow: 0 2px 12px rgba(25,103,210,0.08);
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s, box-shadow 0.2s;
-        }
-
-            .cta-btn:hover {
-                background: linear-gradient(90deg, #1451a0 70%, #1e9fff 100%);
-                box-shadow: 0 4px 16px rgba(25,103,210,0.13);
-            }
-
-        .estado-confirmada {
-            color: #4caf50;
-            font-weight: bold;
-        }
-
-        .estado-pendiente {
-            color: #ff9800;
-            font-weight: bold;
-        }
-
-        @media (max-width: 700px) {
-            .container {
-                max-width: 98vw;
-            }
-
-            #calendar {
-                padding: 2vw;
-            }
-
-            .form-reserva, .reservas-container {
-                padding: 2vw;
+            #calendar, .form-reserva {
+                min-width: 0;
+                width: 100%;
+                margin-bottom: 20px;
             }
         }
+
     </style>
     <!-- FullCalendar JS -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
@@ -131,31 +86,29 @@
 </head>
 <body>
     <div class="container">
-        <div id="calendar"></div>
-
-        <div class="reservas-container">
-            <h2 id="tituloReservas"></h2>
-            <div id="lista-reservas"></div>
+        <div class="arriba">
+            <div class="form-reserva">
+                <h2>Nueva Reserva</h2>
+                <form id="formReserva">
+                    <div class="form-row">
+                        <label for="dia">Día:</label>
+                        <select id="dia" required></select>
+                    </div>
+                    <div class="form-row">
+                        <label for="hora">Hora:</label>
+                        <select id="hora" required></select>
+                    </div>
+                    <div class="form-row">
+                        <input type="checkbox" id="bloqueSemana" class="block-week">
+                        <label for="bloqueSemana">Reservar este horario para toda la semana</label>
+                    </div>
+                    <button type="submit" class="cta-btn">Reservar selección</button>
+                </form>
+            </div>
+            <div id="calendar"></div>
         </div>
-
-        <div class="form-reserva">
-            <h2>Nueva Reserva</h2>
-            <form id="formReserva">
-                <div class="form-row">
-                    <label for="dia">Día:</label>
-                    <select id="dia" required></select>
-                </div>
-                <div class="form-row">
-                    <label for="hora">Hora:</label>
-                    <select id="hora" required></select>
-                </div>
-                <div class="form-row">
-                    <input type="checkbox" id="bloqueSemana" class="block-week">
-                    <label for="bloqueSemana">Reservar este horario para toda la semana</label>
-                </div>
-                <button type="submit" class="cta-btn">Reservar selección</button>
-            </form>
-            <div id="reservaMsg" style="color:#d32f2f; margin-top:10px;"></div>
+        <div class="reservas-container">
+            <!-- Listado de reservas aquí -->
         </div>
     </div>
 
@@ -228,8 +181,8 @@
             }
         }
 
-        // Inicializar FullCalendar  
-        
+        // Inicializar FullCalendar
+
         function inicializarCalendario() {
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
@@ -278,12 +231,12 @@
                     const div = document.createElement('div');
                     div.className = `reserva-item ${r.estado}`;
                     div.innerHTML = `
-                                <div>
-                                    <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
-                                    &nbsp;${r.hora}
-                                </div>
-                                <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
-                            `;
+                                            <div>
+                                                <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
+                                                &nbsp;${r.hora}
+                                            </div>
+                                            <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
+                                        `;
                     lista.appendChild(div);
                 });
         }
@@ -295,7 +248,7 @@
                 snapshot.forEach(doc => {
                     const reserva = doc.data();
                     if (reserva.fecha?.toDate) {
-                        reservasTodas.push({ 
+                        reservasTodas.push({
                             id: doc.id,
                             title: reserva.usuarioNombre,
                             start: reserva.fecha.toDate().toISOString(),
@@ -403,7 +356,7 @@
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
         });
-    </script>       
+    </script>
 </body>
 </html>
 
