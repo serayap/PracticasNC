@@ -115,9 +115,10 @@
             };
             firebase.initializeApp(firebaseConfig);
             const auth = firebase.auth();
-
+            alert("hola");
             // Autenticación y carga inicial
             auth.onAuthStateChanged(user => {
+                alert("Adios");
                 if (!user) {
                     // Redirige sin alertas bloqueantes
                     window.location.href = "index.html";
