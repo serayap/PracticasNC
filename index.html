@@ -170,17 +170,17 @@
                     return;
                 } else {
                     // Puedes mostrar los datos del documento Firestore si quieres
-                    const user = auth.currentUser;
+                    //const user = auth.currentUser;
                     
                     snapshot.forEach(doc => {
                         localStorage.setItem('nombre', doc.data().nombre);
                         localStorage.setItem('email', doc.data().email); 
 
-                        if (user) {
+                        /*if (user) {
                             await user.updateProfile({ displayName: doc.data().nombre });
                             await user.updateEmail(doc.data().email);
                             await user.reload();
-                        }
+                        }*/
                     });
                 }
                 // Usuario autorizado, continúa
