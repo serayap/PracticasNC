@@ -185,6 +185,10 @@
 
         function inicializarCalendario() {
             const calendarEl = document.getElementById('calendar');
+            if (!calendarEl) {
+                alert("No se encontró el div con id 'calendar'");
+                return;
+            }
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
