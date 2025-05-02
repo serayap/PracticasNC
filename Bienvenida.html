@@ -117,7 +117,7 @@
 
             // Autenticación y carga inicial
             auth.onAuthStateChanged(user => {
-                if (!user) {
+                if (!localStorage.getItem('nombre')) {
                     alert("Debes iniciar sesión para acceder a las reservas.");
                     window.location.href = "index.html";
                     return;
