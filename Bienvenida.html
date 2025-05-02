@@ -117,18 +117,24 @@
             const auth = firebase.auth();
 
             // Autenticación y carga inicial
-            alert(auth.nombre);
             auth.onAuthStateChanged(user => {
                 if (!user) {
-                    alert("Debes iniciar sesión para acceder al calendario.");
+                    // Redirige sin alertas bloqueantes
                     window.location.href = "index.html";
                     return;
-                } else {
-                    const nombre = capitalizarPrimeraLetra(auth.nombre || "");
-                    const email = auth.email || "";
-                    // Actualizar DOM aquí
                 }
+
+                // Obtén datos directamente del usuario autenticado
+                const nombre = capitalizarPrimeraLetra(user.displayName || "");
+                const email = user.email || "";
+
+                // Actualiza el DOM
+                document.getElementById('saludo').textContent = nombre
+                    ? `¡Bienvenido, ${nombre}!`
+                    : "¡Bienvenido!";
+                document.getElementById('userEmail').textContent = email;
             });
+
 
             document.getElementById('saludo').textContent = nombre ? `¡Bienvenido, ${nombre}!` : "¡Bienvenido!";
             document.getElementById('userEmail').textContent = email;
