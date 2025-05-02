@@ -189,6 +189,8 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const settings = { experimentalForceLongPolling: true };
+        db.settings(settings);
         const auth = firebase.auth();
 
         let calendar;
@@ -298,18 +300,22 @@
                 });
         }
 
-        // Cargar reservas desde Firestore
         async function cargarReservas() {
             // Todas las reservas para el calendario
             db.collection('reservas').onSnapshot(snapshot => {
                 reservasTodas = [];
                 snapshot.forEach(doc => {
-                    const d = doc.data();
-                    reservasTodas.push({
-                        ...d,
-                        fecha: d.fecha.toDate ? d.fecha.toDate().toISOString().split('T')[0] : d.fecha,
-                        id: doc.id
-                    });
+                    const reserva = doc.data();
+                    if (reserva.fecha?.toDate) { // Validación con optional chaining
+                        reservasTodas.push({ // <-- Corrige el nombre del array
+                            id: doc.id,
+                            title: reserva.usuarioNombre,
+                            start: reserva.fecha.toDate().toISOString(),
+                            estado: reserva.estado
+                        });
+                    } else {
+                        console.error("Documento sin campo 'fecha' válido:", doc.id);
+                    }
                 });
                 mostrarReservasCalendario();
             });
@@ -321,11 +327,15 @@
                     reservasUsuario = [];
                     snapshot.forEach(doc => {
                         const d = doc.data();
-                        reservasUsuario.push({
-                            ...d,
-                            fecha: d.fecha.toDate ? d.fecha.toDate().toISOString().split('T')[0] : d.fecha,
-                            id: doc.id
-                        });
+                        if (d.fecha?.toDate) { // <-- Añade validación aquí
+                            reservasUsuario.push({
+                                ...d,
+                                fecha: d.fecha.toDate().toISOString().split('T')[0],
+                                id: doc.id
+                            });
+                        } else {
+                            console.error("Documento del usuario sin 'fecha' válida:", doc.id);
+                        }
                     });
                     mostrarReservasUsuario();
                 });
