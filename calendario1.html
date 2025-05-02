@@ -61,33 +61,266 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="arriba">
-      <div class="form-reserva">
-        <h2>Formulario de reserva</h2>
-        <!-- Aquí tu formulario -->
-      </div>
-      <div id="calendar"></div>
+    <div class="container">
+        <div class="arriba">
+            <div class="form-reserva">
+                <h2>Formulario de reserva</h2>
+                <!-- Aquí tu formulario -->
+            </div>
+            <div id="calendar"></div>
+        </div>
+        <div class="reservas-container">
+            <h2>Listado de reservas</h2>
+            <!-- Aquí tu listado -->
+        </div>
     </div>
-    <div class="reservas-container">
-      <h2>Listado de reservas</h2>
-      <!-- Aquí tu listado -->
-    </div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const calendarEl = document.getElementById('calendar');
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'es',
-        events: [
-          { title: 'Evento de prueba', start: new Date() }
-        ]
-      });
-      calendar.render();
-    });
-  </script>
+    <!-- Firebase (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
+            authDomain: "reservaspracticasnc.firebaseapp.com",
+            projectId: "reservaspracticasnc",
+            storageBucket: "reservaspracticasnc.appspot.com",
+            messagingSenderId: "742403879145",
+            appId: "1:742403879145:web:2f64807672793aaa348078"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const settings = { experimentalForceLongPolling: true, merge: true };
+        db.settings(settings);
+        const auth = firebase.auth();
+
+        let calendar;
+        let reservasTodas = [];
+        let reservasUsuario = [];
+        let usuarioActual = null;
+
+        function capitalizarPrimeraLetra(str) {
+            return str.replace(/\b\w/g, function (char) {
+                return char.toUpperCase();
+            });
+        }
+
+        // Utilidad: formato YYYY-MM-DD
+        function toISODate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Cargar días de la semana actual y la siguiente
+        function cargarDias() {
+            const selectDia = document.getElementById('dia');
+            selectDia.innerHTML = "";
+            const hoy = new Date();
+            for (let i = 0; i < 14; i++) {
+                const fecha = new Date(hoy);
+                fecha.setDate(hoy.getDate() + i);
+                const fechaISO = toISODate(fecha);
+                const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+                const option = document.createElement('option');
+                option.value = fechaISO;
+                option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+                selectDia.appendChild(option);
+            }
+        }
+
+        // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
+        function cargarHoras() {
+            const selectHora = document.getElementById('hora');
+            selectHora.innerHTML = "";
+            for (let hora = 9; hora <= 20; hora++) {
+                for (let min of [0, 30]) {
+                    const horaStr = `${hora.toString().padStart(2, '0')}:${min === 0 ? '00' : '30'}`;
+                    const option = document.createElement('option');
+                    option.value = horaStr;
+                    option.textContent = horaStr;
+                    selectHora.appendChild(option);
+                }
+            }
+        }
+
+        // Inicializar FullCalendar
+
+        function inicializarCalendario() {
+            const calendarEl = document.getElementById('calendar');
+            if (!calendarEl) {
+                alert("No se encontró el div con id 'calendar'");
+                return;
+            }
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                height: 500,
+                events: [],
+                eventDidMount: function (info) {
+                    // Colores según estado
+                    if (info.event.extendedProps.estado === 'pendiente') {
+                        info.el.style.backgroundColor = '#ff9800';
+                        info.el.style.borderColor = '#ff9800';
+                    }
+                    if (info.event.extendedProps.estado === 'confirmada') {
+                        info.el.style.backgroundColor = '#4caf50';
+                        info.el.style.borderColor = '#4caf50';
+                    }
+                }
+            });
+            calendar.render();
+        }
+
+        // Mostrar todas las reservas en el calendario
+        function mostrarReservasCalendario() {
+            calendar.removeAllEvents();
+            const eventos = reservasTodas.map(r => ({
+                title: r.usuarioNombre + " (" + r.hora + ")",
+                start: r.fecha,
+                color: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
+                extendedProps: { estado: r.estado }
+            }));
+            calendar.addEventSource(eventos);
+        }
+
+        // Mostrar reservas del usuario autenticado
+        function mostrarReservasUsuario() {
+            const lista = document.getElementById('lista-reservas');
+            lista.innerHTML = "";
+            if (reservasUsuario.length === 0) {
+                lista.innerHTML = "<em>No tienes reservas aún.</em>";
+                return;
+            }
+            reservasUsuario
+                .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+                .forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = `reserva-item ${r.estado}`;
+                    div.innerHTML = `
+                                            <div>
+                                                <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
+                                                &nbsp;${r.hora}
+                                            </div>
+                                            <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
+                                        `;
+                    lista.appendChild(div);
+                });
+        }
+
+        async function cargarReservas() {
+            // Todas las reservas para el calendario
+            db.collection('reservas').onSnapshot(snapshot => {
+                reservasTodas = [];
+                snapshot.forEach(doc => {
+                    const reserva = doc.data();
+                    if (reserva.fecha?.toDate) {
+                        reservasTodas.push({
+                            id: doc.id,
+                            title: reserva.usuarioNombre,
+                            start: reserva.fecha.toDate().toISOString(),
+                            estado: reserva.estado
+                        });
+                    } else {
+                        console.error("Documento sin campo 'fecha' válido:", doc.id);
+                    }
+                });
+                mostrarReservasCalendario();
+            });
+
+            // Reservas del usuario autenticado
+            db.collection('reservas')
+                .where('usuarioId', '==', usuarioActual.uid)
+                .onSnapshot(snapshot => {
+                    reservasUsuario = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        if (d.fecha?.toDate) { // <-- Añade validación aquí
+                            reservasUsuario.push({
+                                ...d,
+                                fecha: d.fecha.toDate().toISOString().split('T')[0],
+                                id: doc.id
+                            });
+                        } else {
+                            console.error("Documento del usuario sin 'fecha' válida:", doc.id);
+                        }
+                    });
+                    mostrarReservasUsuario();
+                });
+        }
+
+        // Crear reservas (una o bloque semanal)
+        async function crearReserva(e) {
+            e.preventDefault();
+            const reservaMsg = document.getElementById('reservaMsg');
+            reservaMsg.textContent = "";
+            const dia = document.getElementById('dia').value;
+            const hora = document.getElementById('hora').value;
+            const bloque = document.getElementById('bloqueSemana').checked;
+            let fechas = [dia];
+
+            // Si es bloque semanal, busca todos los días iguales (ej: todos los lunes) en las dos semanas
+            if (bloque) {
+                const fechaInicial = new Date(dia);
+                const diaSemana = fechaInicial.getDay();
+                fechas = [];
+                for (let i = 0; i < 14; i++) {
+                    const f = new Date();
+                    f.setDate(fechaInicial.getDate() + (i - fechaInicial.getDay() + diaSemana));
+                    if (f >= fechaInicial && f.getDay() === diaSemana) {
+                        fechas.push(toISODate(f));
+                    }
+                }
+            }
+
+            // Verifica disponibilidad y crea reservas
+            for (const fecha of fechas) {
+                // Comprobar si ya existe reserva para ese día y hora
+                const existe = await db.collection('reservas')
+                    .where('fecha', '==', new Date(fecha))
+                    .where('hora', '==', hora)
+                    .get();
+                if (!existe.empty) {
+                    reservaMsg.textContent = `Ya existe una reserva para el ${fecha} a las ${hora}.`;
+                    return;
+                }
+            }
+
+            // Crear reservas
+            for (const fecha of fechas) {
+                await db.collection('reservas').add({
+                    usuarioId: usuarioActual.uid,
+                    usuarioNombre: localStorage.getItem('nombre') || usuarioActual.email,
+                    fecha: new Date(fecha),
+                    hora: hora,
+                    estado: 'pendiente',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            reservaMsg.style.color = "#388e3c";
+            reservaMsg.textContent = "Reserva(s) solicitada(s) correctamente.";
+            document.getElementById('formReserva').reset();
+        }
+
+        // Autenticación y carga inicial
+        document.addEventListener('DOMContentLoaded', function () {
+            auth.onAuthStateChanged(user => {
+                if (!user) {
+                    //alert("Debes iniciar sesión para acceder al calendario.");
+                    window.location.href = "index.html";
+                    return;
+                } else {
+                    const nombre = capitalizarPrimeraLetra(user.displayName || "");
+                    const email = user.email || "";
+                    document.getElementById('tituloReservas').textContent = `Reservas para ${nombre || email}`;
+                    usuarioActual = user;
+                }
+
+                inicializarCalendario();
+                cargarDias();
+                cargarHoras();
+                cargarReservas();
+                document.getElementById('formReserva').addEventListener('submit', crearReserva);
+            });
+        });
+    </script>
 </body>
 </html>
