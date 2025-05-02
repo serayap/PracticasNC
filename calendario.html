@@ -160,8 +160,8 @@
             const selectHora = document.getElementById('hora');
             selectHora.innerHTML = "";
             for (let hora = 7; hora <= 20; hora++) {
-                for (let min of [0, 10]) {
-                    const horaStr = `${hora.toString().padStart(2, '0')}:${min === 0 ? '00' : '10'}`;
+                for (let min of [0, 10, 20, 30]) {
+                    const horaStr = `${hora.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
                     const option = document.createElement('option');
                     option.value = horaStr;
                     option.textContent = horaStr;
