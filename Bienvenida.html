@@ -127,6 +127,7 @@
                     window.location.href = "index.html";
                     return;
                 } else {
+                    await user.reload(); 
                     const nombre = capitalizarPrimeraLetra(user.displayName || "");
                     const email = user.email || "";
                     document.getElementById('saludo').textContent = nombre
