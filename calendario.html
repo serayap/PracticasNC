@@ -134,28 +134,25 @@
             return date.toISOString().split('T')[0];
         }
 
+        // Cargar días de la semana actual y la siguiente
         function cargarDias() {
-            const selectDias = document.getElementById('dias');
-            if (!selectDias) {
-                console.error("Elemento con id 'dias' no encontrado");
-                return;
-            }
-            let opcionesDias = '';
+            const selectDia = document.getElementById('dia');
+            selectDia.innerHTML = "";
             const hoy = new Date();
-            let diasAgregados = 0;
-            let i = 0;
-            // Por ejemplo, mostramos las próximas 2 semanas hábiles
-            while (diasAgregados < 10) { // Cambia 10 por la cantidad de días hábiles que quieras mostrar
+            for (let i = 1; i < 15; i++) {
                 const fecha = new Date(hoy);
                 fecha.setDate(hoy.getDate() + i);
                 const diaSemana = fecha.getDay(); // 0=domingo, 6=sábado
                 if (diaSemana !== 0 && diaSemana !== 6) { // Excluye sábados y domingos
-                    opcionesDias += `<option value="${fecha.toISOString()}">${fecha.toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</option>`;
-                    diasAgregados++;
+                    const fechaISO = toISODate(fecha);
+                    const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+                    const option = document.createElement('option');
+                    option.value = fechaISO;
+                    option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+                    selectDia.appendChild(option);
                 }
-                i++;
+                
             }
-            selectDias.innerHTML = opcionesDias;
         }
 
         // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
