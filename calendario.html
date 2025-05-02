@@ -26,6 +26,9 @@
             padding: 20px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
             margin-bottom: 30px;
+            width: 100%;
+            height: 600px;
+            margin: 20px auto;
         }
 
         .reservas-container {
@@ -375,23 +378,25 @@
         }
 
         // Autenticación y carga inicial
-        auth.onAuthStateChanged(user => {
-            if (!user) {
-                //alert("Debes iniciar sesión para acceder al calendario.");
-                window.location.href = "index.html";
-                return;
-            } else {                
-                const nombre = capitalizarPrimeraLetra(user.displayName || "");
-                const email = user.email || "";
-                document.getElementById('tituloReservas').textContent = `Reservas para ${nombre || email}`;                
-                usuarioActual = user;
-            }
+        document.addEventListener('DOMContentLoaded', function () {
+            auth.onAuthStateChanged(user => {
+                if (!user) {
+                    //alert("Debes iniciar sesión para acceder al calendario.");
+                    window.location.href = "index.html";
+                    return;
+                } else {                
+                    const nombre = capitalizarPrimeraLetra(user.displayName || "");
+                    const email = user.email || "";
+                    document.getElementById('tituloReservas').textContent = `Reservas para ${nombre || email}`;                
+                    usuarioActual = user;
+                }
             
-            inicializarCalendario();
-            cargarDias();
-            cargarHoras();
-            cargarReservas();
-            document.getElementById('formReserva').addEventListener('submit', crearReserva);
+                inicializarCalendario();
+                cargarDias();
+                cargarHoras();
+                cargarReservas();
+                document.getElementById('formReserva').addEventListener('submit', crearReserva);
+            });
         });
     </script>
 </body>
