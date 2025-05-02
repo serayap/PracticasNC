@@ -150,10 +150,8 @@
                 // Login con Firebase Auth
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
 
-                //alert("Usuario autenticado: " + userCredential.user.email);
-                //alert("email formulario: " + email);
-                             
-
+                const user = userCredential.user;
+                
                 // Chequea en Firestore si el usuario está autorizado
                 const snapshot = await db.collection('usuarios_registrados')
                     .where('email', '==', email)
@@ -177,7 +175,7 @@
                 await user.reload(); 
 
                 // Usuario autorizado, continúa
-                window.location.href = "Bienvenida.html";
+                setTimeout(() => {window.location.href = "Bienvenida.html";}, 500);
             } catch (error) {
                 errorMsg.textContent = "Usuario o contraseña incorrectos.";
                 errorMsg.style.display = 'block';
