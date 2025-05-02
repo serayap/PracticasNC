@@ -121,7 +121,7 @@
             const auth = firebase.auth();
             
             // Autenticación y carga inicial
-            auth.onAuthStateChanged(user => {                
+            auth.onAuthStateChanged(async user => {                
                 if (!user) {
                     // Redirige sin alertas bloqueantes
                     window.location.href = "index.html";
@@ -135,6 +135,7 @@
                         : "¡Bienvenido!";
                     document.getElementById('userEmail').textContent = email;
                 }
+            }); 
 
             function capitalizarPrimeraLetra(str) {
                 return str.replace(/\b\w/g, function (char) {
