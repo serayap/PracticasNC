@@ -169,10 +169,7 @@
         </div>
     </div>
 
-    <!-- FullCalendar JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales/es.min.js"></script>
+
     <!-- Firebase (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -281,12 +278,12 @@
                     const div = document.createElement('div');
                     div.className = `reserva-item ${r.estado}`;
                     div.innerHTML = `
-                            <div>
-                                <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
-                                &nbsp;${r.hora}
-                            </div>
-                            <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
-                        `;
+                                <div>
+                                    <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
+                                    &nbsp;${r.hora}
+                                </div>
+                                <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
+                            `;
                     lista.appendChild(div);
                 });
         }
@@ -384,19 +381,38 @@
                     //alert("Debes iniciar sesión para acceder al calendario.");
                     window.location.href = "index.html";
                     return;
-                } else {                
+                } else {
                     const nombre = capitalizarPrimeraLetra(user.displayName || "");
                     const email = user.email || "";
-                    document.getElementById('tituloReservas').textContent = `Reservas para ${nombre || email}`;                
+                    document.getElementById('tituloReservas').textContent = `Reservas para ${nombre || email}`;
                     usuarioActual = user;
                 }
-            
+
                 inicializarCalendario();
                 cargarDias();
                 cargarHoras();
                 cargarReservas();
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
+        });
+    </script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/locales/es.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            if (!calendarEl) {
+                console.error("No se encontró el div con id 'calendar'");
+                return;
+            }
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                events: [] // Puedes cargar eventos aquí si lo deseas
+            });
+            calendar.render();
         });
     </script>
 </body>
