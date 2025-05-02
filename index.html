@@ -178,7 +178,8 @@
 
                         if (user) {
                             await user.updateProfile({ displayName: doc.data().nombre });
-                            await user.updateProfile({ email: doc.data().email });
+                            await user.updateEmail(doc.data().email);
+                            await user.reload();
                         }
                     });
                 }

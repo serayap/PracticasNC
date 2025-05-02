@@ -126,22 +126,14 @@
                     // Redirige sin alertas bloqueantes
                     window.location.href = "index.html";
                     return;
+                } else {
+                    const nombre = capitalizarPrimeraLetra(user.displayName || "");
+                    const email = user.email || "";
+                    document.getElementById('saludo').textContent = nombre
+                        ? `¡Bienvenido, ${nombre}!`
+                        : "¡Bienvenido!";
+                    document.getElementById('userEmail').textContent = email;
                 }
-
-                // Obtén datos directamente del usuario autenticado
-                const nombre = capitalizarPrimeraLetra(auth.nombre || "");
-                const email = auth.email || "";
-
-                // Actualiza el DOM
-                document.getElementById('saludo').textContent = nombre
-                    ? `¡Bienvenido, ${nombre}!`
-                    : "¡Bienvenido!";
-                document.getElementById('userEmail').textContent = email;
-            });
-
-
-            document.getElementById('saludo').textContent = nombre ? `¡Bienvenido, ${nombre}!` : "¡Bienvenido!";
-            document.getElementById('userEmail').textContent = email;
 
             function capitalizarPrimeraLetra(str) {
                 return str.replace(/\b\w/g, function (char) {

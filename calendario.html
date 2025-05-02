@@ -380,11 +380,13 @@
                 //alert("Debes iniciar sesión para acceder al calendario.");
                 window.location.href = "index.html";
                 return;
+            } else {                
+                const nombre = capitalizarPrimeraLetra(user.displayName || "");
+                const email = user.email || "";
+                document.getElementById('tituloReservas').textContent = `Reservas para ${nombre || email}`;                
+                usuarioActual = user;
             }
-            usuarioActual = user;
             
-            document.getElementById('tituloReservas').textContent = `Reservas para ${usuarioActual.DisplayName || usuarioActual.email}`;
-
             inicializarCalendario();
             cargarDias();
             cargarHoras();
