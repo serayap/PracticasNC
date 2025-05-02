@@ -141,7 +141,7 @@
         <div id="calendar"></div>
 
         <div class="reservas-container">
-            <h2>Reservas para ${usuarioActual.nombre}</h2>
+            <h2 id="tituloReservas"></h2>
             <div id="lista-reservas"></div>
         </div>
 
@@ -382,6 +382,9 @@
                 return;
             }
             usuarioActual = user;
+
+            document.getElementById('tituloReservas').textContent = `Reservas para ${usuarioActual.displayName || usuarioActual.email}`;
+
             inicializarCalendario();
             cargarDias();
             cargarHoras();
