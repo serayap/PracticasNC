@@ -129,8 +129,8 @@
                 }
 
                 // Obtén datos directamente del usuario autenticado
-                const nombre = capitalizarPrimeraLetra(localStorage.getItem('nombre') || "");
-                const email = localStorage.getItem('email') || "";
+                const nombre = capitalizarPrimeraLetra(auth.nombre || "");
+                const email = auth.email || "";
 
                 // Actualiza el DOM
                 document.getElementById('saludo').textContent = nombre
