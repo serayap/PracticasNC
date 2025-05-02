@@ -383,7 +383,7 @@
             }
             usuarioActual = user;
 
-            document.getElementById('tituloReservas').textContent = `Reservas para ${usuarioActual.displayName || usuarioActual.email}`;
+            document.getElementById('tituloReservas').textContent = `Reservas para ${usuarioActual.nombre || usuarioActual.email}`;
 
             inicializarCalendario();
             cargarDias();
