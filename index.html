@@ -173,6 +173,8 @@
                     snapshot.forEach(doc => {
                         localStorage.setItem('nombre', doc.data().nombre);
                         localStorage.setItem('email', doc.data().email);
+
+                        doc.updateProfile({ displayName: doc.data().nombre });
                     });
                 }
                 // Usuario autorizado, continúa
