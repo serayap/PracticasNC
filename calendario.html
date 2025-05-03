@@ -143,21 +143,13 @@
             max-height: 400px;
             overflow-y: auto;
         }
-                
-        #lista-reservas,
+
+        /* Elementos de la lista */
         #lista-reservas-dia {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            font-size: 1rem;
-            color: #333;
-            line-height: 1.5;
-            /* Otros estilos compartidos */
+            margin-top: 15px;
         }
 
-        .reserva-item,
         .reserva-dia-item {
-            font-family: inherit;
-            font-size: inherit;
-            color: inherit;
             padding: 12px;
             margin: 8px 0;
             background: #f8f9fa;
@@ -308,47 +300,47 @@
 
         // Función para cargar reservas del día
         async function cargarReservasDelDia(fechaStr) {
-            const lista = document.getElementById('lista-reservas-dia');
-            lista.innerHTML = '<div class="cargando">Cargando...</div>';
+    const lista = document.getElementById('lista-reservas-dia');
+    lista.innerHTML = '<div class="cargando">Cargando...</div>';
 
-            try {
-                const fechaInicio = new Date(fechaStr + 'T00:00:00');
-                const fechaFin = new Date(fechaStr + 'T23:59:59');
+    try {
+        const fechaInicio = new Date(fechaStr + 'T00:00:00');
+        const fechaFin = new Date(fechaStr + 'T23:59:59');
+        
+        // Usa firebase.firestore() para crear la query
+        const q = db.collection("reservas")
+                   .where("fecha", ">=", fechaInicio)
+                   .where("fecha", "<=", fechaFin);
+        
+        const querySnapshot = await q.get();
+        lista.innerHTML = '';
 
-                // Usa firebase.firestore() para crear la query
-                const q = db.collection("reservas")
-                    .where("fecha", ">=", fechaInicio)
-                    .where("fecha", "<=", fechaFin);
+        if (querySnapshot.empty) {
+            lista.innerHTML = '<div class="sin-reservas">No hay reservas este día</div>';
+            return;
+        }
 
-                const querySnapshot = await q.get();
-                lista.innerHTML = '';
-
-                if (querySnapshot.empty) {
-                    lista.innerHTML = '<div class="sin-reservas">No hay reservas este día</div>';
-                    return;
-                }
-
-                querySnapshot.forEach((doc) => {
-                    const reserva = doc.data();
-                    const div = document.createElement('div');
-                    div.className = `reserva-dia-item ${reserva.estado}`;
-
-                    div.innerHTML = `
+        querySnapshot.forEach((doc) => {
+            const reserva = doc.data();
+            const div = document.createElement('div');
+            div.className = `reserva-dia-item ${reserva.estado}`;
+            
+            div.innerHTML = `
                 <div>
                     <strong>${reserva.usuarioNombre}</strong>
                     <div class="hora">${reserva.hora}</div>
                 </div>
                 <span class="estado">${reserva.estado}</span>
             `;
+            
+            lista.appendChild(div);
+        });
 
-                    lista.appendChild(div);
-                });
-
-            } catch (error) {
-                console.error("Error:", error);
-                lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
-            }
-        }
+    } catch (error) {
+        console.error("Error:", error);
+        lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
+    }
+}
 
         // Inicializar FullCalendar
         function inicializarCalendario() {
