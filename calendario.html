@@ -174,14 +174,16 @@
         }
 
         /* Contenedor de puntos */
+        /* CSS esencial para los puntos */
         .dots-container {
             position: absolute;
-            bottom: 2px;
-            left: 2px;
-            right: 2px;
+            bottom: 3px;
+            left: 3px;
+            right: 3px;
             display: flex;
             flex-wrap: wrap;
             gap: 2px;
+            z-index: 2;
         }
 
         .dot {
@@ -191,14 +193,13 @@
             flex-shrink: 0;
         }
 
-        .confirmada {background: #4CAF50;}
-        .pendiente {background: #FF9800;}
-
         .fc-daygrid-day-frame {
-            position: relative;
-            min-height: 40px; /* Asegura espacio para los puntos */
+            position: relative !important;
+            min-height: 50px;
         }
 
+        .confirmada {background: #4CAF50;}
+        .pendiente {background: #FF9800;}
 
         @media (max-width: 900px) {
             .arriba {
@@ -483,33 +484,31 @@
                     const fecha = info.date.toISOString().split('T')[0];
                     const reservas = reservasPorFecha[fecha] || { confirmadas: 0, pendientes: 0 };
 
-                    // Eliminar cualquier indicador previo
+                    // Limpiar puntos anteriores
                     const existingDots = info.el.querySelector('.dots-container');
                     if (existingDots) existingDots.remove();
 
-                    // Crear nuevo contenedor
+                    // Crear nuevos puntos
                     const dotsContainer = document.createElement('div');
                     dotsContainer.className = 'dots-container';
 
-                    // Añadir puntos verdes (confirmadas)
-                    for (let i = 0; i < reservas.confirmadas; i++) {
+                    // Puntos confirmadas (verde)
+                    Array.from({ length: reservas.confirmadas }).forEach(() => {
                         const dot = document.createElement('div');
                         dot.className = 'dot confirmada';
                         dotsContainer.appendChild(dot);
-                    }
+                    });
 
-                    // Añadir puntos naranjas (pendientes)
-                    for (let i = 0; i < reservas.pendientes; i++) {
+                    // Puntos pendientes (naranja)
+                    Array.from({ length: reservas.pendientes }).forEach(() => {
                         const dot = document.createElement('div');
                         dot.className = 'dot pendiente';
                         dotsContainer.appendChild(dot);
-                    }
+                    });
 
-                    // Posicionar debajo de la fecha
+                    // Insertar en el DOM
                     const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
-                    if (dayFrame) {
-                        dayFrame.appendChild(dotsContainer);
-                    }
+                    if (dayFrame) dayFrame.appendChild(dotsContainer);
                 }
             });
             calendar.render();
@@ -577,31 +576,41 @@
 
         async function cargarReservas() {
             // Todas las reservas para el calendario
-            db.collection('reservas').onSnapshot(snapshot => {
-                reservasPorFecha = {}; // Reiniciamos el objeto
+            if (calendar) {
+                calendar.destroy(); // Destruir instancia anterior
+                document.getElementById('calendar').innerHTML = ''; // Limpiar contenedor
+            }
 
-                snapshot.forEach(doc => {
-                    const reserva = doc.data();
-                    if (reserva.fecha?.toDate) {
-                        const fecha = reserva.fecha.toDate().toISOString().split('T')[0];
-                        const estado = reserva.estado || 'pendiente';
+            return new Promise((resolve) => {
+                db.collection('reservas').onSnapshot(snapshot => {
+                    reservasPorFecha = {}; // Reiniciamos el objeto
 
-                        if (!reservasPorFecha[fecha]) {
-                            reservasPorFecha[fecha] = {
-                                confirmadas: 0,
-                                pendientes: 0
-                            };
+                    snapshot.forEach(doc => {
+                        const reserva = doc.data();
+                        if (reserva.fecha?.toDate) {
+                            const fecha = reserva.fecha.toDate().toISOString().split('T')[0];
+                            const estado = reserva.estado || 'pendiente';
+
+                            if (!reservasPorFecha[fecha]) {
+                                reservasPorFecha[fecha] = {
+                                    confirmadas: 0,
+                                    pendientes: 0
+                                };
+                            }
+
+                            reservasPorFecha[fecha][estado === 'confirmada' ? 'confirmadas' : 'pendientes']++;
                         }
+                    });
 
-                        reservasPorFecha[fecha][estado === 'confirmada' ? 'confirmadas' : 'pendientes']++;
+                    // Actualizar el calendario
+                    if (calendar) {
+                        calendar.destroy();
+                    } else {
+                        alert("Elemento #calendar no encontrado");
+                        return;
                     }
+                    inicializarCalendario();
                 });
-
-                // Actualizar el calendario
-                if (calendar) {
-                    calendar.destroy();
-                }
-                inicializarCalendario();
             });
         
 
@@ -700,8 +709,8 @@
                     usuarioActual = user;
                 }
 
+                await cargarReservas();
                 inicializarCalendario();
-                cargarReservas();
                 cargarDias();
                 cargarHoras();                
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
