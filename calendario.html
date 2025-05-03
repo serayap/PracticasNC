@@ -8,6 +8,14 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js'></script>
     <style>
+        body {
+            background: linear-gradient(135deg, #e3f0ff 0%, #f9fbfc 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
         .container {
             display: flex;
             flex-direction: column;
@@ -323,7 +331,7 @@
             for (const fecha of fechas) {
                 await db.collection('reservas').add({
                     usuarioId: usuarioActual.uid,
-                    usuarioNombre: localStorage.getItem('nombre') || usuarioActual.email,
+                    usuarioNombre: usuarioActual.displayName || usuarioActual.email,
                     fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
                     hora: hora,
                     estado: 'pendiente',
