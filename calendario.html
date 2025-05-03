@@ -309,7 +309,7 @@
             if (tituloDia) {
                 const fecha = new Date(fechaStr); // info.dateStr es 'YYYY-MM-DD'
                 const numeroDia = fecha.getDate();
-                tituloDia.textContent = numeroDia;
+                tituloDia.textContent = `Reservas del día ${numeroDia}`;
             }
 
             const fechaInicio = new Date(fechaStr + 'T00:00:00');
