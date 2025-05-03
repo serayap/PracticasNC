@@ -190,9 +190,9 @@
             }
 
             #reservaMsg {
-                white-space: pre-line;
+                max-width: 300px; /* o el ancho que prefieras */
+                word-break: break-word;
             }
-
         }
     </style>
 </head>
@@ -540,7 +540,7 @@
                         day: 'numeric',
                         month: 'short'
                     });
-                    reservaMsg.textContent = `Ya existe reserva para el ${fechaFormateada} \n de ${hora}.`;
+                    reservaMsg.textContent = `Ya existe reserva para el ${fechaFormateada} de ${hora}.`;
                     return;
                 }
             }
