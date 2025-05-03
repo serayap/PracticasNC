@@ -143,13 +143,21 @@
             max-height: 400px;
             overflow-y: auto;
         }
-
-        /* Elementos de la lista */
+                
+        #lista-reservas,
         #lista-reservas-dia {
-            margin-top: 15px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.5;
+            /* Otros estilos compartidos */
         }
 
+        .reserva-item,
         .reserva-dia-item {
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
             padding: 12px;
             margin: 8px 0;
             background: #f8f9fa;
@@ -174,12 +182,15 @@
                 gap: 0;
             }
 
-            #calendar, .form-reserva, .seccion-derecha {
+            #calendar, .form-reserva {
                 min-width: 0;
                 width: 100%;
                 margin-bottom: 20px;
             }
 
+            .seccion-derecha {
+                width: 100%;
+            }
         }
     </style>
 </head>
