@@ -220,7 +220,7 @@
             </div>
             <div class="seccion-derecha">             
                 <div class="reservas-dia">
-                    <h2 class="cabecera">Reservas del día</h2>
+                    <h2 class="cabecera" id="tituloReservasDia">Reservas del día</h2>
                     <div id="lista-reservas-dia"></div>
                 </div>
             </div>
@@ -298,42 +298,50 @@
             }
         }
 
-        // Función para cargar reservas del día
-        async function cargarReservasDelDia(fechaStr) {
+    // Función para cargar reservas del día
+    async function cargarReservasDelDia(fechaStr) {
     const lista = document.getElementById('lista-reservas-dia');
     lista.innerHTML = '<div class="cargando">Cargando...</div>';
 
-    try {
-        const fechaInicio = new Date(fechaStr + 'T00:00:00');
-        const fechaFin = new Date(fechaStr + 'T23:59:59');
-        
-        // Usa firebase.firestore() para crear la query
-        const q = db.collection("reservas")
-                   .where("fecha", ">=", fechaInicio)
-                   .where("fecha", "<=", fechaFin);
-        
-        const querySnapshot = await q.get();
-        lista.innerHTML = '';
+        try {
+            // Solo el número del día
+            const tituloDia = document.getElementById('tituloReservasDia');
+            if (tituloDia) {
+                const fecha = new Date(info.dateStr); // info.dateStr es 'YYYY-MM-DD'
+                const numeroDia = fecha.getDate();
+                tituloDia.textContent = numeroDia;
+            }
 
-        if (querySnapshot.empty) {
-            lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día<em></div>';
-            return;
-        }
+            const fechaInicio = new Date(fechaStr + 'T00:00:00');
+            const fechaFin = new Date(fechaStr + 'T23:59:59');
+        
+            // Usa firebase.firestore() para crear la query
+            const q = db.collection("reservas")
+                       .where("fecha", ">=", fechaInicio)
+                       .where("fecha", "<=", fechaFin);
+        
+            const querySnapshot = await q.get();
+            lista.innerHTML = '';
 
-        querySnapshot.forEach((doc) => {
-            const reserva = doc.data();
-            const div = document.createElement('div');
-            div.className = `reserva-dia-item ${reserva.estado}`;
+            if (querySnapshot.empty) {
+                lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día<em></div>';
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const reserva = doc.data();
+                const div = document.createElement('div');
+                div.className = `reserva-dia-item ${reserva.estado}`;
             
-            div.innerHTML = `
-                <div>
-                    <strong>${reserva.usuarioNombre}</strong>
-                    <div class="hora">${reserva.hora}</div>
-                </div>
-                <span class="estado">${reserva.estado}</span>
-            `;
+                div.innerHTML = `
+                    <div>
+                        <strong>${reserva.usuarioNombre}</strong>
+                        <div class="hora">${reserva.hora}</div>
+                    </div>
+                    <span class="estado">${reserva.estado}</span>
+                `;
             
-            lista.appendChild(div);
+                lista.appendChild(div);
         });
 
     } catch (error) {
