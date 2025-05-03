@@ -300,22 +300,23 @@
 
         // Función para cargar reservas del día
         async function cargarReservasDelDia(fechaStr) {
-            const fechaInicio = new Date(fechaStr + 'T00:00:00');
-            const fechaFin = new Date(fechaStr + 'T23:59:59');
+            const lista = document.getElementById('lista-reservas-dia');
+            lista.innerHTML = '<div class="cargando">Cargando...</div>';
 
             try {
-                const q = query(
-                    collection(db, "reservas"),
-                    where("fecha", ">=", fechaInicio),
-                    where("fecha", "<=", fechaFin)
-                );
+                const fechaInicio = new Date(fechaStr + 'T00:00:00');
+                const fechaFin = new Date(fechaStr + 'T23:59:59');
 
-                const querySnapshot = await getDocs(q);
-                const lista = document.getElementById('lista-reservas-dia');
+                // Usa firebase.firestore() para crear la query
+                const q = db.collection("reservas")
+                    .where("fecha", ">=", fechaInicio)
+                    .where("fecha", "<=", fechaFin);
+
+                const querySnapshot = await q.get();
                 lista.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    lista.innerHTML = '<div class="sin-reservas">No hay reservas para este día</div>';
+                    lista.innerHTML = '<div class="sin-reservas">No hay reservas este día</div>';
                     return;
                 }
 
@@ -336,8 +337,8 @@
                 });
 
             } catch (error) {
-                console.error("Error cargando reservas:", error);
-                lista.innerHTML = '<div class="error-reserva">Error al cargar reservas</div>';
+                console.error("Error:", error);
+                lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
             }
         }
 
