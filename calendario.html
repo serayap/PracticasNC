@@ -30,8 +30,6 @@
             font-weight: 900;
             background: linear-gradient(90deg, #1976d2 20%, #42a5f5 80%);
             color: transparent;
-            background-clip: text;
-            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: 1px; /* Menos separación */
             text-align: center;
@@ -72,9 +70,8 @@
 
         .arriba {
             display: flex;
-            flex-direction: row;
             gap: 20px;
-            width: 100%;
+            align-items: flex-start;
         }
 
         .form-reserva {
@@ -125,10 +122,57 @@
             transition: background 0.2s;
         }
 
-            .fc .fc-button:hover,
-            .fc .fc-button:focus {
-                background: #1565c0;
-            }
+        .fc .fc-button:hover,.fc .fc-button:focus {
+             background: #1565c0;
+        }
+
+        .seccion-izquierda {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        .seccion-derecha {
+            flex: 2;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Panel de reservas del día */
+        .reservas-dia {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Elementos de la lista */
+        #lista-reservas-dia {
+            margin-top: 15px;
+        }
+
+        .reserva-dia-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid transparent;
+        }
+
+        .reserva-dia-item.pendiente {
+            border-color: #ff9800;
+        }
+
+        .reserva-dia-item.confirmada {
+            border-color: #4caf50;
+        }
 
         @media (max-width: 900px) {
             .arriba {
@@ -148,35 +192,35 @@
     <div class="container">
         <h2 class="cabecera-principal" id="tituloReservas"></h2>
         <div class="arriba">
-            <div>
+            <!-- Sección izquierda: Formularios -->
+            <div class="seccion-izquierda">
                 <div class="form-reserva">
                     <h2 class="cabecera">Nueva solicitud de reserva</h2>
                     <form id="formReserva">
-                        <div class="form-row">
-                            <label for="dia">Día:</label>
-                            <select id="dia" required></select>
-                        </div>
-                        <div class="form-row">
-                            <label for="hora">Hora:</label>
-                            <select id="hora" required></select>
-                        </div>
-                        <div class="form-row">
-                            <input type="checkbox" id="bloqueSemana" class="block-week">
-                            <label for="bloqueSemana">Reservar este horario para toda la semana</label>
-                        </div>
-                        <button type="submit" class="cta-btn">Reservar selección</button>
+                        <!-- ... tus campos del formulario ... -->
                     </form>
                 </div>
+
                 <div class="form-reserva">
-                    <h2 class="cabecera">Listado de solicitudes de reservas</h2>
-                    <!-- Aquí tu listado -->
-                    <div id="lista-reservas"></div>
+                    <h2 class="cabecera">Tus solicitudes</h2>
+                    <div id="lista-reservas-usuario"></div>
                 </div>
             </div>
-            <div id="calendar-container">
-                <div id="calendar"></div>
+
+            <!-- Sección derecha: Calendario + Reservas del día -->
+            <div class="seccion-derecha">
+                <div id="calendar-container">
+                    <div id="calendar"></div>
+                </div>
+
+                <div class="reservas-dia">
+                    <h2 class="cabecera">Reservas del día</h2>
+                    <div id="lista-reservas-dia"></div>
+                </div>
             </div>
         </div>
+    </div>
+
     <!-- Firebase (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -230,7 +274,7 @@
                     option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
                     selectDia.appendChild(option);
                 }
-                
+
             }
         }
 
@@ -278,6 +322,9 @@
                 height: 'auto',
                 aspectRatio: 1.1,
                 events: [],
+                dateClick: function (info) {
+                    cargarReservasDelDia(info.dateStr);
+                },
                 eventDidMount: function (info) {
                     // Colores según estado
                     if (info.event.extendedProps.estado === 'pendiente') {
@@ -319,12 +366,12 @@
                     const div = document.createElement('div');
                     div.className = `reserva-item ${r.estado}`;
                     div.innerHTML = `
-                                            <div>
-                                                <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
-                                                &nbsp;${r.hora}
-                                            </div>
-                                            <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
-                                        `;
+                                                <div>
+                                                    <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
+                                                    &nbsp;${r.hora}
+                                                </div>
+                                                <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
+                                            `;
                     lista.appendChild(div);
                 });
         }
@@ -348,6 +395,49 @@
                 });
                 mostrarReservasCalendario();
             });
+
+            // Función para cargar reservas del día
+            async function cargarReservasDelDia(fechaStr) {
+                const fechaInicio = new Date(fechaStr + 'T00:00:00');
+                const fechaFin = new Date(fechaStr + 'T23:59:59');
+
+                try {
+                    const q = query(
+                        collection(db, "reservas"),
+                        where("fecha", ">=", fechaInicio),
+                        where("fecha", "<=", fechaFin)
+                    );
+
+                    const querySnapshot = await getDocs(q);
+                    const lista = document.getElementById('lista-reservas-dia');
+                    lista.innerHTML = '';
+
+                    if (querySnapshot.empty) {
+                        lista.innerHTML = '<div class="sin-reservas">No hay reservas para este día</div>';
+                        return;
+                    }
+
+                    querySnapshot.forEach((doc) => {
+                        const reserva = doc.data();
+                        const div = document.createElement('div');
+                        div.className = `reserva-dia-item ${reserva.estado}`;
+
+                        div.innerHTML = `
+                <div>
+                    <strong>${reserva.usuarioNombre}</strong>
+                    <div class="hora">${reserva.hora}</div>
+                </div>
+                <span class="estado">${reserva.estado}</span>
+            `;
+
+                        lista.appendChild(div);
+                    });
+
+                } catch (error) {
+                    console.error("Error cargando reservas:", error);
+                    lista.innerHTML = '<div class="error-reserva">Error al cargar reservas</div>';
+                }
+            }
 
             // Reservas del usuario autenticado
             db.collection('reservas')
