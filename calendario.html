@@ -307,7 +307,7 @@
             // Solo el número del día
             const tituloDia = document.getElementById('tituloReservasDia');
             if (tituloDia) {
-                const fecha = new Date(info.dateStr); // info.dateStr es 'YYYY-MM-DD'
+                const fecha = new Date(fechaStr); // info.dateStr es 'YYYY-MM-DD'
                 const numeroDia = fecha.getDate();
                 tituloDia.textContent = numeroDia;
             }
