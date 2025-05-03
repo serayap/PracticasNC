@@ -26,24 +26,25 @@
 
         .cabecera-principal {
             font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.3rem; /* Un poco más pequeño */
             font-weight: 900;
             background: linear-gradient(90deg, #1976d2 20%, #42a5f5 80%);
             color: transparent;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
+            letter-spacing: 1px; /* Menos separación */
             text-align: center;
-            margin: 40px auto 32px auto;
-            text-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+            margin: 16px auto 8px auto; /* Mucho menos margen arriba y abajo */
+            text-shadow: 0 1px 4px rgba(25, 118, 210, 0.08); /* Sombra más sutil */
             animation: gradient-move 3s linear infinite alternate;
-            padding: 12px 0;
-            border-bottom: 4px solid #1976d2;
-            border-radius: 0 0 14px 14px;
-            box-shadow: 0 4px 24px rgba(25, 118, 210, 0.08);
-            max-width: 600px;
+            padding: 4px 0; /* Menos padding vertical */
+            border-bottom: 2px solid #1976d2; /* Más fino */
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 12px rgba(25, 118, 210, 0.05); /* Sombra más pequeña */
+            max-width: 500px; /* Más estrecho */
         }
+
 
         @keyframes gradient-move {
             0% {
