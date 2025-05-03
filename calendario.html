@@ -135,13 +135,18 @@
         }
 
         /* Panel de reservas del día */
-        .reservas-dia, #lista-reservas-dia {
+        .reservas-dia {
             background: #fff;
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
             max-height: 400px;
             overflow-y: auto;
+        }
+
+        /* Elementos de la lista */
+        #lista-reservas-dia {
+            margin-top: 15px;
         }
 
         .reserva-dia-item {
@@ -216,7 +221,7 @@
             <div class="seccion-derecha">             
                 <div class="reservas-dia">
                     <h2 class="cabecera">Reservas del día</h2>
-                    <div id="lista-reservas-dia"></div>
+                    <div id="lista-reservas"></div>
                 </div>
             </div>
         </div>
