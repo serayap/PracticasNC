@@ -358,9 +358,9 @@
                 div.innerHTML = `
                     <div>
                         <!--<strong>${reserva.usuarioNombre}</strong>-->
-                        <div class="hora">${reserva.hora}</div>
+                        <div class="hora">${reserva.hora}&nbsp;&nbsp;&nbsp;${reserva.estado}</div>
                     </div>
-                    <span class="estado">${reserva.estado}</span>
+                    <!--<span class="estado">${reserva.estado}</span>-->
                 `;
             
                 lista.appendChild(div);
