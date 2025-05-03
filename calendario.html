@@ -126,6 +126,48 @@
                 background: #1565c0;
             }
 
+        .seccion-derecha {
+            flex: 2;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Panel de reservas del día */
+        .reservas-dia {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Elementos de la lista */
+        #lista-reservas-dia {
+            margin-top: 15px;
+        }
+
+        .reserva-dia-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid transparent;
+        }
+
+            .reserva-dia-item.pendiente {
+                border-color: #ff9800;
+            }
+
+            .reserva-dia-item.confirmada {
+                border-color: #4caf50;
+            }
+
         @media (max-width: 900px) {
             .arriba {
                 flex-direction: column;
@@ -136,6 +178,10 @@
                 min-width: 0;
                 width: 100%;
                 margin-bottom: 20px;
+            }
+
+            .seccion-derecha {
+                width: 100%;
             }
         }
     </style>
@@ -172,7 +218,12 @@
             <div id="calendar-container">
                 <div id="calendar"></div>
             </div>
-            <div>hola</div>
+            <div class="seccion-derecha">             
+                <div class="reservas-dia">
+                    <h2 class="cabecera">Reservas del día</h2>
+                    <div id="lista-reservas-dia"></div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Firebase (compat) -->
@@ -431,7 +482,7 @@
                 } else {
                     const nombre = capitalizarPrimeraLetra(user.displayName || "");
                     const email = user.email || "";
-                    document.getElementById('tituloReservas').textContent = `Reservas de prácticas para ${nombre || email}`;
+                    document.getElementById('tituloReservas').textContent = `Reservas de prácticas para ${nombre || email} con Carlos`;
                     usuarioActual = user;
                 }
 
