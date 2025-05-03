@@ -175,14 +175,15 @@
 
         /* Contenedor de puntos */
         .dots-container {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
             display: flex;
             flex-wrap: wrap;
             gap: 2px;
-            margin-top: 2px;
-            padding: 0 2px;
         }
 
-        /* Puntos individuales */
         .dot {
             width: 8px;
             height: 8px;
@@ -190,9 +191,14 @@
             flex-shrink: 0;
         }
 
-        /* Estados */
-        .dot.confirmada { background: #4CAF50;} /* Verde */
-        .dot.pendiente { background: #FF9800; }/* Naranja */
+        .confirmada {background: #4CAF50;}
+        .pendiente {background: #FF9800;}
+
+        .fc-daygrid-day-frame {
+            position: relative;
+            min-height: 40px; /* Asegura espacio para los puntos */
+        }
+
 
         @media (max-width: 900px) {
             .arriba {
@@ -395,7 +401,7 @@
 }
 
         // Inicializar FullCalendar
-        function inicializarCalendario() {
+        /*function inicializarCalendario() {
             const calendarEl = document.getElementById('calendar');
             if (!calendarEl) {
                 alert("No se encontró el div con id 'calendar'");
@@ -464,10 +470,51 @@
                         info.el.style.backgroundColor = '#4caf50';
                         info.el.style.borderColor = '#4caf50';
                     }
-                }*/
+                }
+            });
+            calendar.render();
+        }*/
+        function inicializarCalendario() {
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                firstDay: 1,
+                dayCellDidMount: (info) => {
+                    const fecha = info.date.toISOString().split('T')[0];
+                    const reservas = reservasPorFecha[fecha] || { confirmadas: 0, pendientes: 0 };
+
+                    // Eliminar cualquier indicador previo
+                    const existingDots = info.el.querySelector('.dots-container');
+                    if (existingDots) existingDots.remove();
+
+                    // Crear nuevo contenedor
+                    const dotsContainer = document.createElement('div');
+                    dotsContainer.className = 'dots-container';
+
+                    // Añadir puntos verdes (confirmadas)
+                    for (let i = 0; i < reservas.confirmadas; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot confirmada';
+                        dotsContainer.appendChild(dot);
+                    }
+
+                    // Añadir puntos naranjas (pendientes)
+                    for (let i = 0; i < reservas.pendientes; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot pendiente';
+                        dotsContainer.appendChild(dot);
+                    }
+
+                    // Posicionar debajo de la fecha
+                    const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
+                    if (dayFrame) {
+                        dayFrame.appendChild(dotsContainer);
+                    }
+                }
             });
             calendar.render();
         }
+
 
         // Mostrar todas las reservas en el calendario
         function mostrarReservasCalendario() {
@@ -546,18 +593,15 @@
                             };
                         }
 
-                        if (estado === 'confirmada') {
-                            reservasPorFecha[fecha].confirmadas++;
-                        } else {
-                            reservasPorFecha[fecha].pendientes++;
-                        }
+                        reservasPorFecha[fecha][estado === 'confirmada' ? 'confirmadas' : 'pendientes']++;
                     }
                 });
 
                 // Actualizar el calendario
                 if (calendar) {
-                    calendar.render();
+                    calendar.destroy();
                 }
+                inicializarCalendario();
             });
         
 
@@ -657,9 +701,9 @@
                 }
 
                 inicializarCalendario();
-                cargarDias();
-                cargarHoras();
                 cargarReservas();
+                cargarDias();
+                cargarHoras();                
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
         });
