@@ -72,7 +72,7 @@
         <div class="arriba">
             <div>
                 <div class="form-reserva">
-                    <h2>Nueva Reserva</h2>
+                    <h2>Nueva solicitud de reserva</h2>
                     <form id="formReserva">
                         <div class="form-row">
                             <label for="dia">Día:</label>
@@ -90,7 +90,7 @@
                     </form>
                 </div>
                 <div class="form-reserva">
-                    <h2>Listado de reservas</h2>
+                    <h2>Listado de solicitudes de reservas</h2>
                     <!-- Aquí tu listado -->
                     <div id="lista-reservas"></div>
                 </div>
@@ -191,6 +191,12 @@
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
+                titleFormat: function (date) {
+                    // date.start es un objeto Date de JS
+                    const mes = date.start.toLocaleDateString('es-ES', { month: 'long' });
+                    const año = date.start.getFullYear();
+                    return 'Prácticas reservadas - ' + mes + ' ' + año;
+                },
                 firstDay: 1,
                 validRange: {
                     start: start.toISOString().split('T')[0],
