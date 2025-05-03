@@ -286,17 +286,33 @@
         // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
         function cargarHoras() {
             const selectHora = document.getElementById('hora');
-            selectHora.innerHTML = "";
-            for (let hora = 7; hora <= 20; hora++) {
-                for (let min of [0, 10, 20, 30]) {
-                    const horaStr = `${hora.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
-                    const option = document.createElement('option');
-                    option.value = horaStr;
-                    option.textContent = horaStr;
-                    selectHora.appendChild(option);
-                }
-            }
-        }
+            if (!selectHora) return;
+
+            // Limpia las opciones anteriores
+            selectHora.innerHTML = '';
+
+            // Array de tramos horarios personalizados
+            const tramos = [
+                "7:30 a 8:50",
+                "8:50 a 10:10",
+                "10:10 a 11:30",
+                "11:30 a 12:50",
+                "12:50 a 14:10",
+                "13:50 a 15:10",
+                "15:10 a 16:30",
+                "16:30 a 17:50",
+                "17:50 a 19:10",
+                "19:10 a 20:30"
+            ];
+
+            // Añade cada tramo como opción
+            tramos.forEach(tramo => {
+                const option = document.createElement('option');
+                option.value = tramo;
+                option.textContent = tramo;
+                selectHora.appendChild(option);
+            });
+        }     
 
     // Función para cargar reservas del día
     async function cargarReservasDelDia(fechaStr) {
