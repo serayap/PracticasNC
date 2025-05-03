@@ -357,7 +357,7 @@
             
                 div.innerHTML = `
                     <div>
-                        <strong>${reserva.usuarioNombre}</strong>
+                        <!--<strong>${reserva.usuarioNombre}</strong>-->
                         <div class="hora">${reserva.hora}</div>
                     </div>
                     <span class="estado">${reserva.estado}</span>
@@ -447,9 +447,9 @@
                     div.innerHTML = `
                                             <div>
                                                 <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
-                                                &nbsp;${r.hora}
+                                                &nbsp;${r.hora}&nbsp;&nbsp;&nbsp;${r.estado.toUpperCase()}
                                             </div>
-                                            <div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>
+                                            <!--<div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>-->
                                         `;
                     lista.appendChild(div);
                 });
