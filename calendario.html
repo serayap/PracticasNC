@@ -88,18 +88,19 @@
         }
 
         #calendar-container {
-            width: 600px; /* Cambia a tu gusto */
+            width: 500px; /* Cambia a tu gusto */
             margin: 0 auto; /* Centra el calendario */
         }
 
         #calendar {
-            flex: 1 1 55%;
             min-width: 300px;
             background: #fff;
             border-radius: 12px;
-            padding: 20px;
+            padding: 12px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
             margin-bottom: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .fc-toolbar-title {
@@ -249,7 +250,6 @@
         }
 
         // Inicializar FullCalendar
-
         function inicializarCalendario() {
             const calendarEl = document.getElementById('calendar');
             if (!calendarEl) {
@@ -276,6 +276,7 @@
                     end: end.toISOString().split('T')[0]
                 },
                 height: 'auto',
+                aspectRatio: 1.1,
                 events: [],
                 eventDidMount: function (info) {
                     // Colores según estado
