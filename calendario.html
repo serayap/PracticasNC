@@ -393,7 +393,7 @@
                     start: start.toISOString().split('T')[0],
                     end: end.toISOString().split('T')[0]
                 },
-                height: 'auto',
+                height: '400',
                 aspectRatio: 1.1,
                 events: [],
                 dateClick: function (info) {
@@ -530,7 +530,7 @@
                         day: 'numeric',
                         month: 'short'
                     });
-                    reservaMsg.textContent = `Ya existe una reserva para el ${fechaFormateada} de ${hora}.`;
+                    reservaMsg.textContent = `Ya existe reserva para el ${fechaFormateada} de ${hora}.`;
                     return;
                 }
             }
