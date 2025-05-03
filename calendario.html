@@ -298,6 +298,49 @@
             }
         }
 
+        // Función para cargar reservas del día
+        async function cargarReservasDelDia(fechaStr) {
+            const fechaInicio = new Date(fechaStr + 'T00:00:00');
+            const fechaFin = new Date(fechaStr + 'T23:59:59');
+
+            try {
+                const q = query(
+                    collection(db, "reservas"),
+                    where("fecha", ">=", fechaInicio),
+                    where("fecha", "<=", fechaFin)
+                );
+
+                const querySnapshot = await getDocs(q);
+                const lista = document.getElementById('lista-reservas-dia');
+                lista.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    lista.innerHTML = '<div class="sin-reservas">No hay reservas para este día</div>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const reserva = doc.data();
+                    const div = document.createElement('div');
+                    div.className = `reserva-dia-item ${reserva.estado}`;
+
+                    div.innerHTML = `
+                <div>
+                    <strong>${reserva.usuarioNombre}</strong>
+                    <div class="hora">${reserva.hora}</div>
+                </div>
+                <span class="estado">${reserva.estado}</span>
+            `;
+
+                    lista.appendChild(div);
+                });
+
+            } catch (error) {
+                console.error("Error cargando reservas:", error);
+                lista.innerHTML = '<div class="error-reserva">Error al cargar reservas</div>';
+            }
+        }
+
         // Inicializar FullCalendar
         function inicializarCalendario() {
             const calendarEl = document.getElementById('calendar');
@@ -401,48 +444,6 @@
                 mostrarReservasCalendario();
             });
 
-            // Función para cargar reservas del día
-            async function cargarReservasDelDia(fechaStr) {
-                const fechaInicio = new Date(fechaStr + 'T00:00:00');
-                const fechaFin = new Date(fechaStr + 'T23:59:59');
-
-                try {
-                    const q = query(
-                        collection(db, "reservas"),
-                        where("fecha", ">=", fechaInicio),
-                        where("fecha", "<=", fechaFin)
-                    );
-
-                    const querySnapshot = await getDocs(q);
-                    const lista = document.getElementById('lista-reservas-dia');
-                    lista.innerHTML = '';
-
-                    if (querySnapshot.empty) {
-                        lista.innerHTML = '<div class="sin-reservas">No hay reservas para este día</div>';
-                        return;
-                    }
-
-                    querySnapshot.forEach((doc) => {
-                        const reserva = doc.data();
-                        const div = document.createElement('div');
-                        div.className = `reserva-dia-item ${reserva.estado}`;
-
-                        div.innerHTML = `
-                <div>
-                    <strong>${reserva.usuarioNombre}</strong>
-                    <div class="hora">${reserva.hora}</div>
-                </div>
-                <span class="estado">${reserva.estado}</span>
-            `;
-
-                        lista.appendChild(div);
-                    });
-
-                } catch (error) {
-                    console.error("Error cargando reservas:", error);
-                    lista.innerHTML = '<div class="error-reserva">Error al cargar reservas</div>';
-                }
-            }
 
             // Reservas del usuario autenticado
             db.collection('reservas')
