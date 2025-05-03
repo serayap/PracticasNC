@@ -190,8 +190,13 @@
             }
 
             #reservaMsg {
-                max-width: 200px; /* o el ancho que prefieras */
+                white-space: pre-line;
+                max-width: 220px; /* O el ancho que prefieras */
+                color: #1976d2;
                 word-break: break-word;
+                background: #f0f4ff; /* Opcional, solo para ver el área */
+                padding: 8px;
+                border-radius: 8px;
             }
         }
     </style>
@@ -540,7 +545,7 @@
                         day: 'numeric',
                         month: 'short'
                     });
-                    reservaMsg.textContent = `Ya existe reserva para el ${fechaFormateada} de ${hora}.`;
+                    reservaMsg.textContent = `Ya existe reserva para el ${fechaFormateada} \nde ${hora}.`;
                     return;
                 }
             }
