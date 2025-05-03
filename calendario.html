@@ -191,10 +191,10 @@
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
-                titleFormat: function (date) {
-                    // date.start es un objeto Date de JS
-                    const mes = date.start.toLocaleDateString('es-ES', { month: 'long' });
-                    const año = date.start.getFullYear();
+                titleFormat: function (arg) {
+                    // arg.date es un objeto Date de JS para la vista actual
+                    const mes = arg.date.toLocaleDateString('es-ES', { month: 'long' });
+                    const año = arg.date.getFullYear();
                     return 'Prácticas reservadas - ' + mes + ' ' + año;
                 },
                 firstDay: 1,
