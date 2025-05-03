@@ -188,6 +188,11 @@
             .seccion-derecha {
                 width: 100%;
             }
+
+            #reservaMsg {
+                white-space: pre-line;
+            }
+
         }
     </style>
 </head>
@@ -535,7 +540,7 @@
                         day: 'numeric',
                         month: 'short'
                     });
-                    reservaMsg.textContent = `Ya existe reserva para el ${fechaFormateada}<br>de ${hora}.`;
+                    reservaMsg.textContent = `Ya existe reserva para el ${fechaFormateada} \n de ${hora}.`;
                     return;
                 }
             }
