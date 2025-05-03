@@ -696,7 +696,7 @@
         }
 
         // Autenticación y carga inicial
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', async () => {
             auth.onAuthStateChanged(user => {
                 if (!user) {
                     //alert("Debes iniciar sesión para acceder al calendario.");
