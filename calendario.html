@@ -524,7 +524,13 @@
                     .where('hora', '==', hora)
                     .get();
                 if (!existe.empty) {
-                    reservaMsg.textContent = `Ya existe una reserva para el ${fecha} a las ${hora}.`;
+                    const fechaObj = new Date(fecha);
+                    const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'short'
+                    });
+                    reservaMsg.textContent = `Ya existe una reserva para el ${fechaFormateada} de ${hora}.`;
                     return;
                 }
             }
