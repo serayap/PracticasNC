@@ -402,7 +402,7 @@
     }
 }
 
-    /*function mostrarEventosDelDia(fechaStr) {
+    function mostrarEventosDelDia(fechaStr) {
       const eventos = calendar.getEvents();
       const eventosDelDia = eventos.filter(evento => {
         const inicio = evento.start?.toISOString().split('T')[0];
@@ -410,7 +410,7 @@
       });
   
       console.log("Eventos en", fechaStr, ":", eventosDelDia);
-    }*/
+    }
 
         // Inicializar FullCalendar
         function inicializarCalendario() {
@@ -439,17 +439,17 @@
                     end: end.toISOString().split('T')[0]
                 },
                 //height: 'auto',
-                aspectRatio: 0.9
+                aspectRatio: 0.9,
                 //events: [],
                 /*dateClick: function (info) {
                     cargarReservasDelDia(info.dateStr);
                 }*/
-                /*eventosDidMount: function (info) {
+                eventosDidMount: function (info) {
                     // Mostrar eventos al hacer clic en el día
                     info.el.addEventListener('click', () => {
                         mostrarEventosDelDia(fecha);
                     });
-                }*/
+                }
                 /*eventDidMount: function (info) {
                     // Colores según estado
                     if (info.event.extendedProps.estado === 'pendiente') {
