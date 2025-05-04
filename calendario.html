@@ -218,6 +218,10 @@
                 min-height: 40px; /* deja espacio para los puntos */
             }
 
+            /* Ocultar contador nativo de FullCalendar */
+            .fc-daygrid-more-link {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -284,9 +288,15 @@
 
         let calendar;
         let reservasTodas = [];
-        let reservasPorFecha = {};
         let reservasUsuario = [];
         let usuarioActual = null;
+        let reservasPorFecha = new Proxy({}, {
+            set(target, key, value) {
+                target[key] = value;
+                calendar.refetchEvents(); // Forzar actualización
+                return true;
+            }
+        });
 
         function capitalizarPrimeraLetra(str) {
             return str.replace(/\b\w/g, function (char) {
@@ -473,30 +483,33 @@
                     const fecha = info.date.toISOString().split('T')[0];
                     const reservas = reservasPorFecha[fecha] || { confirmadas: 0, pendientes: 0 };
 
-                    // Elimina contenedores previos si los hay
-                    const oldDots = info.el.querySelector('.dots-container');
-                    if (oldDots) oldDots.remove();
+                    // Limpiar dots antiguos
+                    const existingDots = info.el.querySelector('.dots-container');
+                    if (existingDots) existingDots.remove();
 
-                    // Crea el contenedor de cuadraditos
+                    // Crear nuevos dots
                     const dotsContainer = document.createElement('div');
                     dotsContainer.className = 'dots-container';
 
-                    // Añade cuadraditos verdes (confirmadas)
-                    for (let i = 0; i < reservas.confirmadas; i++) {
+                    // Añadir dots verdes (confirmadas)
+                    Array.from({ length: reservas.confirmadas }).forEach(() => {
                         const dot = document.createElement('div');
                         dot.className = 'dot confirmada';
                         dotsContainer.appendChild(dot);
-                    }
-                    // Añade cuadraditos naranjas (pendientes)
-                    for (let i = 0; i < reservas.pendientes; i++) {
+                    });
+
+                    // Añadir dots naranjas (pendientes)
+                    Array.from({ length: reservas.pendientes }).forEach(() => {
                         const dot = document.createElement('div');
                         dot.className = 'dot pendiente';
                         dotsContainer.appendChild(dot);
-                    }
+                    });
 
-                    // Inserta los cuadraditos debajo del número del día
-                    const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
-                    if (dayFrame) dayFrame.appendChild(dotsContainer);
+                    // Insertar debajo del número del día
+                    const dayNumberEl = info.el.querySelector('.fc-daygrid-day-number');
+                    if (dayNumberEl) {
+                        dayNumberEl.insertAdjacentElement('afterend', dotsContainer);
+                    }
                 }
             });
             calendar.render();
@@ -658,14 +671,19 @@
                     usuarioActual = user;
                 }
 
-                inicializarCalendario();
+                //inicializarCalendario();
                 cargarDias();
                 cargarHoras();
                 cargarReservas();
                 
                 db.collection('reservas').onSnapshot(snapshot => {
                     ReservasporFechas(snapshot);
-                    calendar.refetchEvents();
+
+                    // Destruir y recrear el calendario para forzar actualización
+                    if (calendar) {
+                        calendar.destroy();
+                    }
+                    inicializarCalendario();
                 });
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
