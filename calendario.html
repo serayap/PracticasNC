@@ -677,6 +677,9 @@
                 db.collection('reservas').onSnapshot(snapshot => {
                     console.log("Reservas por fecha:", reservasPorFecha);
                     ReservasporFechas(snapshot);
+                    if (calendar) {
+                        calendar.refetchEvents(); // 👈 Forzar re-renderizado
+                    }
                 });
                 
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
