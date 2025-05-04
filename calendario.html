@@ -678,6 +678,7 @@
                 
                 db.collection('reservas').onSnapshot(snapshot => {
                     ReservasporFechas(snapshot);
+                    console.log("Reservas por fecha:", reservasPorFecha);
 
                     // Destruir y recrear el calendario para forzar actualización
                     if (calendar) {
