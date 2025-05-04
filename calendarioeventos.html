@@ -474,7 +474,8 @@
                     });
 
                     const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
-                    console.log(fecha + " : " + reservas);
+                    console.log(fecha + " : ");
+                    console.log(reservas);
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
                     if (oldDots) oldDots.remove();
