@@ -373,7 +373,7 @@
                        .where("fecha", "<=", fechaFin);
         
             const querySnapshot = await q.get();
-            lista.innerHTML = '';
+            lista.innerHTML = 'selecciona un dia';
 
             if (querySnapshot.empty) {
                 lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día<em></div>';
@@ -531,7 +531,7 @@
                         console.error("Documento sin campo 'fecha' válido:", doc.id);
                     }
                 });
-                alert(reservasTodas.join(", "));
+                console.log(reservasTodas.join(", "));
                 mostrarReservasCalendario();
             });
 
