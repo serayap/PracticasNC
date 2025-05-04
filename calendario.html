@@ -531,7 +531,7 @@
                         console.error("Documento sin campo 'fecha' válido:", doc.id);
                     }
                 });
-                console.log(reservasTodas.join(", "));
+                console.table(reservasTodas);
                 mostrarReservasCalendario();
             });
 
