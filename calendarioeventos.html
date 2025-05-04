@@ -430,6 +430,7 @@
             const end = new Date(year, month + 2, 0); // Día 0 del mes+2 es el último del mes+1
 
             calendar = new FullCalendar.Calendar(calendarEl, {
+                plugins: [dayGridPlugin, interactionPlugin],
                 initialView: 'dayGridMonth',
                 locale: 'es',
                 titleFormat: { year: 'numeric', month: 'long' },
@@ -441,13 +442,17 @@
                 //height: 'auto',
                 aspectRatio: 0.9,
                 //events: [],
-                dateClick: function (info) {
+                /*dateClick: function (info) {
+                    cargarReservasDelDia(info.dateStr);                    
+                },*/
+                /*dayCellDidMount: (info) => {
                     cargarReservasDelDia(info.dateStr);
-                    // Mostrar eventos al hacer clic en el día
+                    const fecha = info.date.toISOString().split('T')[0];
+
+                    // Añadir event listener al elemento de la celda
                     info.el.addEventListener('click', () => {
                         mostrarEventosDelDia(fecha);
-                    });
-                }
+                 });*/
                 /*eventDidMount: function (info) {
                     // Colores según estado
                     if (info.event.extendedProps.estado === 'pendiente') {
@@ -459,8 +464,14 @@
                         info.el.style.borderColor = '#4caf50';
                     }
                 },*/
-                /*dayCellDidMount: function (info) {
+                dayCellDidMount: function (info) {
                     const fecha = info.date.toISOString().split('T')[0];
+
+                    // Event listener para clics en la celda
+                    info.el.addEventListener('click', () => {
+                        mostrarEventosDelDia(fecha);
+                    });
+
                     const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
 
                     // Elimina contenedores previos si los hay
@@ -487,7 +498,7 @@
                     // Inserta los cuadraditos debajo del número del día
                     const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
                     if (dayFrame) dayFrame.appendChild(dotsContainer);
-                }*/
+                }
             });
             calendar.render();
         }
