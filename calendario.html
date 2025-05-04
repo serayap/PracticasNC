@@ -321,7 +321,7 @@
         }
 
         //Función paraagrupar reservas por fecha
-        function ReservasporFechas() {            
+        function ReservasporFechas(snapshot) {            
             snapshot.forEach(doc => {
                 const reserva = doc.data();
                 if (reserva.fecha?.toDate) {
