@@ -480,11 +480,13 @@
 
         // Mostrar todas las reservas en el calendario
         function mostrarReservasCalendario() {
+            console.table(reservasTodas);
             calendar.removeAllEvents();
             const eventos = reservasTodas.map(r => ({
                 title: r.usuarioNombre + " (" + r.hora + ")",
-                start: r.fecha,
-                color: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
+                start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
+                backgroundColor: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
+                textColor: '#fff',
                 extendedProps: { estado: r.estado }
             }));
             calendar.addEventSource(eventos);
@@ -531,7 +533,7 @@
                         console.error("Documento sin campo 'fecha' válido:", doc.id);
                     }
                 });
-                console.table(reservasTodas);
+                //console.table(reservasTodas);
                 mostrarReservasCalendario();
             });
 
