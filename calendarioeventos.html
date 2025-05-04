@@ -510,13 +510,14 @@
         function mostrarReservasCalendario() {
             //console.table(reservasTodas);
             calendar.removeAllEvents();
-            eventos = reservasTodas.map(r => ({
-                //title: r.usuarioNombre + " (" + r.hora + ")",
-                start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
-                backgroundColor: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
-                textColor: '#fff'
-                //extendedProps: { estado: r.estado }
-            }));
+            const eventos = Object.values(reservasTodas)
+                .flatMap(reservasDelDia =>
+                    reservasDelDia.reservas.map(r => ({
+                        start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
+                        backgroundColor: r.estado === 'confirmada' ? '#4CAF50' : '#FF9800',
+                        textColor: '#fff'
+                    }))
+                );
             //console.table(eventos);
             calendar.addEventSource(eventos);
         }
