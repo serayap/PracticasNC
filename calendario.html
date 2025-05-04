@@ -286,7 +286,7 @@
         db.settings(settings);
         const auth = firebase.auth();
 
-        let calendar;
+        let calendar = null;
         let reservasTodas = [];
         let reservasUsuario = [];
         let usuarioActual = null;
@@ -684,7 +684,9 @@
 
                     // Destruir y recrear el calendario para forzar actualización
                     if (calendar) {
-                        calendar.destroy();
+                        calendar.refetchEvents();
+                    } else {
+                        console.error("Calendario no inicializado");
                     }
                     inicializarCalendario();
                 });
