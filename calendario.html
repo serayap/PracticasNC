@@ -484,11 +484,12 @@
             calendar.removeAllEvents();
             const eventos = reservasTodas.map(r => ({
                 //title: r.usuarioNombre + " (" + r.hora + ")",
-                //start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
+                start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
                 backgroundColor: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
                 textColor: '#fff'
                 //extendedProps: { estado: r.estado }
             }));
+            console.table(eventos);
             calendar.addEventSource(eventos);
         }
 
