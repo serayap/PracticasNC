@@ -438,19 +438,17 @@
                     end: end.toISOString().split('T')[0]
                 },
                 //height: 'auto',
-                aspectRatio: 0.9,
+                aspectRatio: 0.9
                 //events: [],
                 /*dateClick: function (info) {
                     cargarReservasDelDia(info.dateStr);
                 }*/
-                eventosDidMount: function (info) {
-                    const fecha = info.date.toISOString().split('T')[0];
-
+                /*eventosDidMount: function (info) {
                     // Mostrar eventos al hacer clic en el día
                     info.el.addEventListener('click', () => {
                         mostrarEventosDelDia(fecha);
                     });
-                }
+                }*/
                 /*eventDidMount: function (info) {
                     // Colores según estado
                     if (info.event.extendedProps.estado === 'pendiente') {
