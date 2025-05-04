@@ -189,6 +189,35 @@
                 width: 100%;
             }
 
+            .dots-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 2px;
+                margin-top: 2px;
+                justify-content: flex-start;
+            }
+
+            .dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 2px;
+                margin-right: 1px;
+            }
+
+                .dot.confirmada {
+                    background: #4CAF50;
+                }
+                /* Verde */
+                .dot.pendiente {
+                    background: #FF9800;
+                }
+            /* Naranja */
+
+            .fc-daygrid-day-frame {
+                position: relative;
+                min-height: 40px; /* deja espacio para los puntos */
+            }
+
         }
     </style>
 </head>
@@ -405,7 +434,7 @@
                 dateClick: function (info) {
                     cargarReservasDelDia(info.dateStr);
                 },
-                eventDidMount: function (info) {
+                /*eventDidMount: function (info) {
                     // Colores según estado
                     if (info.event.extendedProps.estado === 'pendiente') {
                         info.el.style.backgroundColor = '#ff9800';
@@ -415,6 +444,35 @@
                         info.el.style.backgroundColor = '#4caf50';
                         info.el.style.borderColor = '#4caf50';
                     }
+                },*/
+                dayCellDidMount: function (info) {
+                    const fecha = info.date.toISOString().split('T')[0];
+                    const reservas = reservasPorFecha[fecha] || { confirmadas: 0, pendientes: 0 };
+
+                    // Elimina contenedores previos si los hay
+                    const oldDots = info.el.querySelector('.dots-container');
+                    if (oldDots) oldDots.remove();
+
+                    // Crea el contenedor de cuadraditos
+                    const dotsContainer = document.createElement('div');
+                    dotsContainer.className = 'dots-container';
+
+                    // Añade cuadraditos verdes (confirmadas)
+                    for (let i = 0; i < reservas.confirmadas; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot confirmada';
+                        dotsContainer.appendChild(dot);
+                    }
+                    // Añade cuadraditos naranjas (pendientes)
+                    for (let i = 0; i < reservas.pendientes; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot pendiente';
+                        dotsContainer.appendChild(dot);
+                    }
+
+                    // Inserta los cuadraditos debajo del número del día
+                    const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
+                    if (dayFrame) dayFrame.appendChild(dotsContainer);
                 }
             });
             calendar.render();
@@ -473,6 +531,7 @@
                         console.error("Documento sin campo 'fecha' válido:", doc.id);
                     }
                 });
+                alert(reservasTodas.join(", "));
                 mostrarReservasCalendario();
             });
 
