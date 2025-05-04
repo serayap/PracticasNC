@@ -284,6 +284,7 @@
 
         let calendar;
         let reservasTodas = [];
+        let reservasPorFecha = {};
         let reservasUsuario = [];
         let usuarioActual = null;
 
@@ -317,6 +318,30 @@
                 }
                 
             }
+        }
+
+        //Función paraagrupar reservas por fecha
+        function ReservasporFechas() {            
+            snapshot.forEach(doc => {
+                const reserva = doc.data();
+                if (reserva.fecha?.toDate) {
+                    const fechaStr = reserva.fecha.toDate().toISOString().split('T')[0]; // YYYY-MM-DD
+
+                    // Inicializar el día si no existe
+                    if (!reservasPorFecha[fechaStr]) {
+                        reservasPorFecha[fechaStr] = {confirmadas: 0,pendientes: 0};
+                    }
+
+                    // Contar por estado
+                    /*if (reserva.estado === 'confirmada') {
+                        reservasPorFecha[fechaStr].confirmadas++;
+                    } else {
+                        reservasPorFecha[fechaStr].pendientes++;
+                    }*/
+                    reservasPorFecha[fechaStr][reserva.estado === 'confirmada' ? 'confirmadas' : 'pendientes']++;
+                }
+                calendar.refetchEvents(); // Actualizar calendario
+            });
         }
 
         // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
@@ -448,7 +473,7 @@
                 //eventDisplay: 'block',
                 dayCellDidMount: function (info) {
                     const fecha = info.date.toISOString().split('T')[0];
-                    const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
+                    const reservas = reservasPorFecha[fecha] || { confirmadas: 0, pendientes: 0 };
 
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
@@ -639,6 +664,7 @@
                 cargarDias();
                 cargarHoras();
                 cargarReservas();
+                ReservasporFechas();
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
         });
