@@ -433,7 +433,7 @@
                 //events: [],
                 dateClick: function (info) {
                     cargarReservasDelDia(info.dateStr);
-                },
+                }
                 /*eventDidMount: function (info) {
                     // Colores según estado
                     if (info.event.extendedProps.estado === 'pendiente') {
@@ -445,7 +445,7 @@
                         info.el.style.borderColor = '#4caf50';
                     }
                 },*/
-                dayCellDidMount: function (info) {
+                /*dayCellDidMount: function (info) {
                     const fecha = info.date.toISOString().split('T')[0];
                     const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
 
@@ -473,7 +473,7 @@
                     // Inserta los cuadraditos debajo del número del día
                     const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
                     if (dayFrame) dayFrame.appendChild(dotsContainer);
-                }
+                }*/
             });
             calendar.render();
         }
