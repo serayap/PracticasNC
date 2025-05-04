@@ -320,29 +320,27 @@
             }
         }
 
-        //Función paraagrupar reservas por fecha
-        function ReservasporFechas(snapshot) {            
+        //Función paraagrupar reservas por fecha        
+        function ReservasporFechas(snapshot) {
+            reservasPorFecha = {};
             snapshot.forEach(doc => {
                 const reserva = doc.data();
                 if (reserva.fecha?.toDate) {
-                    const fechaStr = reserva.fecha.toDate().toISOString().split('T')[0]; // YYYY-MM-DD
+                    const fechaStr = reserva.fecha.toDate().toISOString().split('T')[0];
+                    const estado = reserva.estado || 'pendiente';
 
-                    // Inicializar el día si no existe
                     if (!reservasPorFecha[fechaStr]) {
-                        reservasPorFecha[fechaStr] = {confirmadas: 0,pendientes: 0};
+                        reservasPorFecha[fechaStr] = { confirmadas: 0, pendientes: 0 };
                     }
 
-                    // Contar por estado
-                    /*if (reserva.estado === 'confirmada') {
+                    if (estado === 'confirmada') {
                         reservasPorFecha[fechaStr].confirmadas++;
                     } else {
                         reservasPorFecha[fechaStr].pendientes++;
-                    }*/
-                    reservasPorFecha[fechaStr][reserva.estado === 'confirmada' ? 'confirmadas' : 'pendientes']++;
+                    }
                 }
-                calendar.refetchEvents(); // Actualizar calendario
             });
-        }
+        }        
 
         // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
         function cargarHoras() {
@@ -664,7 +662,11 @@
                 cargarDias();
                 cargarHoras();
                 cargarReservas();
-                ReservasporFechas();
+                
+                db.collection('reservas').onSnapshot(snapshot => {
+                    ReservasporFechas(snapshot);
+                    calendar.refetchEvents();
+                });
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
         });
