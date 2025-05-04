@@ -476,7 +476,7 @@
 
                     const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
                     console.log(fecha + " : ");
-                    console.log(eventos);
+                    console.log(eventos.start);
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
                     if (oldDots) oldDots.remove();
