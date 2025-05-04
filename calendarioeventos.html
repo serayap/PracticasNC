@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Distribución Formulario + Calendario + Listado</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js'></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 60%, #e0e0e0 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1050px;
+            margin: 0 auto;
+            gap: 0;
+        }
+
+        .cabecera-principal {
+            font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+            font-size: 1.3rem; /* Un poco más pequeño */
+            font-weight: 900;
+            background: linear-gradient(90deg, #1976d2 20%, #42a5f5 80%);
+            color: transparent;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px; /* Menos separación */
+            text-align: center;
+            margin: 16px auto 8px auto; /* Mucho menos margen arriba y abajo */
+            text-shadow: 0 1px 4px rgba(25, 118, 210, 0.08); /* Sombra más sutil */
+            animation: gradient-move 3s linear infinite alternate;
+            padding: 4px 0; /* Menos padding vertical */
+            border-bottom: 2px solid #1976d2; /* Más fino */
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 12px rgba(25, 118, 210, 0.05); /* Sombra más pequeña */
+            max-width: 1000px; /* Más estrecho */
+        }
+
+
+        @keyframes gradient-move {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .cabecera {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1976d2;
+            background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            display: inline-block;
+        }
+
+        .arriba {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .form-reserva {
+            flex: 1 1 40%;
+            min-width: 300px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 5px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin-bottom: 0;
+        }
+
+        #calendar-container {
+            width: 400px; /* Cambia a tu gusto */
+            margin: 0 auto; /* Centra el calendario */
+        }
+
+        #calendar {
+            min-width: 200px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            margin-bottom: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .fc-toolbar {
+            padding: 2px 0 !important; /* Reduce el espacio vertical */
+            min-height: 0 !important;
+        }
+
+        .fc-toolbar-title {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            font-size: 1.5rem !important;
+            font-weight: 5700;
+            color: #1565c0;
+            padding: 2px 8px !important;
+            letter-spacing: 1px;
+        }
+
+        .fc .fc-button {
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+            .fc .fc-button:hover,
+            .fc .fc-button:focus {
+                background: #1565c0;
+            }
+
+        .seccion-derecha {
+            flex: 2;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Panel de reservas del día */
+        .reservas-dia {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Elementos de la lista */
+        #lista-reservas-dia {
+            margin-top: 15px;
+        }
+
+        .reserva-dia-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid transparent;
+        }
+
+            .reserva-dia-item.pendiente {
+                border-color: #ff9800;
+            }
+
+            .reserva-dia-item.confirmada {
+                border-color: #4caf50;
+            }
+
+        @media (max-width: 900px) {
+            .arriba {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            #calendar, .form-reserva {
+                min-width: 0;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .seccion-derecha {
+                width: 100%;
+            }
+
+            .dots-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 2px;
+                margin-top: 2px;
+                justify-content: flex-start;
+            }
+
+            .dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 2px;
+                margin-right: 1px;
+            }
+
+                .dot.confirmada {
+                    background: #4CAF50;
+                }
+                /* Verde */
+                .dot.pendiente {
+                    background: #FF9800;
+                }
+            /* Naranja */
+
+            .fc-daygrid-day-frame {
+                position: relative;
+                min-height: 40px; /* deja espacio para los puntos */
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="cabecera-principal" id="tituloReservas"></h2>
+        <div class="arriba">
+            <div>
+                <div class="form-reserva">
+                    <h2 class="cabecera">Nueva solicitud de reserva</h2>
+                    <form id="formReserva">
+                        <div class="form-row">
+                            <label for="dia">Día:</label>
+                            <select id="dia" required></select>
+                        </div>
+                        <div class="form-row">
+                            <label for="hora">Hora:</label>
+                            <select id="hora" required></select>
+                        </div>
+                        <div class="form-row">
+                            <input type="checkbox" id="bloqueSemana" class="block-week">
+                            <label for="bloqueSemana">Reservar este horario para toda la semana</label>
+                        </div>
+                        <button type="submit" class="cta-btn">Solicitar reserva</button>
+                    </form>
+                </div>
+                <div class="form-reserva">
+                    <h2 class="cabecera">Solicitudes de reservas</h2>
+                    <!-- Aquí tu listado -->
+                    <div id="lista-reservas"></div>
+                    <div id="reservaMsg"></div>
+                </div>
+            </div>
+            <div id="calendar-container">
+                <div id="calendar"></div>
+            </div>
+            <div class="seccion-derecha">             
+                <div class="reservas-dia">
+                    <h2 class="cabecera" id="tituloReservasDia">Reservas del día</h2>
+                    <div id="lista-reservas-dia"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Firebase (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
+            authDomain: "reservaspracticasnc.firebaseapp.com",
+            projectId: "reservaspracticasnc",
+            storageBucket: "reservaspracticasnc.appspot.com",
+            messagingSenderId: "742403879145",
+            appId: "1:742403879145:web:2f64807672793aaa348078"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const settings = { experimentalForceLongPolling: true, merge: true };
+        db.settings(settings);
+        const auth = firebase.auth();
+
+        let calendar;
+        let reservasTodas = [];
+        let reservasUsuario = [];
+        let usuarioActual = null;
+
+        function capitalizarPrimeraLetra(str) {
+            return str.replace(/\b\w/g, function (char) {
+                return char.toUpperCase();
+            });
+        }
+
+        // Utilidad: formato YYYY-MM-DD
+        function toISODate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Cargar días de la semana actual y la siguiente
+        function cargarDias() {
+            const selectDia = document.getElementById('dia');
+            selectDia.innerHTML = "";
+            const hoy = new Date();
+            for (let i = 1; i < 15; i++) {
+                const fecha = new Date(hoy);
+                fecha.setDate(hoy.getDate() + i);
+                const diaSemana = fecha.getDay(); // 0=domingo, 6=sábado
+                if (diaSemana !== 0 && diaSemana !== 6) { // Excluye sábados y domingos
+                    const fechaISO = toISODate(fecha);
+                    const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+                    const option = document.createElement('option');
+                    option.value = fechaISO;
+                    option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+                    selectDia.appendChild(option);
+                }
+                
+            }
+        }
+
+        // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
+        function cargarHoras() {
+            const selectHora = document.getElementById('hora');
+            if (!selectHora) return;
+
+            // Limpia las opciones anteriores
+            selectHora.innerHTML = '';
+
+            // Array de tramos horarios personalizados
+            const tramos = [
+                "7:30 a 8:50",
+                "8:50 a 10:10",
+                "10:10 a 11:30",
+                "11:30 a 12:50",
+                "12:50 a 14:10",
+                "13:50 a 15:10",
+                "15:10 a 16:30",
+                "16:30 a 17:50",
+                "17:50 a 19:10",
+                "19:10 a 20:30"
+            ];
+
+            // Añade cada tramo como opción
+            tramos.forEach(tramo => {
+                const option = document.createElement('option');
+                option.value = tramo;
+                option.textContent = tramo;
+                selectHora.appendChild(option);
+            });
+        }     
+
+    // Función para cargar reservas del día
+    async function cargarReservasDelDia(fechaStr) {
+    const lista = document.getElementById('lista-reservas-dia');
+    lista.innerHTML = '<div class="cargando">Cargando...</div>';
+
+        try {
+            // Solo el número del día
+            const tituloDia = document.getElementById('tituloReservasDia');
+            if (tituloDia) {
+                const fecha = new Date(fechaStr); // info.dateStr es 'YYYY-MM-DD'
+                const numeroDia = fecha.getDate();
+                tituloDia.textContent = `Reservas del día ${numeroDia}`;
+            }
+
+            const fechaInicio = new Date(fechaStr + 'T00:00:00');
+            const fechaFin = new Date(fechaStr + 'T23:59:59');
+        
+            // Usa firebase.firestore() para crear la query
+            const q = db.collection("reservas")
+                       .where("fecha", ">=", fechaInicio)
+                       .where("fecha", "<=", fechaFin);
+        
+            const querySnapshot = await q.get();
+            lista.innerHTML = 'selecciona un dia';
+
+            if (querySnapshot.empty) {
+                lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día<em></div>';
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const reserva = doc.data();
+                const div = document.createElement('div');
+                div.className = `reserva-dia-item ${reserva.estado}`;
+            
+                div.innerHTML = `
+                    <div>
+                        <!--<strong>${reserva.usuarioNombre}</strong>-->
+                        <div class="hora">${reserva.hora}&nbsp;&nbsp;&nbsp;${reserva.estado}</div>
+                    </div>
+                    <!--<span class="estado">${reserva.estado}</span>-->
+                `;
+            
+                lista.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error("Error:", error);
+        lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
+    }
+}
+
+        // Inicializar FullCalendar
+        function inicializarCalendario() {
+            const calendarEl = document.getElementById('calendar');
+            if (!calendarEl) {
+                alert("No se encontró el div con id 'calendar'");
+                return;
+            }
+
+            const fechaActual = new Date(); // O fija la fecha si es para pruebas
+            const year = fechaActual.getFullYear();
+            const month = fechaActual.getMonth(); // 0-indexed
+
+            // Primer día del mes actual
+            const start = new Date(year, month, 1);
+            // Último día del mes siguiente
+            const end = new Date(year, month + 2, 0); // Día 0 del mes+2 es el último del mes+1
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                titleFormat: { year: 'numeric', month: 'long' },
+                firstDay: 1,
+                validRange: {
+                    start: start.toISOString().split('T')[0],
+                    end: end.toISOString().split('T')[0]
+                },
+                //height: 'auto',
+                aspectRatio: 0.9,
+                //events: [],
+                dateClick: function (info) {
+                    cargarReservasDelDia(info.dateStr);
+                },
+                /*eventDidMount: function (info) {
+                    // Colores según estado
+                    if (info.event.extendedProps.estado === 'pendiente') {
+                        info.el.style.backgroundColor = '#ff9800';
+                        info.el.style.borderColor = '#ff9800';
+                    }
+                    if (info.event.extendedProps.estado === 'confirmada') {
+                        info.el.style.backgroundColor = '#4caf50';
+                        info.el.style.borderColor = '#4caf50';
+                    }
+                },*/
+                dayCellDidMount: function (info) {
+                    const fecha = info.date.toISOString().split('T')[0];
+                    const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
+
+                    // Elimina contenedores previos si los hay
+                    const oldDots = info.el.querySelector('.dots-container');
+                    if (oldDots) oldDots.remove();
+
+                    // Crea el contenedor de cuadraditos
+                    const dotsContainer = document.createElement('div');
+                    dotsContainer.className = 'dots-container';
+
+                    // Añade cuadraditos verdes (confirmadas)
+                    for (let i = 0; i < reservas.confirmadas; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot confirmada';
+                        dotsContainer.appendChild(dot);
+                    }
+                    // Añade cuadraditos naranjas (pendientes)
+                    for (let i = 0; i < reservas.pendientes; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot pendiente';
+                        dotsContainer.appendChild(dot);
+                    }
+
+                    // Inserta los cuadraditos debajo del número del día
+                    const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
+                    if (dayFrame) dayFrame.appendChild(dotsContainer);
+                }
+            });
+            calendar.render();
+        }
+
+        // Mostrar todas las reservas en el calendario
+        function mostrarReservasCalendario() {
+            //console.table(reservasTodas);
+            calendar.removeAllEvents();
+            const eventos = reservasTodas.map(r => ({
+                //title: r.usuarioNombre + " (" + r.hora + ")",
+                start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
+                backgroundColor: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
+                textColor: '#fff'
+                //extendedProps: { estado: r.estado }
+            }));
+            console.table(eventos);
+            calendar.addEventSource(eventos);
+        }
+
+        // Mostrar reservas del usuario autenticado
+        function mostrarReservasUsuario() {
+            const lista = document.getElementById('lista-reservas');
+            lista.innerHTML = "";
+            if (reservasUsuario.length === 0) {
+                lista.innerHTML = "<em>No tienes reservas aún.</em>";
+                return;
+            }
+            reservasUsuario
+                .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+                .forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = `reserva-item ${r.estado}`;
+                    div.innerHTML = `
+                                            <div>
+                                                <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
+                                                &nbsp;${r.hora}&nbsp;&nbsp;&nbsp;${r.estado.toUpperCase()}
+                                            </div>
+                                            <!--<div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>-->
+                                        `;
+                    lista.appendChild(div);
+                });
+        }
+
+        async function cargarReservas() {
+            // Todas las reservas para el calendario
+            db.collection('reservas').onSnapshot(snapshot => {
+                reservasTodas = [];
+                snapshot.forEach(doc => {
+                    const reserva = doc.data();
+                    if (reserva.fecha?.toDate) { // Validar existencia de fecha
+                        reservasTodas.push({
+                            id: doc.id,
+                            usuarioNombre: reserva.usuarioNombre,
+                            hora: reserva.hora,
+                            fecha: reserva.fecha, // Asegurar que es un Timestamp
+                            estado: reserva.estado
+                        });
+                    } else {
+                        console.error("Documento sin campo 'fecha':", doc.id);
+                    }
+                });
+                //console.table(reservasTodas);
+                mostrarReservasCalendario();
+            });
+
+
+            // Reservas del usuario autenticado
+            db.collection('reservas')
+                .where('usuarioId', '==', usuarioActual.uid)
+                .onSnapshot(snapshot => {
+                    reservasUsuario = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        if (d.fecha?.toDate) { // <-- Añade validación aquí
+                            reservasUsuario.push({
+                                ...d,
+                                fecha: d.fecha.toDate().toISOString().split('T')[0],
+                                id: doc.id
+                            });
+                        } else {
+                            console.error("Documento del usuario sin 'fecha' válida:", doc.id);
+                        }
+                    });
+                    mostrarReservasUsuario();
+                });
+        }
+
+        // Crear reservas (una o bloque semanal)
+        async function crearReserva(e) {
+            e.preventDefault();
+            const reservaMsg = document.getElementById('reservaMsg');
+            reservaMsg.textContent = "";
+            const dia = document.getElementById('dia').value;
+            const hora = document.getElementById('hora').value;
+            const bloque = document.getElementById('bloqueSemana').checked;
+            let fechas = [dia];
+
+            // Si es bloque semanal, busca todos los días iguales (ej: todos los lunes) en las dos semanas
+            if (bloque) {
+                const fechaInicial = new Date(dia);
+                const diaSemana = fechaInicial.getDay();
+                fechas = [];
+                for (let i = 0; i < 14; i++) {
+                    const f = new Date();
+                    f.setDate(fechaInicial.getDate() + (i - fechaInicial.getDay() + diaSemana));
+                    if (f >= fechaInicial && f.getDay() === diaSemana) {
+                        fechas.push(toISODate(f));
+                    }
+                }
+            }
+
+            // Verifica disponibilidad y crea reservas
+            for (const fecha of fechas) {
+                // Comprobar si ya existe reserva para ese día y hora
+                const existe = await db.collection('reservas')
+                    .where('fecha', '==', new Date(fecha))
+                    .where('hora', '==', hora)
+                    .get();
+                if (!existe.empty) {
+                    const fechaObj = new Date(fecha);
+                    const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'short'
+                    });
+                    reservaMsg.textContent = `Ya hay reserva el ${fechaFormateada} de ${hora}`;
+                    return;
+                }
+            }
+
+            // Crear reservas
+            for (const fecha of fechas) {
+                await db.collection('reservas').add({
+                    usuarioId: usuarioActual.uid,
+                    usuarioNombre: usuarioActual.displayName || usuarioActual.email,
+                    fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
+                    hora: hora,
+                    estado: 'pendiente',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            reservaMsg.style.color = "#388e3c";
+            reservaMsg.textContent = "Reserva(s) solicitada(s) correctamente.";
+            document.getElementById('formReserva').reset();
+        }
+
+        // Autenticación y carga inicial
+        document.addEventListener('DOMContentLoaded', function () {
+            auth.onAuthStateChanged(user => {
+                if (!user) {
+                    //alert("Debes iniciar sesión para acceder al calendario.");
+                    window.location.href = "index.html";
+                    return;
+                } else {
+                    const nombre = capitalizarPrimeraLetra(user.displayName || "");
+                    const email = user.email || "";
+                    document.getElementById('tituloReservas').textContent = `Reservas de prácticas para ${nombre || email} con Carlos`;
+                    usuarioActual = user;
+                }
+
+                inicializarCalendario();
+                cargarDias();
+                cargarHoras();
+                cargarReservas();
+                document.getElementById('formReserva').addEventListener('submit', crearReserva);
+            });
+        });
+    </script>
+</body>
+</html>
