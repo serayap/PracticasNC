@@ -286,6 +286,7 @@
         let reservasTodas = [];
         let reservasUsuario = [];
         let usuarioActual = null;
+        let eventos = [];
 
         function capitalizarPrimeraLetra(str) {
             return str.replace(/\b\w/g, function (char) {
@@ -475,7 +476,7 @@
 
                     const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
                     console.log(fecha + " : ");
-                    console.log(reservas);
+                    console.log(eventos);
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
                     if (oldDots) oldDots.remove();
@@ -509,14 +510,14 @@
         function mostrarReservasCalendario() {
             //console.table(reservasTodas);
             calendar.removeAllEvents();
-            const eventos = reservasTodas.map(r => ({
+            eventos = reservasTodas.map(r => ({
                 //title: r.usuarioNombre + " (" + r.hora + ")",
                 start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
                 backgroundColor: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
                 textColor: '#fff'
                 //extendedProps: { estado: r.estado }
             }));
-            console.table(eventos);
+            //console.table(eventos);
             calendar.addEventSource(eventos);
         }
 
