@@ -669,10 +669,11 @@
                     usuarioActual = user;
                 }
 
-                inicializarCalendario();
                 cargarDias();
                 cargarHoras();
                 cargarReservas();
+                inicializarCalendario();
+                
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
         });
