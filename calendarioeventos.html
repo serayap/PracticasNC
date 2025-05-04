@@ -400,7 +400,16 @@
         console.error("Error:", error);
         lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
     }
-}
+
+    function mostrarEventosDelDia(fechaStr) {
+      const eventos = calendar.getEvents();
+      const eventosDelDia = eventos.filter(evento => {
+        const inicio = evento.start?.toISOString().split('T')[0];
+        return inicio === fechaStr;
+      });
+  
+      console.log("Eventos en", fechaStr, ":", eventosDelDia);
+    }
 
         // Inicializar FullCalendar
         function inicializarCalendario() {
@@ -409,6 +418,11 @@
                 alert("No se encontró el div con id 'calendar'");
                 return;
             }
+
+            // Mostrar eventos al hacer clic en el día
+            info.el.addEventListener('click', () => {
+                mostrarEventosDelDia(fecha);
+            });
 
             const fechaActual = new Date(); // O fija la fecha si es para pruebas
             const year = fechaActual.getFullYear();
