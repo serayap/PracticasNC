@@ -470,6 +470,7 @@
                     // Event listener para clics en la celda
                     info.el.addEventListener('click', () => {
                         mostrarEventosDelDia(fecha);
+                        console.log(fecha);
                     });
 
                     const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
