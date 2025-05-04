@@ -283,7 +283,7 @@
         const auth = firebase.auth();
 
         let calendar;
-        let reservasTodas = [];
+        let reservasTodas;
         let reservasUsuario = [];
         let usuarioActual = null;
         let eventos = [];
@@ -475,8 +475,8 @@
                     });
 
                     const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
-                    console.log(fecha + " : ");
-                    console.log(reservas);
+                    console.log(fecha + " : ", reservas);
+
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
                     if (oldDots) oldDots.remove();
@@ -548,17 +548,24 @@
         async function cargarReservas() {
             // Todas las reservas para el calendario
             db.collection('reservas').onSnapshot(snapshot => {
-                reservasTodas = [];
+                reservasTodas = {};
                 snapshot.forEach(doc => {
                     const reserva = doc.data();
                     if (reserva.fecha?.toDate) { // Validar existencia de fecha
-                        reservasTodas.push({
-                            id: doc.id,
-                            usuarioNombre: reserva.usuarioNombre,
-                            hora: reserva.hora,
-                            fecha: reserva.fecha, // Asegurar que es un Timestamp
-                            estado: reserva.estado
-                        });
+                        const fechaStr = reserva.fecha.toDate().toISOString().split('T')[0];
+                        const estado = reserva.estado || 'pendiente';
+
+                        // Inicializar si no existe
+                        if (!reservasTodas[fechaStr]) {
+                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0 };
+                        }
+
+                        // Sumar según el estado
+                        if (estado === 'confirmada') {
+                            reservasTodas[fechaStr].confirmadas++;
+                        } else {
+                            reservasTodas[fechaStr].pendientes++;
+                        }
                     } else {
                         console.error("Documento sin campo 'fecha':", doc.id);
                     }
