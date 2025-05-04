@@ -218,6 +218,10 @@
                 min-height: 40px; /* deja espacio para los puntos */
             }
 
+            .fc-daygrid-more-link {
+                display: none !important;
+            }
+
         }
     </style>
 </head>
@@ -485,11 +489,11 @@
             const eventos = reservasTodas.map(r => ({
                 //title: r.usuarioNombre + " (" + r.hora + ")",
                 start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
-                backgroundColor: r.estado === 'confirmada' ? '#4caf50' : '#ff9800'
-                //textColor: '#fff',
+                backgroundColor: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
+                textColor: '#fff',
                 //extendedProps: { estado: r.estado }
             }));
-            console.table(eventos);
+            //console.table(eventos);
             calendar.addEventSource(eventos);
         }
 
