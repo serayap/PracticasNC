@@ -290,13 +290,7 @@
         let reservasTodas = [];
         let reservasUsuario = [];
         let usuarioActual = null;
-        let reservasPorFecha = new Proxy({}, {
-            set(target, key, value) {
-                target[key] = value;
-                calendar.refetchEvents(); // Forzar actualización
-                return true;
-            }
-        });
+        let reservasPorFecha = {};
 
         function capitalizarPrimeraLetra(str) {
             return str.replace(/\b\w/g, function (char) {
@@ -348,8 +342,10 @@
                     nuevoReservasPorFecha[fechaStr][estado === 'confirmada' ? 'confirmadas' : 'pendientes']++;
                 }
             });
-            // Actualizar el objeto reactivo
-            Object.assign(reservasPorFecha, nuevoReservasPorFecha);
+            // Actualiza el calendario solo si está inicializado
+            if (calendar) {
+                calendar.refetchEvents();
+            }
             console.log("Reservas actualizadas:", reservasPorFecha);
         }
        
@@ -673,23 +669,16 @@
                     usuarioActual = user;
                 }
 
-                //inicializarCalendario();
+                inicializarCalendario();
                 cargarDias();
                 cargarHoras();
                 cargarReservas();
-                
-                db.collection('reservas').onSnapshot(snapshot => {
-                    ReservasporFechas(snapshot);
-                    console.log("Reservas por fecha:", reservasPorFecha);
 
-                    // Destruir y recrear el calendario para forzar actualización
-                    if (calendar) {
-                        calendar.refetchEvents();
-                    } else {
-                        console.error("Calendario no inicializado");
-                    }
-                    inicializarCalendario();
+                db.collection('reservas').onSnapshot(snapshot => {
+                    console.log("Reservas por fecha:", reservasPorFecha);
+                    ReservasporFechas(snapshot);
                 });
+                
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
         });
