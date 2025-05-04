@@ -332,25 +332,27 @@
 
         //Función paraagrupar reservas por fecha        
         function ReservasporFechas(snapshot) {
-            reservasPorFecha = {};
+            const nuevoReservasPorFecha = {}; // Objeto temporal
             snapshot.forEach(doc => {
                 const reserva = doc.data();
                 if (reserva.fecha?.toDate) {
-                    const fechaStr = reserva.fecha.toDate().toISOString().split('T')[0];
+                    const fecha = reserva.fecha.toDate();
+                    const fechaStr = fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
                     const estado = reserva.estado || 'pendiente';
 
-                    if (!reservasPorFecha[fechaStr]) {
-                        reservasPorFecha[fechaStr] = { confirmadas: 0, pendientes: 0 };
+                    if (!nuevoReservasPorFecha[fechaStr]) {
+                        nuevoReservasPorFecha[fechaStr] = { confirmadas: 0, pendientes: 0 };
                     }
 
-                    if (estado === 'confirmada') {
-                        reservasPorFecha[fechaStr].confirmadas++;
-                    } else {
-                        reservasPorFecha[fechaStr].pendientes++;
-                    }
+                    // Incrementar contadores
+                    nuevoReservasPorFecha[fechaStr][estado === 'confirmada' ? 'confirmadas' : 'pendientes']++;
                 }
             });
-        }        
+            // Actualizar el objeto reactivo
+            Object.assign(reservasPorFecha, nuevoReservasPorFecha);
+            console.log("Reservas actualizadas:", reservasPorFecha);
+        }
+       
 
         // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
         function cargarHoras() {
