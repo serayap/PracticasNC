@@ -522,15 +522,16 @@
                 reservasTodas = [];
                 snapshot.forEach(doc => {
                     const reserva = doc.data();
-                    if (reserva.fecha?.toDate) {
+                    if (reserva.fecha?.toDate) { // Validar existencia de fecha
                         reservasTodas.push({
                             id: doc.id,
-                            title: reserva.usuarioNombre,
-                            start: reserva.fecha.toDate().toISOString(),
+                            usuarioNombre: reserva.usuarioNombre,
+                            hora: reserva.hora,
+                            fecha: reserva.fecha, // Asegurar que es un Timestamp
                             estado: reserva.estado
                         });
                     } else {
-                        console.error("Documento sin campo 'fecha' válido:", doc.id);
+                        console.error("Documento sin campo 'fecha':", doc.id);
                     }
                 });
                 //console.table(reservasTodas);
