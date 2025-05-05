@@ -475,7 +475,7 @@
                     });
 
                     const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
-                    console.log(fecha + " : ", reservas);
+                    //console.log(fecha + " : ", reservas);
 
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
@@ -567,11 +567,13 @@
                         } else {
                             reservasTodas[fechaStr].pendientes++;
                         }
+
+                        console.log(fechaStr + " : ", reservasTodas[fechaStr]);
                     } else {
                         console.error("Documento sin campo 'fecha':", doc.id);
                     }
                 });
-                //console.table(reservasTodas);
+                console.table(reservasTodas);
                 //mostrarReservasCalendario();
             });
 
