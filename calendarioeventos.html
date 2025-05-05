@@ -287,6 +287,7 @@
         let reservasUsuario = [];
         let usuarioActual = null;
         let eventos = [];
+        let calendarioInicializado = false;
 
         function capitalizarPrimeraLetra(str) {
             return str.replace(/\b\w/g, function (char) {
@@ -559,7 +560,7 @@
 
                         // Inicializar si no existe
                         if (!reservasTodas[fechaStr]) {
-                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0 };
+                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0};
                         }
 
                         // Sumar según el estado
@@ -574,7 +575,16 @@
                         console.error("Documento sin campo 'fecha':", doc.id);
                     }
                 });
+
+                // Solo inicializa el calendario la primera vez
+                if (!calendarioInicializado) {
+                    inicializarCalendario();
+                    calendarioInicializado = true;
+                } else if (calendar) {
+                    calendar.render(); // O calendar.refetchEvents() si usas eventos
+                }
                 console.table(reservasTodas);
+                //console.log("Datos actualizados:", reservasTodas);
                 //mostrarReservasCalendario();
             });
 
@@ -676,7 +686,7 @@
                 cargarDias();
                 cargarHoras();
                 cargarReservas();
-                inicializarCalendario();
+                //inicializarCalendario();
                 
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
             });
