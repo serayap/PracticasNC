@@ -282,12 +282,12 @@
         db.settings(settings);
         const auth = firebase.auth();
 
-        let calendar;
+        let calendar = null;
+        let primeraCarga = true;
         let reservasTodas = {};
         let reservasUsuario = [];
         let usuarioActual = null;
         let eventos = [];
-        let calendarioInicializado = false;
 
         function capitalizarPrimeraLetra(str) {
             return str.replace(/\b\w/g, function (char) {
@@ -467,17 +467,24 @@
                     }
                 },*/
                 dayCellDidMount: function (info) {
-                    const fecha = info.date.toISOString().split('T')[0];
+                    // Obtener fecha en zona horaria local
+                    const fechaLocal = info.date.toLocaleDateString("es-ES", {
+                        timeZone: "Europe/Madrid",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit"
+                    }).split("/").reverse().join("-"); // Formato YYYY-MM-DD
 
                     // Event listener para clics en la celda
                     info.el.addEventListener('click', () => {
-                        mostrarEventosDelDia(fecha);
-                        console.log(fecha);
+                        mostrarEventosDelDia(fechaLocal);
+                        console.log(fechaLocal);
                     });
 
-                    const reservas = reservasTodas[fecha] || { confirmadas: 0, pendientes: 0 };
-                    console.log(fecha + " : ", reservasTodas[fecha]);
-                    console.log(fecha + " : ", reservas);
+                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
+                    console.log("Zona horaria del navegador:", Intl.DateTimeFormat().resolvedOptions().timeZone);
+                    console.log(fechaLocal + " : ", reservasTodas[fechaLocal]);
+                    console.log(fechaLocal + " : ", reservas);
 
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
@@ -555,16 +562,20 @@
                 snapshot.forEach(doc => {
                     const reserva = doc.data();
                     if (reserva.fecha?.toDate) { // Validar existencia de fecha
-                        const fechaStr = reserva.fecha.toDate().toISOString().split('T')[0];
-                        const estado = reserva.estado || 'pendiente';
+                        const fechaDate = reserva.fecha.toDate();
+                        // Convertir a fecha local (ej: España)
+                        const fechaStr = fechaDate.toLocaleDateString("es-ES", {
+                            timeZone: "Europe/Madrid",
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit"
+                        }).split("/").reverse().join("-"); // Formato YYYY-MM-DD
 
-                        // Inicializar si no existe
                         if (!reservasTodas[fechaStr]) {
-                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0};
+                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0 };
                         }
 
-                        // Sumar según el estado
-                        if (estado === 'confirmada') {
+                        if (reserva.estado === 'confirmada') {
                             reservasTodas[fechaStr].confirmadas++;
                         } else {
                             reservasTodas[fechaStr].pendientes++;
@@ -574,14 +585,15 @@
                     } else {
                         console.error("Documento sin campo 'fecha':", doc.id);
                     }
+
+                    console.log("Datos actualizados (LOCALES):", reservasTodas);
+                    if (calendar) calendar.refetchEvents(); // Actualizar calendario
                 });
 
                 // Solo inicializa el calendario la primera vez
-                if (!calendarioInicializado) {
+                if (primeraCarga) {
                     inicializarCalendario();
-                    calendarioInicializado = true;
-                } else if (calendar) {
-                    calendar.render(); // O calendar.refetchEvents() si usas eventos
+                    primeraCarga = false;
                 }
                 console.table(reservasTodas);
                 //console.log("Datos actualizados:", reservasTodas);
