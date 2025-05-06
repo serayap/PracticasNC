@@ -189,6 +189,7 @@
                 width: 100%;
             }
 
+            /* Posicionamiento de los dots */
             .dots-container {
                 position: absolute;
                 bottom: 2px;
@@ -197,7 +198,7 @@
                 display: flex;
                 flex-wrap: wrap;
                 gap: 2px;
-                z-index: 2;
+                z-index: 2; /* Para que estén por encima */
             }
 
             /* dots deben tener tamaño y color */
@@ -219,7 +220,7 @@
             /* Asegurar que el contenedor del día tiene espacio */
             .fc-daygrid-day-frame {
                 position: relative;
-                min-height: 40px;
+                min-height: 60px;
             }
 
         }
@@ -487,8 +488,8 @@
 
                     const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
                     //console.log("Zona horaria del navegador:", Intl.DateTimeFormat().resolvedOptions().timeZone);
-                    console.log(fechaLocal + " : ", reservasTodas[fechaLocal]);
-                    console.log(fechaLocal + " : ", reservas);
+                    console.log("hola " + fechaLocal + " : ", reservasTodas[fechaLocal]);
+                    console.log("hola1 " + fechaLocal + " : ", reservas);
 
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
@@ -511,6 +512,13 @@
                         dotsContainer.appendChild(dot);
                     }
 
+                    // Alternativa 1: Debajo del número del día
+                    const dayNumberEl = info.el.querySelector('.fc-daygrid-day-number');
+                    if (dayNumberEl) {
+                        dayNumberEl.insertAdjacentElement('afterend', dotsContainer);
+                    }
+
+                    // Alternativa 2: Dentro del contenedor de eventos
                     // Inserta los cuadraditos debajo del número del día
                     const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
                     if (dayFrame) dayFrame.appendChild(dotsContainer);
