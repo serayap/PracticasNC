@@ -190,32 +190,36 @@
             }
 
             .dots-container {
+                position: absolute;
+                bottom: 2px;
+                left: 2px;
+                right: 2px;
                 display: flex;
                 flex-wrap: wrap;
                 gap: 2px;
-                margin-top: 2px;
-                justify-content: flex-start;
+                z-index: 2;
             }
 
+            /* dots deben tener tamaño y color */
             .dot {
-                width: 8px;
-                height: 8px;
+                width: 10px;
+                height: 10px;
                 border-radius: 2px;
-                margin-right: 1px;
+                flex-shrink: 0;
             }
 
                 .dot.confirmada {
                     background: #4CAF50;
                 }
-                /* Verde */
+
                 .dot.pendiente {
                     background: #FF9800;
                 }
-            /* Naranja */
 
+            /* Asegurar que el contenedor del día tiene espacio */
             .fc-daygrid-day-frame {
                 position: relative;
-                min-height: 40px; /* deja espacio para los puntos */
+                min-height: 40px;
             }
 
         }
@@ -482,7 +486,7 @@
                     });
 
                     const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
-                    console.log("Zona horaria del navegador:", Intl.DateTimeFormat().resolvedOptions().timeZone);
+                    //console.log("Zona horaria del navegador:", Intl.DateTimeFormat().resolvedOptions().timeZone);
                     console.log(fechaLocal + " : ", reservasTodas[fechaLocal]);
                     console.log(fechaLocal + " : ", reservas);
 
@@ -581,7 +585,7 @@
                             reservasTodas[fechaStr].pendientes++;
                         }
 
-                        //console.log(fechaStr + " : ", reservasTodas[fechaStr]);
+                        console.log("Datos cargados (LOCALES):", reservasTodas);
                     } else {
                         console.error("Documento sin campo 'fecha':", doc.id);
                     }
