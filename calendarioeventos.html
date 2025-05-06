@@ -198,15 +198,16 @@
                 display: flex;
                 flex-wrap: wrap;
                 gap: 2px;
-                z-index: 2; /* Para que estén por encima */
+                z-index: 10; /* Para que estén por encima */
             }
 
             /* dots deben tener tamaño y color */
             .dot {
-                width: 10px;
-                height: 10px;
-                border-radius: 2px;
-                flex-shrink: 0;
+                width: 20px;
+                height: 20px;
+                border: 2px solid red;
+                background: #FF9800;
+                z-index: 100;
             }
 
                 .dot.confirmada {
@@ -488,8 +489,7 @@
 
                     const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
                     //console.log("Zona horaria del navegador:", Intl.DateTimeFormat().resolvedOptions().timeZone);
-                    console.log("hola " + fechaLocal + " : ", reservasTodas[fechaLocal]);
-                    console.log("hola1 " + fechaLocal + " : ", reservas);
+                    console.log("hola " + fechaLocal + " : ", reservas);
 
                     // Elimina contenedores previos si los hay
                     const oldDots = info.el.querySelector('.dots-container');
