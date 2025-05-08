@@ -510,6 +510,7 @@
                         const dot = document.createElement('div');
                         dot.className = 'dot pendiente';
                         dotsContainer.appendChild(dot);
+                        alert("reservas pendiente " + i);
                     }
 
                     // Alternativa 1: Debajo del número del día
@@ -517,13 +518,16 @@
                     const dayNumberEl = info.el.querySelector('.fc-daygrid-day-events');
                     if (dayNumberEl) {
                         dayNumberEl.insertAdjacentElement('afterend', dotsContainer);
+                        alert("daygrid events ");
                     }
 
                     // Alternativa 2: Dentro del contenedor de eventos
                     // Inserta los cuadraditos debajo del número del día
-                    //const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
-                    const dayFrame = info.el.querySelector('.fc-daygrid-day-events');
-                    if (dayFrame) dayFrame.appendChild(dotsContainer);
+                    const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
+                    if (dayFrame) {
+                        dayFrame.appendChild(dotsContainer);
+                        alert("daygrid frame ");
+                    }
                 }
             });
             calendar.render();
