@@ -502,13 +502,13 @@
                     // Añade cuadraditos verdes (confirmadas)
                     for (let i = 0; i < reservas.confirmadas; i++) {
                         const dot = document.createElement('div');
-                        dot.className = 'dot confirmada';
+                        dot.className = 'dot.confirmada';
                         dotsContainer.appendChild(dot);
                     }
                     // Añade cuadraditos naranjas (pendientes)
                     for (let i = 0; i < reservas.pendientes; i++) {
                         const dot = document.createElement('div');
-                        dot.className = 'dot pendiente';
+                        dot.className = 'dot.pendiente';
                         dotsContainer.appendChild(dot);
                         alert("reservas pendiente " + i);
                     }
@@ -518,7 +518,7 @@
                     const dayNumberEl = info.el.querySelector('.fc-daygrid-day-events');
                     if (dayNumberEl) {
                         dayNumberEl.insertAdjacentElement('afterend', dotsContainer);
-                        alert("daygrid events ");
+                        //alert("daygrid events ");
                     }
 
                     // Alternativa 2: Dentro del contenedor de eventos
@@ -526,7 +526,7 @@
                     const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
                     if (dayFrame) {
                         dayFrame.appendChild(dotsContainer);
-                        alert("daygrid frame ");
+                        //alert("daygrid frame ");
                     }
                 }
             });
