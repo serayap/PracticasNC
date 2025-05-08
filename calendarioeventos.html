@@ -513,14 +513,16 @@
                     }
 
                     // Alternativa 1: Debajo del número del día
-                    const dayNumberEl = info.el.querySelector('.fc-daygrid-day-number');
+                    //const dayNumberEl = info.el.querySelector('.fc-daygrid-day-number');
+                    const dayNumberEl = info.el.querySelector('.fc-daygrid-day-events');
                     if (dayNumberEl) {
                         dayNumberEl.insertAdjacentElement('afterend', dotsContainer);
                     }
 
                     // Alternativa 2: Dentro del contenedor de eventos
                     // Inserta los cuadraditos debajo del número del día
-                    const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
+                    //const dayFrame = info.el.querySelector('.fc-daygrid-day-frame');
+                    const dayFrame = info.el.querySelector('.fc-daygrid-day-events');
                     if (dayFrame) dayFrame.appendChild(dotsContainer);
                 }
             });
