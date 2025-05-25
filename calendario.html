@@ -19,10 +19,23 @@
         .container {
             display: flex;
             flex-direction: column;
-            max-width: 1050px;
+            max-width: 1300px;
             margin: 0 auto;
             gap: 0;
         }
+
+        .subcabecera-creditos {
+            background: #e3f2fd;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 1.1em;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(25,103,210,0.07);
+        }
+
 
         .cabecera-principal {
             font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
@@ -43,6 +56,128 @@
             border-radius: 0 0 10px 10px;
             box-shadow: 0 2px 12px rgba(25, 118, 210, 0.05); /* Sombra más pequeña */
             max-width: 1000px; /* Más estrecho */
+        }
+
+        .reserva-item-compacta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Espacio entre texto y botón */
+            gap: 8px;
+            padding: 2px 0;
+            font-size: 0.95em;
+            white-space: nowrap; /* Evita saltos de línea */
+            border: 1px solid gray; /* Borde azul */
+            border-radius: 6px; /* Esquinas redondeadas */
+            background: #f5faff; /* Fondo suave opcional */
+        }
+
+        .cta-btn-solicitar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 6px auto; /* Centrado con margen vertical */
+            background: linear-gradient(90deg, #1976d2 60%, #63a4ff 100%);
+            color: #fff;
+            text-decoration: none;
+            padding: 4px 6px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s, color 0.2s, transform 0.1s;
+            min-width: 150px;
+            max-width: 100%;
+        }
+
+            .cta-btn-solicitar:hover {
+                background: linear-gradient(90deg, #1565c0 40%, #1976d2 100%);
+                box-shadow: 0 8px 24px rgba(25, 118, 210, 0.21);
+                color: #fff;
+                transform: scale(1.05);
+            }
+
+
+        .cta-btn-pendiente {
+            display: flex;
+            flex-shrink: 0;
+            justify-content: flex-end;
+            gap: 8px;
+            background: linear-gradient(90deg, #ff9800 60%, #ffb347 100%); /* naranja vibrante */
+            color: #fff; /* texto oscuro para destacar sobre naranja claro */
+            text-decoration: none;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: 300;
+            box-shadow: 0 2px 12px rgba(255, 152, 0, 0.10);
+            border: none;
+            transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+        }
+
+            .cta-btn-pendiente:hover {
+                background: linear-gradient(90deg, #ff5722 30%, #ff9800 100%); /* naranja más intenso al pasar el ratón */
+                color: #fff; /* texto blanco para máximo contraste */
+                box-shadow: 0 4px 16px rgba(255, 152, 0, 0.18);
+            }
+
+        .cta-btn-confirmada {
+            display: flex;
+            flex-shrink: 0; /* El botón nunca se encoge */
+            justify-content: flex-end; /* Alinea todo a la derecha */
+            gap: 8px; /* Espacio entre botones, opcional */
+            background: linear-gradient(90deg, #56ab2f 30%, #a8e063 100%);
+            color: #fff;
+            text-decoration: none;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: 300;
+            box-shadow: 0 2px 12px rgba(25,103,210,0.08);
+            border: none;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+            .cta-btn-confirmada:hover {
+                background: linear-gradient(90deg, #ff4b2b 30%, #ff416c 100%);
+                box-shadow: 0 4px 16px rgba(255, 65, 108, 0.15);
+                color: #fff; /* Opcional, por si quieres asegurar el color */
+                /* Puedes agregar más efectos si lo deseas */
+            }
+        
+        .cta-btn-confirmada-disabled {
+            background: linear-gradient(90deg, #bdbdbd 30%, #eeeeee 100%);
+            color: #757575;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 300;
+            padding: 2px 10px;
+            box-shadow: 0 2px 8px rgba(189, 189, 189, 0.13);
+            opacity: 0.7;
+            cursor: not-allowed;
+            pointer-events: auto; /* Permite mostrar el tooltip aunque esté deshabilitado */
+            position: relative;
+            transition: background 0.2s, color 0.2s, opacity 0.2s;
+        }
+
+        /* Tooltip personalizado al pasar el ratón */
+        .cta-btn-confirmada-disabled[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            left: 50%;
+            top: 110%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0.95;
+            pointer-events: none;
         }
 
 
@@ -87,8 +222,13 @@
             margin-bottom: 0;
         }
 
+        #formReserva .cta-btn {
+            display: block;
+            margin: 16px auto 0 auto; /* Centra horizontalmente */
+        }
+
         #calendar-container {
-            width: 400px; /* Cambia a tu gusto */
+            width: 600px; /* Cambia a tu gusto */
             margin: 0 auto; /* Centra el calendario */
         }
 
@@ -101,11 +241,14 @@
             margin-bottom: 0;
             width: 100%;
             box-sizing: border-box;
+            height: 350px !important; /* Altura máxima total */
         }
 
         .fc-toolbar {
             padding: 2px 0 !important; /* Reduce el espacio vertical */
             min-height: 0 !important;
+            padding-bottom: 4px !important;
+            margin-bottom: 8px !important;
         }
 
         .fc-toolbar-title {
@@ -173,6 +316,10 @@
                 border-color: #4caf50;
             }
 
+            .reserva-dia-item.anulada {
+                border-color: #ff6a6a;
+            }
+
         @media (max-width: 900px) {
             .arriba {
                 flex-direction: column;
@@ -189,45 +336,164 @@
                 width: 100%;
             }
 
-            .dots-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 2px;
-                margin-top: 2px;
-                justify-content: flex-start;
+            /* En tu media query para pantallas grandes */
+            #calendar-container {
+                width: 700px !important; /* Mayor ancho del contenedor */
             }
 
-            .dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 2px;
-                margin-right: 1px;
-            }
-
-                .dot.confirmada {
-                    background: #4CAF50;
-                }
-                /* Verde */
-                .dot.pendiente {
-                    background: #FF9800;
-                }
-            /* Naranja */
-
-            .fc-daygrid-day-frame {
-                position: relative;
-                min-height: 40px; /* deja espacio para los puntos */
-            }
-
-            /* Ocultar contador nativo de FullCalendar */
-            .fc-daygrid-more-link {
-                display: none !important;
+            .fc-daygrid-day {
+                min-width: 80px !important; /* Ancho mayor para celdas */
             }
         }
+            
+
+            /* Añade esto para control general de altura */
+            .fc .fc-daygrid-day {
+                height: 40px !important; /* Altura fija para todas las celdas */
+            }
+
+        .fc-daygrid-day-events {
+            /*min-height: 18px !important;
+            margin-top: auto;*/
+            min-height: 0 !important;
+            margin-top: auto !important; /* Empuja los eventos hacia abajo */
+            flex-grow: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+        }
+        .fc-daygrid-day-bg {
+            padding: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .fc-daygrid-day-number {
+            /*font-size: 0.9em !important;
+                padding: 2px !important;
+                line-height: 1.2 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;*/
+            line-height: 1 !important;
+            padding: 2px !important;
+            font-size: 0.85em !important;
+        }
+
+        .fc-dot-pendiente,
+        .fc-dot-confirmada {
+            /*transform: scale(0.8);
+            margin-left: 2px !important;*/
+            transform: scale(0.7) !important;
+            margin: 0 1px !important;
+        }
+
+        .fc-daygrid-day {
+            /*min-width: 50px !important;
+            width: 100%;*/
+            height: 32px !important; /* Altura máxima de la celda */
+            min-height: 32px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .fc-daygrid-day-frame {
+            /*height: 100%;
+            display: flex;
+            flex-direction: column;*/
+            height: 100% !important;
+            min-height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .fc-daygrid-day-top {
+            /*flex-grow: 1;
+            min-height: 24px !important;
+            padding: 2px 4px !important;
+            display: flex !important;
+            align-items: center !important;*/
+            flex-wrap: nowrap !important;
+            gap: 2px !important;
+            height: 24px !important; /* Altura fija para la sección superior */
+            min-height: 24px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            flex-shrink: 0 !important;            
+            box-sizing: border-box !important;
+        }
+
+        /* Ajusta el header del calendario */
+        .fc-col-header {
+            height: 30px !important;
+        }
+
+        .fc-col-header-cell {
+            height: 100% !important;
+            padding: 2px !important;
+        }
+
+        .fc-scrollgrid {
+            border: none !important;
+        }
+
+        .fc-daygrid-body tr {
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+        }
+
+        .fc-scrollgrid-sync-table {
+            height: 100% !important;
+            min-height: 0 !important;
+        }
+
+        /* Contenedor de la vista */
+        .fc-view-harness {
+            min-height: 0 !important;
+        }
+
+        .leyenda-colores {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .dot {            
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 2px;
+            vertical-align: middle;
+        }
+
+        .dot-pendiente {
+            background: #FF9800;
+        }
+
+        .dot-confirmada {
+            background: #4CAF50;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <h2 class="cabecera-principal" id="tituloReservas"></h2>
+        <div id="subcabecera-creditos" class="subcabecera-creditos">
+          <span id="creditosUsuario">...</span>
+        </div>
         <div class="arriba">
             <div>
                 <div class="form-reserva">
@@ -236,20 +502,23 @@
                         <div class="form-row">
                             <label for="dia">Día:</label>
                             <select id="dia" required></select>
-                        </div>
-                        <div class="form-row">
                             <label for="hora">Hora:</label>
                             <select id="hora" required></select>
                         </div>
+                        <!--<div class="form-row">
+                            <label for="hora">Hora:</label>
+                            <select id="hora" required></select>
+                        </div>-->
                         <div class="form-row">
                             <input type="checkbox" id="bloqueSemana" class="block-week">
-                            <label for="bloqueSemana">Reservar este horario para toda la semana</label>
+                            <label for="bloqueSemana">Reservar este horario para 5 dias seguidos</label>
                         </div>
-                        <button type="submit" class="cta-btn">Solicitar reserva</button>
+                        <button type="submit" class="cta-btn-solicitar">Solicitar reserva</button>
+                        <div id="addreservaMsg"></div>
                     </form>
                 </div>
                 <div class="form-reserva">
-                    <h2 class="cabecera">Solicitudes de reservas</h2>
+                    <h2 class="cabecera">Mis solicitudes de reservas</h2>
                     <!-- Aquí tu listado -->
                     <div id="lista-reservas"></div>
                     <div id="reservaMsg"></div>
@@ -257,6 +526,11 @@
             </div>
             <div id="calendar-container">
                 <div id="calendar"></div>
+                <!-- Leyenda de colores -->
+                <div class="leyenda-colores">
+                    <span class="leyenda-item"><span class="dot dot-pendiente"></span>Pendiente</span>
+                    <span class="leyenda-item"><span class="dot dot-confirmada"></span>Confirmada</span>
+                </div>
             </div>
             <div class="seccion-derecha">             
                 <div class="reservas-dia">
@@ -287,10 +561,43 @@
         const auth = firebase.auth();
 
         let calendar = null;
-        let reservasTodas = [];
+        let primeraCarga = true;
+        let reservasTodas = {};
         let reservasUsuario = [];
         let usuarioActual = null;
-        let reservasPorFecha = {};
+        let eventos = [];
+
+        async function getUsuarioRegistradoDoc(uid) {
+            const q = await db.collection("usuarios_registrados")
+                .where("usuarioId", "==", uid)
+                .get();
+            if (!q.empty) {
+                return q.docs[0]; // Devuelve el DocumentSnapshot
+            }
+            return null;
+        }
+
+        async function mostrarCreditosUsuario() {
+            const doc = await getUsuarioRegistradoDoc(usuarioActual.uid);
+            if (!doc) {
+                document.getElementById("creditosUsuario").textContent = "No disponible";
+                return;
+            }
+            const datos = doc.data();
+            const creditos = datos.creditos !== undefined && datos.creditos !== null ? Number(datos.creditos) : 0;
+            const nombre = capitalizarPrimeraLetra(usuarioActual.usuarioNombre || "");
+            document.getElementById("creditosUsuario").textContent = "Minutos disponibles de " + nombre + ": " + creditos;
+
+            /*const doc = await db.collection("usuarios_registrados").doc(usuarioActual.docIdUsuarioRegistrado).get();
+            const datos = doc.data();
+            console.log(usuarioActual.docIdUsuarioRegistrado);
+            console.log("Datos obtenidos:", datos);
+            let creditos = 0;
+            if (datos && datos.creditos !== undefined && datos.creditos !== null) {
+                creditos = Number(datos.creditos);
+            }
+            document.getElementById("creditosUsuario").textContent = creditos;*/
+        }
 
         function capitalizarPrimeraLetra(str) {
             return str.replace(/\b\w/g, function (char) {
@@ -324,42 +631,45 @@
             }
         }
 
-        //Función paraagrupar reservas por fecha        
-        function ReservasporFechas(snapshot) {
-            const nuevoReservasPorFecha = {}; // Objeto temporal
-            snapshot.forEach(doc => {
-                const reserva = doc.data();
-                if (reserva.fecha?.toDate) {
-                    const fecha = reserva.fecha.toDate();
-                    const fechaStr = fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-                    const estado = reserva.estado || 'pendiente';
-
-                    if (!nuevoReservasPorFecha[fechaStr]) {
-                        nuevoReservasPorFecha[fechaStr] = { confirmadas: 0, pendientes: 0 };
-                    }
-
-                    // Incrementar contadores
-                    nuevoReservasPorFecha[fechaStr][estado === 'confirmada' ? 'confirmadas' : 'pendientes']++;
-                }
-            });
-            // Actualiza el calendario solo si está inicializado
-            if (calendar) {
-                calendar.refetchEvents();
+        // Cargar horas desde firestore
+        async function cargarTimeSlots() {
+            try {
+                const h = await db.collection("configuracion").doc("horarios").get();
+                timeSlots = h.data().slots;
+                //console.log("Tramos horarios cargados:", timeSlots);
+            } catch (error) {
+                console.error("Error al cargar los tramos horarios:", error);
+                // Usar valores por defecto si hay error
+                timeSlots = ["07:30 a 08:50", "09:00 a 10:20", "10:30 a 11:50", "12:00 a 13:20", "13:30 a 14:50"];
             }
-            console.log("Reservas actualizadas:", reservasPorFecha);
-        }
-       
 
-        // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
-        function cargarHoras() {
+            // Añade cada tramo como opción
             const selectHora = document.getElementById('hora');
             if (!selectHora) return;
 
             // Limpia las opciones anteriores
             selectHora.innerHTML = '';
 
+            timeSlots.forEach(timeslot => {
+                const option = document.createElement('option');
+                option.value = timeslot;
+                option.textContent = timeslot;
+                selectHora.appendChild(option);
+            });
+        }
+
+        // Cargar horas (bloques de 30 minutos de 9:00 a 20:00)
+        /*function cargarHoras() {
+            const selectHora = document.getElementById('hora');
+            if (!selectHora) return;
+
+            // Limpia las opciones anteriores
+            selectHora.innerHTML = '';
+            // Tramos horarios como en tu select
+            let timeSlots = []; // Inicialmente vacío         
+
             // Array de tramos horarios personalizados
-            const tramos = [
+            const timeSlots = [
                 "7:30 a 8:50",
                 "8:50 a 10:10",
                 "10:10 a 11:30",
@@ -372,66 +682,121 @@
                 "19:10 a 20:30"
             ];
 
+            // Guarda el array en Firestore
+            db.collection("configuracion").doc("horarios").set({
+                slots: timeSlots
+            })
+                .then(() => {
+                    console.log("Slots guardados correctamente en Firestore");
+                })
+                .catch((error) => {
+                    console.error("Error al guardar los slots:", error);
+                });
+
             // Añade cada tramo como opción
-            tramos.forEach(tramo => {
+            timeSlots.forEach(timeslot => {
                 const option = document.createElement('option');
-                option.value = tramo;
-                option.textContent = tramo;
+                option.value = timeslot;
+                option.textContent = timeslot;
                 selectHora.appendChild(option);
             });
-        }     
+        } */    
 
     // Función para cargar reservas del día
-    async function cargarReservasDelDia(fechaStr) {
-    const lista = document.getElementById('lista-reservas-dia');
-    lista.innerHTML = '<div class="cargando">Cargando...</div>';
+        async function cargarReservasDelDia(fechaStr) {
+            const lista = document.getElementById('lista-reservas-dia');
+            lista.innerHTML = '<div class="cargando">Cargando...</div>';
 
-        try {
-            // Solo el número del día
-            const tituloDia = document.getElementById('tituloReservasDia');
-            if (tituloDia) {
-                const fecha = new Date(fechaStr); // info.dateStr es 'YYYY-MM-DD'
-                const numeroDia = fecha.getDate();
-                tituloDia.textContent = `Reservas del día ${numeroDia}`;
+            try {
+                // Actualizar título con formato "Reservas del lunes, 12 de mayo"
+                const tituloDia = document.getElementById('tituloReservasDia');
+                if (tituloDia) {
+                    const fecha = new Date(fechaStr);
+                    tituloDia.textContent = `Reservas del ${fecha.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long'
+                    })}`;
+                }
+
+                // Consulta a Firestore (sin ordenar)
+                const fechaInicio = new Date(fechaStr + 'T00:00:00');
+                const fechaFin = new Date(fechaStr + 'T23:59:59');
+                const q = db.collection("reservas")
+                    .where("fecha", ">=", fechaInicio)
+                    .where("fecha", "<=", fechaFin)
+                    .where('estado', 'in', ['confirmada', 'pendiente']); // Solo estos estados
+
+                const querySnapshot = await q.get();
+                lista.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día</em></div>';
+                    return;
+                }
+
+                // Convertir documentos a array y filtrar horas inválidas
+                const reservas = [];
+                querySnapshot.forEach(doc => {
+                    const reserva = doc.data();
+                    if (reserva.hora && typeof reserva.hora === 'string') {
+                        reservas.push(reserva);
+                    }
+                });
+
+                // Depuración: ver horas originales y minutos calculados
+                //console.log("Reservas sin ordenar:", reservas.map(r => r.hora));
+
+                // Ordenar por hora de inicio (ascendente)
+                reservas.sort((a, b) => {
+                    return horaAminutos(a.hora) - horaAminutos(b.hora);
+                });
+
+                // Depuración: ver orden después de ordenar
+                //console.log("Reservas ordenadas:", reservas.map(r => r.hora));
+
+                // Mostrar en el DOM
+                reservas.forEach(reserva => {
+                    const div = document.createElement('div');
+                    div.className = `reserva-dia-item ${reserva.estado}`;
+
+                    // Formato visual mejorado
+                    div.innerHTML = `
+                <div class="reserva-hora">
+                    <span class="hora">${reserva.hora}</span>
+                </div>
+                <span class="estado ${reserva.estado}">${reserva.estado}</span>
+            `;
+                    lista.appendChild(div);
+                });
+
+            } catch (error) {
+                console.error("Error:", error);
+                lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
             }
+        }
 
-            const fechaInicio = new Date(fechaStr + 'T00:00:00');
-            const fechaFin = new Date(fechaStr + 'T23:59:59');
-        
-            // Usa firebase.firestore() para crear la query
-            const q = db.collection("reservas")
-                       .where("fecha", ">=", fechaInicio)
-                       .where("fecha", "<=", fechaFin);
-        
-            const querySnapshot = await q.get();
-            lista.innerHTML = 'selecciona un dia';
-
-            if (querySnapshot.empty) {
-                lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día<em></div>';
-                return;
+        function horaAminutos(horaRango) {
+            try {
+                const [inicio] = horaRango.split(' a '); // Extrae la hora inicial
+                const [hora, minutos] = inicio.split(':').map(Number);
+                return hora * 60 + minutos;
+            } catch (error) {
+                console.error("Error al parsear la hora:", horaRango);
+                return 0; // Si hay error, trata como 0 minutos (puedes ajustarlo)
             }
+        }
 
-            querySnapshot.forEach((doc) => {
-                const reserva = doc.data();
-                const div = document.createElement('div');
-                div.className = `reserva-dia-item ${reserva.estado}`;
-            
-                div.innerHTML = `
-                    <div>
-                        <!--<strong>${reserva.usuarioNombre}</strong>-->
-                        <div class="hora">${reserva.hora}&nbsp;&nbsp;&nbsp;${reserva.estado}</div>
-                    </div>
-                    <!--<span class="estado">${reserva.estado}</span>-->
-                `;
-            
-                lista.appendChild(div);
-        });
 
-    } catch (error) {
-        console.error("Error:", error);
-        lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
+    function mostrarEventosDelDia(fechaStr) {
+      const eventos = calendar.getEvents();
+      const eventosDelDia = eventos.filter(evento => {
+        const inicio = evento.start?.toISOString().split('T')[0];
+        return inicio === fechaStr;
+      });
+  
+      //console.log("Eventos en", fechaStr, ":", eventosDelDia);
     }
-}
 
         // Inicializar FullCalendar
         function inicializarCalendario() {
@@ -451,6 +816,7 @@
             const end = new Date(year, month + 2, 0); // Día 0 del mes+2 es el último del mes+1
 
             calendar = new FullCalendar.Calendar(calendarEl, {
+                //plugins: [dayGridPlugin, interactionPlugin],
                 initialView: 'dayGridMonth',
                 locale: 'es',
                 titleFormat: { year: 'numeric', month: 'long' },
@@ -460,11 +826,21 @@
                     end: end.toISOString().split('T')[0]
                 },
                 //height: 'auto',
-                aspectRatio: 0.9,
+                aspectRatio: 0.8, // Menor = más compacto verticalmente
+                fixedWeekCount: false, // Elimina filas vacías
+                expandRows: false, // Evita que las filas se expandan
                 //events: [],
                 dateClick: function (info) {
-                    cargarReservasDelDia(info.dateStr);
+                    cargarReservasDelDia(info.dateStr);                    
                 },
+                /*dayCellDidMount: (info) => {
+                    cargarReservasDelDia(info.dateStr);
+                    const fecha = info.date.toISOString().split('T')[0];
+
+                    // Añadir event listener al elemento de la celda
+                    info.el.addEventListener('click', () => {
+                        mostrarEventosDelDia(fecha);
+                 });*/
                 /*eventDidMount: function (info) {
                     // Colores según estado
                     if (info.event.extendedProps.estado === 'pendiente') {
@@ -476,38 +852,46 @@
                         info.el.style.borderColor = '#4caf50';
                     }
                 },*/
-                //eventDisplay: 'block',
-                dayCellDidMount: function (info) {
-                    const fecha = info.date.toISOString().split('T')[0];
-                    const reservas = reservasPorFecha[fecha] || { confirmadas: 0, pendientes: 0 };
+                /*dayCellDidMount: function (info) {
+                    // Corrige la fecha para la zona horaria local
+                    const fechaLocal = new Date(info.date.getTime() - (info.date.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); // Formato YYYY-MM-DD local
 
-                    // Limpiar dots antiguos
-                    const existingDots = info.el.querySelector('.dots-container');
-                    if (existingDots) existingDots.remove();
+                    // 2. Verifica que la fecha exista en reservasTodas
+                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
+                    console.log('Fecha:', fechaLocal, 'Pendientes:', reservas.pendientes);
 
-                    // Crear nuevos dots
-                    const dotsContainer = document.createElement('div');
-                    dotsContainer.className = 'dots-container';
+                    if (reservas.pendientes > 0) {
+                        //setTimeout(() => {
+                            let eventsContainer = info.el.querySelector('.fc-daygrid-day-events');
+                            if (!eventsContainer) {
+                                eventsContainer = document.createElement('div');
+                                //eventsContainer.className = 'fc-daygrid-day-events';
+                                const frame = info.el.querySelector('.fc-daygrid-day-frame');
+                                if (frame) frame.appendChild(eventsContainer);
+                            }
+                            const dot = document.createElement('div');
+                            //dot.className = 'fc-dot-custom';
+                            //dot.style.cssText = 'width:20px;height:20px;border-radius:50%;background:#FF9800;margin:2px auto;';
+                            dot.style.cssText = 'width: 18px;height: 18px;border - radius: 50 %;background: #FF9800;margin: 0 auto;margin - top: 2px;display: flex;align - items: center;justify - content: center;color: black;font - size: 12px;font - weight: bold;';
+                            dot.textContent = reservas.pendiente;
+                            eventsContainer.appendChild(dot);
+                        //}, 50);
+                    }                    
+                }*/
+                dayCellContent: function (info) {
+                    // Corrige la fecha para la zona horaria local
+                    const fechaLocal = new Date(info.date.getTime() - (info.date.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); // Formato YYYY-MM-DD local
 
-                    // Añadir dots verdes (confirmadas)
-                    Array.from({ length: reservas.confirmadas }).forEach(() => {
-                        const dot = document.createElement('div');
-                        dot.className = 'dot confirmada';
-                        dotsContainer.appendChild(dot);
-                    });
-
-                    // Añadir dots naranjas (pendientes)
-                    Array.from({ length: reservas.pendientes }).forEach(() => {
-                        const dot = document.createElement('div');
-                        dot.className = 'dot pendiente';
-                        dotsContainer.appendChild(dot);
-                    });
-
-                    // Insertar debajo del número del día
-                    const dayNumberEl = info.el.querySelector('.fc-daygrid-day-number');
-                    if (dayNumberEl) {
-                        dayNumberEl.insertAdjacentElement('afterend', dotsContainer);
+                    // 2. Verifica que la fecha exista en reservasTodas
+                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
+                    let dotp = '', dotc = '';
+                    if (reservas.pendientes > 0) {
+                        dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #FF9800;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.pendientes}</span>`;
                     }
+                    if (reservas.confirmadas > 0) {
+                        dotc = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #4CAF50;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.confirmadas}</span>`;
+                    }
+                    return { html: info.dayNumberText + dotp + dotc };
                 }
             });
             calendar.render();
@@ -517,13 +901,14 @@
         function mostrarReservasCalendario() {
             //console.table(reservasTodas);
             calendar.removeAllEvents();
-            const eventos = reservasTodas.map(r => ({
-                //title: r.usuarioNombre + " (" + r.hora + ")",
-                start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
-                backgroundColor: r.estado === 'confirmada' ? '#4caf50' : '#ff9800',
-                textColor: '#fff',
-                //extendedProps: { estado: r.estado }
-            }));
+            const eventos = Object.values(reservasTodas)
+                .flatMap(reservasDelDia =>
+                    reservasDelDia.reservas.map(r => ({
+                        start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
+                        backgroundColor: r.estado === 'confirmada' ? '#4CAF50' : '#FF9800',
+                        textColor: '#fff'
+                    }))
+                );
             //console.table(eventos);
             calendar.addEventSource(eventos);
         }
@@ -540,37 +925,78 @@
                 .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
                 .forEach(r => {
                     const div = document.createElement('div');
-                    div.className = `reserva-item ${r.estado}`;
-                    div.innerHTML = `
-                                            <div>
-                                                <strong>${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</strong>
-                                                &nbsp;${r.hora}&nbsp;&nbsp;&nbsp;${r.estado.toUpperCase()}
-                                            </div>
-                                            <!--<div class="estado-${r.estado}">${r.estado.toUpperCase()}</div>-->
-                                        `;
+                    div.className = `reserva-item ${r.estado}`; 
+                    const fechaTexto = new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+                    if (r.estado == 'pendiente') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><button onclick="anularReserva('${r.fecha}', '${r.hora}', 'pendiente')" class='cta-btn-pendiente'>anular</button></div>`;
+                    //if (r.estado == 'confirmada') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><div class='cta-btn'style ='background: linear-gradient(90deg, #56ab2f 30%, #a8e063 100%); box-shadow: 0 4px 16px rgba(255, 65, 108, 0.15);'>confirmada</div></div>`;
+                    if (r.estado == 'confirmada') {
+
+                        if (esMenosDe24Horas(r.fecha, r.hora)) {
+                            // Botón deshabilitado
+                            div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${fechaTexto}</span><span class="reserva-hora">⏰ ${r.hora}</span><button disabled class='cta-btn-confirmada-disabled' title="No se puede anular a menos de 24h o reservas pasadas">confirmada</button></div>`;
+                        } else {
+                            div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><button onclick="anularReserva('${r.fecha}', '${r.hora}', 'confirmada')" class='cta-btn-confirmada'>confirmada</button></div>`;
+
+                        }
+                    }
+                    //if (r.estado == 'anulada') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><div class='cta-btn'style ='background: linear-gradient(90deg, #ff6a6a 30%, #ffe0e0 100%);'>anulada</div></div>`;
+                                 
                     lista.appendChild(div);
                 });
+        }
+
+        // Función para saber si faltan menos de 24h para la reserva
+        function esMenosDe24Horas(fechaStr, horaStr) {
+            // fechaStr: 'YYYY-MM-DD', horaStr: 'HH:MM a HH:MM'
+            const ahora = new Date();
+            const [anio, mes, dia] = fechaStr.split('-').map(Number);
+            const horaInicioStr = horaStr.split('a')[0].trim(); // "HH:MM"
+            const [h, m] = horaInicioStr.split(':').map(Number);
+            const fechaHoraReserva = new Date(anio, mes - 1, dia, h, m, 0, 0);
+            const diferenciaMs = fechaHoraReserva - ahora;
+            const horasRestantes = diferenciaMs / (1000 * 60 * 60);
+            return horasRestantes < 24;
         }
 
         async function cargarReservas() {
             // Todas las reservas para el calendario
             db.collection('reservas').onSnapshot(snapshot => {
-                reservasTodas = [];
+                reservasTodas = {};
                 snapshot.forEach(doc => {
                     const reserva = doc.data();
+                    //console.log(reserva);
                     if (reserva.fecha?.toDate) { // Validar existencia de fecha
-                        reservasTodas.push({
-                            id: doc.id,
-                            usuarioNombre: reserva.usuarioNombre,
-                            hora: reserva.hora,
-                            fecha: reserva.fecha, // Asegurar que es un Timestamp
-                            estado: reserva.estado
-                        });
+                        const fechaDate = reserva.fecha.toDate();
+                        // Convertir a fecha local (ej: España)
+                        const fechaStr = fechaDate.toLocaleDateString("es-ES", {
+                            timeZone: "Europe/Madrid",
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit"
+                        }).split("/").reverse().join("-"); // Formato YYYY-MM-DD
+
+                        if (!reservasTodas[fechaStr]) {
+                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0 };
+                        }
+
+                        if (reserva.estado === 'confirmada') reservasTodas[fechaStr].confirmadas++;
+                        if (reserva.estado === 'pendiente') reservasTodas[fechaStr].pendientes++;
+                        //console.log("Datos cargados (LOCALES):", reservasTodas);
                     } else {
                         console.error("Documento sin campo 'fecha':", doc.id);
                     }
+
+                    //console.log("Datos actualizados (LOCALES):", reservasTodas);
+                    if (calendar) calendar.refetchEvents(); // Actualizar calendario
                 });
+
+                // Solo inicializa el calendario la primera vez
+                if (primeraCarga) {
+                    inicializarCalendario();
+                    primeraCarga = false;
+                }
                 //console.table(reservasTodas);
+                //console.log("Datos actualizados:", reservasTodas);
                 //mostrarReservasCalendario();
             });
 
@@ -601,32 +1027,78 @@
             e.preventDefault();
             const reservaMsg = document.getElementById('reservaMsg');
             reservaMsg.textContent = "";
+            const lista = document.getElementById('lista-reservas-dia');
+            lista.innerHTML = '';
+            const tituloDia = document.getElementById('tituloReservasDia');
+            tituloDia.textContent = "Reservas del dia"
+
             const dia = document.getElementById('dia').value;
             const hora = document.getElementById('hora').value;
             const bloque = document.getElementById('bloqueSemana').checked;
             let fechas = [dia];
 
-            // Si es bloque semanal, busca todos los días iguales (ej: todos los lunes) en las dos semanas
+            // 1. Consultar créditos del usuario
+            const doc = await getUsuarioRegistradoDoc(usuarioActual.uid);
+            const datos = doc ? doc.data() : null;
+            const creditos = datos && typeof datos.creditos === "number" ? datos.creditos : 0;
+
+            /*const doc = await db.collection("usuarios_registrados").doc(usuarioActual.docIdUsuarioRegistrado).get();
+            const datos = doc.data();
+            const creditos = datos && typeof datos.creditos === "number" ? datos.creditos : 0;*/
+
+            // 2. Si es bloque, buscar 5 días laborables consecutivos (sin sábados ni domingos)
+            let creditosNecesarios = 80; // Individual por defecto
             if (bloque) {
-                const fechaInicial = new Date(dia);
-                const diaSemana = fechaInicial.getDay();
+                let fechaActual = new Date(dia);
                 fechas = [];
-                for (let i = 0; i < 14; i++) {
-                    const f = new Date();
-                    f.setDate(fechaInicial.getDate() + (i - fechaInicial.getDay() + diaSemana));
-                    if (f >= fechaInicial && f.getDay() === diaSemana) {
-                        fechas.push(toISODate(f));
+                while (fechas.length < 5) {
+                    const diaSemana = fechaActual.getDay();
+                    if (diaSemana !== 0 && diaSemana !== 6) { // 0 = domingo, 6 = sábado
+                        fechas.push(toISODate(fechaActual));
                     }
+                    fechaActual.setDate(fechaActual.getDate() + 1);
+                }
+                creditosNecesarios = 80 * fechas.length;
+            }
+
+            // 3. Comprobar si tiene créditos suficientes
+            if (creditos < creditosNecesarios) {
+                reservaMsg.style.color = "#d32f2f";
+                reservaMsg.innerHTML = `No tienes minutos suficientes para reservar.<br>Necesitas: ${creditosNecesarios} minutos. Dispones: ${creditos} minutos`;
+                return;
+            }
+
+            // 4. Verifica que el usuario no tenga ya una reserva ese día
+            for (const fecha of fechas) {
+                const yaTieneReserva = await db.collection('reservas')
+                    .where('fecha', '==', new Date(fecha))
+                    .where('usuarioId', '==', usuarioActual.uid)
+                    .where('estado', 'in', ['confirmada', 'pendiente']) // Solo estos estados
+                    .get();
+                //console.log("Reservas encontradas:", yaTieneReserva.docs.map(d => d.data()));
+                if (!yaTieneReserva.empty) {
+                    const fechaObj = new Date(fecha);
+                    const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'short'
+                    });
+                    reservaMsg.style.color = "#d32f2f";
+                    reservaMsg.innerHTML = `Ya tienes una reserva el ${fechaFormateada}.<br>No puedes reservar más en el mismo día.`;
+                    //console.log(fecha);
+                    return;
                 }
             }
 
-            // Verifica disponibilidad y crea reservas
+            // 5. Verifica disponibilidad para ese día, hora y usuario
             for (const fecha of fechas) {
-                // Comprobar si ya existe reserva para ese día y hora
                 const existe = await db.collection('reservas')
                     .where('fecha', '==', new Date(fecha))
                     .where('hora', '==', hora)
+                    .where('usuarioId', '==', usuarioActual.uid.trim()) // <-- Filtro por usuario
+                    .where('estado', 'in', ['confirmada', 'pendiente']) // Solo estos estados
                     .get();
+
                 if (!existe.empty) {
                     const fechaObj = new Date(fecha);
                     const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
@@ -634,55 +1106,250 @@
                         day: 'numeric',
                         month: 'short'
                     });
-                    reservaMsg.textContent = `Ya hay reserva el ${fechaFormateada} de ${hora}`;
+                    reservaMsg.style.color = "#d32f2f";
+                    reservaMsg.textContent = `Ya tienes una reserva el ${fechaFormateada} a las ${hora}`;
                     return;
                 }
             }
 
-            // Crear reservas
+
+            // 6. Crear reservas
+            const reservasImplicadas = [];
+
             for (const fecha of fechas) {
-                await db.collection('reservas').add({
-                    usuarioId: usuarioActual.uid,
+                const reservaRef = await db.collection('reservas').add({
+                    usuarioId: usuarioActual.uid.trim(),
                     usuarioNombre: usuarioActual.displayName || usuarioActual.email,
                     fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
                     hora: hora,
                     estado: 'pendiente',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
+                reservasImplicadas.push({
+                    id: reservaRef.id, // <-- El id generado por Firestore
+                    fecha: fecha,      // YYYY-MM-DD
+                    hora: hora
+                });
             }
+
+            const creditoantes = creditos;
+
+            // 7. Descontar créditos usados
+            await db.collection("usuarios_registrados").doc(doc.id).update({
+                creditos: creditos - creditosNecesarios
+            });
+
+            // 8. Actualizar visualización de créditos (si tienes una función para ello)
+            if (typeof mostrarCreditosUsuario === "function") {
+                mostrarCreditosUsuario();
+            }
+
+            // 9. Llama al log de créditos con las reservas implicadas
+            await logCredito({
+                usuarioId: datos.usuarioId,
+                email: datos.email,
+                perfil: datos.perfil,
+                creditosAntes: creditoantes,
+                tipo: "restar",
+                creditosDespues: creditos - creditosNecesarios,
+                reservasImplicadas: reservasImplicadas
+            });
+
             reservaMsg.style.color = "#388e3c";
-            reservaMsg.textContent = "Reserva(s) solicitada(s) correctamente.";
+            reservaMsg.innerHTML = "Reserva(s) solicitada(s) correctamente.<br>RECUERDA: cuando se confirme, tienes<br> hasta 24 horas antes para anularla.";
             document.getElementById('formReserva').reset();
+            calendar.render();
         }
+
+
+        async function anularReserva(fechaStr, hora, estado) {
+            try {                
+                const lista = document.getElementById('lista-reservas-dia');
+                lista.innerHTML = '';
+                const tituloDia = document.getElementById('tituloReservasDia');
+                tituloDia.textContent = "Reservas del dia"
+
+                // 1. Convertir fecha a Timestamp
+                const [anio, mes, dia] = fechaStr.split('-').map(Number);
+                const inicioDia = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 0, 0, 0, 0));
+                const finDia = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 23, 59, 59, 999));
+                //console.log("Rango de búsqueda:", inicioDia.toDate(), finDia.toDate());
+                //console.log(usuarioActual.uid);
+
+                // 2. Buscar reservas en ese día y hora
+                const q = await db.collection("reservas")
+                    .where("fecha", ">=", inicioDia)
+                    .where("fecha", "<=", finDia)
+                    .where("hora", "==", hora)
+                    .where("estado", "==", estado)
+                    .where("usuarioId", "==", usuarioActual.uid.trim()) // <-- Filtro por usuario
+                    .get();
+               
+                if (q.empty) {
+                    reservaMsg.textContent = "No se encontró la reserva para anular.";
+                    return;
+                }
+                //console.log("Reservas encontradas:", q.docs.map(d => d.data()));
+                // 3. Actualizar estado a "anulada" y contar cuántas se anulan
+                let reservasAnuladas = 0;
+                const updatePromises = [];
+                const reservasImplicadas = [];
+
+                q.forEach((doc) => {
+                    updatePromises.push(doc.ref.update({ estado: "anulada" }));
+                    reservasAnuladas++;
+
+                    const reserva = doc.data();
+                    reservasImplicadas.push({
+                        id: doc.id,
+                        fecha: reserva.fecha.toDate().toISOString().split('T')[0], // YYYY-MM-DD
+                        hora: reserva.hora
+                    });
+                });
+                await Promise.all(updatePromises);
+                //console.log("Reservas anuladas:", reservasAnuladas);
+
+                // 4. Sumar minutos a los créditos del usuario
+                // Suponiendo 80 minutos por reserva individual
+                const minutosASumar = reservasAnuladas * 80;
+
+                // Obtener créditos actuales
+                const userDocRef = db.collection("usuarios_registrados").doc(usuarioActual.docIdUsuarioRegistrado);
+                const userDoc = await userDocRef.get();
+                const datos = userDoc.data();
+                const creditosActuales = datos && typeof datos.creditos === "number" ? datos.creditos : 0;
+
+                // Actualizar créditos
+                await userDocRef.update({
+                    creditos: creditosActuales + minutosASumar
+                });
+
+                // Llama al log de creditos
+                await logCredito({
+                    usuarioId: datos.usuarioId,
+                    email: datos.email,
+                    perfil: datos.perfil,
+                    creditosAntes: creditosActuales,
+                    tipo: "sumar",
+                    creditosDespues: creditosActuales + minutosASumar,
+                    reservasImplicadas: reservasImplicadas
+                });                              
+
+                // (Opcional) Actualizar visualización de créditos
+                if (typeof mostrarCreditosUsuario === "function") {
+                    mostrarCreditosUsuario();
+                }
+
+                reservaMsg.style.color = "#388e3c";
+                reservaMsg.innerHTML = `Reserva anulada correctamente.<br>Se han sumado ${minutosASumar} minutos a tus créditos.`;
+                calendar.render();
+            } catch (error) {
+                //console.error("Error al anular la reserva:", error);
+                alert("Error al anular la reserva.");
+            }
+        }
+
+
+        function parseFechaFirestore(fechaStr) {
+            // Traducir el mes de español a inglés
+            const meses = {
+                'enero': 'Enero', 'febrero': 'Febrero', 'marzo': 'Marzo', 'abril': 'Abril', 'mayo': 'Mayo',
+                'junio': 'Junio', 'julio': 'Julio', 'agosto': 'Agosto', 'septiembre': 'Septiembre', 'octubre': 'Octubre',
+                'noviembre': 'Noviembre', 'diciembre': 'Diciembre'
+            };
+            let fechaEn = fechaStr;
+            for (let [es, en] of Object.entries(meses)) {
+                if (fechaEn.includes(es)) {
+                    fechaEn = fechaEn.replace(es, en);
+                    break;
+                }
+            }
+            // Eliminar 'UTC+2' y ajustar am/pm
+            fechaEn = fechaEn.split(' UTC')[0]
+                .replace(' a.m.', ' AM')
+                .replace(' p.m.', ' PM')
+                .replace(' de ', ' ');
+
+            // Parsear a Date
+            // Ejemplo: '12 May 2025, 2:00:00 AM'
+            const fechaDate = new Date(Date.parse(fechaEn));
+
+            // Ajustar a UTC si es necesario (ejemplo: restar 2 horas si era UTC+2)
+            // En este ejemplo, la hora ya está en local, así que para UTC:
+            fechaDate.setHours(fechaDate.getHours() - 2);
+
+            return fechaDate;
+        }
+
+        async function logCredito({
+            usuarioId,
+            email,
+            perfil,
+            creditosAntes,
+            tipo, // "sumar" o "restar"
+            creditosDespues,
+            reservasImplicadas
+        }) {
+            await db.collection("creditos").add({
+                fecha: firebase.firestore.FieldValue.serverTimestamp(),
+                usuarioId,
+                email,
+                perfil,
+                creditosAntes,
+                tipo,
+                creditosDespues,
+                reservasImplicadas
+            });
+        }
+
+
 
         // Autenticación y carga inicial
         document.addEventListener('DOMContentLoaded', function () {
-            auth.onAuthStateChanged(user => {
+            auth.onAuthStateChanged(async user => {
                 if (!user) {
                     //alert("Debes iniciar sesión para acceder al calendario.");
                     window.location.href = "index.html";
                     return;
                 } else {
-                    const nombre = capitalizarPrimeraLetra(user.displayName || "");
-                    const email = user.email || "";
-                    document.getElementById('tituloReservas').textContent = `Reservas de prácticas para ${nombre || email} con Carlos`;
+                    //const nombre = capitalizarPrimeraLetra(user.displayName || "");
+                    //const email = user.email || "";
+                    document.getElementById('tituloReservas').textContent = `Reservas de prácticas con Carlos`;
+                    //document.getElementById('tituloReservas').textContent = `Reservas de prácticas para ${nombre || email} con Carlos`;
                     usuarioActual = user;
                 }
 
-                inicializarCalendario();
-                cargarDias();
-                cargarHoras();
-                cargarReservas();
-
-                db.collection('reservas').onSnapshot(snapshot => {
-                    console.log("Reservas por fecha:", reservasPorFecha);
-                    ReservasporFechas(snapshot);
-                    if (calendar) {
-                        calendar.refetchEvents(); // 👈 Forzar re-renderizado
+                // --- Busca el documento en Firestore por usuarioId ---
+                let docIdUsuarioRegistrado = null;
+                try {
+                    const q = await db.collection('usuarios_registrados')
+                        .where('usuarioId', '==', usuarioActual.uid)
+                        .get();
+                    if (!q.empty) {
+                        docIdUsuarioRegistrado = q.docs[0].id; // <--- ID del documento en Firestore
+                        nombre = q.docs[0].data().nombre;      // <-- Así accedes al campo 'nombre'
+                        // Puedes guardar este ID en una variable global si lo necesitas luego:
+                        usuarioActual.docIdUsuarioRegistrado = docIdUsuarioRegistrado;
+                        usuarioActual.usuarioNombre = nombre;
+                    } else {
+                        console.warn("No existe documento para ese usuarioId en usuarios_registrados");
                     }
-                });
+                } catch (err) {
+                    console.error("Error buscando documento de usuario registrado:", err);
+                }
+                // ------------------------------------------------------------
+
+
+                mostrarCreditosUsuario();
+                cargarTimeSlots();
+                cargarDias();
+                //cargarHoras();
+                cargarReservas();
+                //inicializarCalendario();
                 
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
+
             });
         });
     </script>

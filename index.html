@@ -174,12 +174,23 @@
 
                 const doc = snapshot.docs[0];
                 const nombreFirestore = doc.data().nombre;
+                const perfilFirestore = doc.data().perfil;
 
                 await user.updateProfile({ displayName: nombreFirestore });
                 await user.reload(); 
 
                 // Usuario autorizado, continúa
-                setTimeout(() => {window.location.href = "Bienvenida.html";}, 500);
+                //setTimeout(() => { window.location.href = "Bienvenida.html"; }, 500);
+
+                switch (perfilFirestore){
+                    case "alumno":
+                        window.location.href = "Bienvenida.html";
+                        break;
+                    case "profesor":
+                        window.location.href = "Planificacion.html";
+                        break;
+                }
+                
             } catch (error) {
                 errorMsg.textContent = "Usuario o contraseña incorrectos.";
                 errorMsg.style.display = 'block';
