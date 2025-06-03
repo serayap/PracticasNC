@@ -236,6 +236,10 @@
             cursor: pointer;
         }
 
+        .fc-today-button {
+            display: none !important;
+        }
+
     </style>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:600&display=swap" rel="stylesheet">
 </head>
@@ -284,6 +288,17 @@
         const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
         const auth = firebase.auth();
+
+        function clearCollection(path) {
+            const ref = db.collection(path)
+            ref.onSnapshot((snapshot) => {
+                snapshot.docs.forEach((doc) => {
+                    ref.doc(doc.id).delete()
+                })
+            })
+        }
+
+        //clearCollection('creditos')
 
         // Tramos horarios como en tu select
         let timeSlots = []; // Inicialmente vacío
@@ -532,8 +547,8 @@
                     const userDocRef = userQuery.docs[0].ref;
                     const datos = userQuery.docs[0].data();
                     const creditosActuales = typeof datos.creditos === "number" ? datos.creditos : 0;
-                    const creditosDespues = creditosActuales + 80;
-
+                    const creditosDespues = creditosActuales + 1;
+                    //console.log("creditosActuales: " + creditosActuales + "creditosDespues" + creditosDespues);
                     await userDocRef.update({
                         creditos: creditosDespues
                     });
@@ -580,7 +595,7 @@
                 const reservasPendientes = await db.collection("reservas")
                     .where("usuarioId", "==", usuarioId)
                     .where("estado", "==", "pendiente")
-                    .where("fecha", "<", fechaConfirmada)
+                    .where("fecha", "<=", fechaConfirmada)
                     .get();
 
                 // 4. Construye el array de reservas implicadas
@@ -712,17 +727,24 @@
                     perfil,
                     creditosAntes,
                     tipo, // "sumar" o "restar"
-                    creditosDespues
+                    creditosDespues,
+                    reservasImplicadas
                 }) {
-                    await db.collection("creditos").add({
-                        fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                        usuarioId,
-                        email,
-                        perfil,
-                        creditosAntes,
-                        tipo,
-                        creditosDespues
-                    });
+                    try {
+                        await db.collection("logcreditos").add({
+                            fecha: firebase.firestore.FieldValue.serverTimestamp(),
+                            usuarioId,
+                            email,
+                            perfil,
+                            creditosAntes,
+                            tipo,
+                            creditosDespues,
+                            reservasImplicadas
+                        });
+                        console.log("Log de crédito guardado correctamente");
+                    } catch (error) {
+                        console.error("Error al guardar el log de créditos:", error);
+                    }
                 }
 
 

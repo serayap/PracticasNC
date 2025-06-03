@@ -175,7 +175,7 @@
                 const doc = snapshot.docs[0];
                 const nombreFirestore = doc.data().nombre;
                 const perfilFirestore = doc.data().perfil;
-
+                
                 await user.updateProfile({ displayName: nombreFirestore });
                 await user.reload(); 
 
@@ -188,6 +188,9 @@
                         break;
                     case "profesor":
                         window.location.href = "Planificacion.html";
+                        break;
+                    case "administracion":
+                        window.location.href = "administracion.html";
                         break;
                 }
                 
