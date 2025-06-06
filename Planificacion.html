@@ -262,7 +262,7 @@
             <div class="leyenda-item">
                 <div class="color-box confirmada"></div>
                 <span>Confirmada</span>
-            </div>            
+            </div>
             <!--<div class="leyenda-item">
                 <div class="color-box anulada"></div>
                 <span>Anulada</span>
@@ -273,16 +273,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
-            authDomain: "reservaspracticasnc.firebaseapp.com",
-            projectId: "reservaspracticasnc",
-            storageBucket: "reservaspracticasnc.appspot.com",
-            messagingSenderId: "742403879145",
-            appId: "1:742403879145:web:2f64807672793aaa348078"
-        };
+        function dct(e) {
+            const bytes = CryptoJS.AES.decrypt(e, "34#-2?579/fbh%$l(Oñh05t@");
+            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        }
+        const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const settings = { experimentalForceLongPolling: true, merge: true };
@@ -452,7 +450,7 @@
                         reservaElement.dataset.estado = estado;
                         reservaElement.dataset.email = reserva.usuarioEmail || ''; // Si tienes el email
 
-                        if (estado === 'pendiente' || estado === 'confirmada' ) {
+                        if (estado === 'pendiente' || estado === 'confirmada') {
                             reservaElement.addEventListener('click', function (e) {
                                 e.stopPropagation();
                                 mostrarMenuContextual(reserva, reservaElement, estado);
@@ -567,7 +565,7 @@
                             fecha: reservaData.fecha.toDate().toISOString().split('T')[0],
                             hora: reservaData.hora
                         }]
-                    });                    
+                    });
                 } else {
                     console.warn("No se encontró el documento del alumno para sumar créditos.");
                 }

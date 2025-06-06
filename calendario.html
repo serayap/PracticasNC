@@ -543,7 +543,7 @@
     <div class="container">
         <h2 class="cabecera-principal" id="tituloReservas"></h2>
         <div id="subcabecera-creditos" class="subcabecera-creditos">
-          <span id="creditosUsuario">...</span>
+            <span id="creditosUsuario">...</span>
         </div>
         <div class="arriba">
             <div>
@@ -601,16 +601,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
-            authDomain: "reservaspracticasnc.firebaseapp.com",
-            projectId: "reservaspracticasnc",
-            storageBucket: "reservaspracticasnc.appspot.com",
-            messagingSenderId: "742403879145",
-            appId: "1:742403879145:web:2f64807672793aaa348078"
-        };
+        function dct(e) {
+            const bytes = CryptoJS.AES.decrypt(e, "34#-2?579/fbh%$l(Oñh05t@");            
+            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));            
+        }
+        const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const settings = { experimentalForceLongPolling: true, merge: true };
@@ -684,7 +682,7 @@
                     option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
                     selectDia.appendChild(option);
                 }
-                
+
             }
         }
 
@@ -713,9 +711,9 @@
                 option.textContent = timeslot;
                 selectHora.appendChild(option);
             });
-        }        
+        }
 
-    // Función para cargar reservas del día
+        // Función para cargar reservas del día
         async function cargarReservasDelDia(fechaStr) {
             const lista = document.getElementById('lista-reservas-dia');
             lista.innerHTML = '<div class="cargando">Cargando...</div>';
@@ -775,11 +773,11 @@
 
                     // Formato visual mejorado
                     div.innerHTML = `
-                <div class="reserva-hora">
-                    <span class="hora">${reserva.hora}</span>
-                    <span class="estado ${reserva.estado}">${reserva.estado}</span>
-                </div>                
-            `;
+                    <div class="reserva-hora">
+                        <span class="hora">${reserva.hora}</span>
+                        <span class="estado ${reserva.estado}">${reserva.estado}</span>
+                    </div>
+                `;
                     lista.appendChild(div);
                 });
 
@@ -801,15 +799,15 @@
         }
 
 
-    function mostrarEventosDelDia(fechaStr) {
-      const eventos = calendar.getEvents();
-      const eventosDelDia = eventos.filter(evento => {
-        const inicio = evento.start?.toISOString().split('T')[0];
-        return inicio === fechaStr;
-      });
-  
-      //console.log("Eventos en", fechaStr, ":", eventosDelDia);
-    }
+        function mostrarEventosDelDia(fechaStr) {
+            const eventos = calendar.getEvents();
+            const eventosDelDia = eventos.filter(evento => {
+                const inicio = evento.start?.toISOString().split('T')[0];
+                return inicio === fechaStr;
+            });
+
+            //console.log("Eventos en", fechaStr, ":", eventosDelDia);
+        }
 
         // Inicializar FullCalendar
         function inicializarCalendario() {
@@ -844,7 +842,7 @@
                 expandRows: false, // Evita que las filas se expandan
                 //events: [],
                 dateClick: function (info) {
-                    cargarReservasDelDia(info.dateStr);                    
+                    cargarReservasDelDia(info.dateStr);
                 },
                 /*dayCellDidMount: (info) => {
                     cargarReservasDelDia(info.dateStr);
@@ -889,7 +887,7 @@
                             dot.textContent = reservas.pendiente;
                             eventsContainer.appendChild(dot);
                         //}, 50);
-                    }                    
+                    }
                 }*/
                 dayCellContent: function (info) {
                     // Corrige la fecha para la zona horaria local
@@ -938,7 +936,7 @@
                 .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
                 .forEach(r => {
                     const div = document.createElement('div');
-                    div.className = `reserva-item ${r.estado}`; 
+                    div.className = `reserva-item ${r.estado}`;
                     const fechaTexto = new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
                     if (r.estado == 'pendiente') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><button onclick="anularReserva('${r.fecha}', '${r.hora}', 'pendiente')" class='cta-btn-pendiente'>anular</button></div>`;
                     //if (r.estado == 'confirmada') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><div class='cta-btn'style ='background: linear-gradient(90deg, #56ab2f 30%, #a8e063 100%); box-shadow: 0 4px 16px rgba(255, 65, 108, 0.15);'>confirmada</div></div>`;
@@ -953,7 +951,7 @@
                         }
                     }
                     //if (r.estado == 'anulada') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><div class='cta-btn'style ='background: linear-gradient(90deg, #ff6a6a 30%, #ffe0e0 100%);'>anulada</div></div>`;
-                                 
+
                     lista.appendChild(div);
                 });
         }
@@ -1188,7 +1186,7 @@
 
 
         async function anularReserva(fechaStr, hora, estado) {
-            try {                
+            try {
                 const lista = document.getElementById('lista-reservas-dia');
                 lista.innerHTML = '';
                 const tituloDia = document.getElementById('tituloReservasDia');
@@ -1209,7 +1207,7 @@
                     .where("estado", "==", estado)
                     .where("usuarioId", "==", usuarioActual.uid.trim()) // <-- Filtro por usuario
                     .get();
-               
+
                 if (q.empty) {
                     reservaMsg.textContent = "No se encontró la reserva para anular.";
                     return;
@@ -1234,7 +1232,7 @@
                 await Promise.all(updatePromises);
                 //console.log("Reservas anuladas:", reservasAnuladas);
 
-                // 4. Sumar clases a los créditos del usuario                
+                // 4. Sumar clases a los créditos del usuario
                 const clasesASumar = reservasAnuladas;
 
                 // Obtener créditos actuales
@@ -1257,7 +1255,7 @@
                     tipo: "sumar",
                     creditosDespues: creditosActuales + clasesASumar,
                     reservasImplicadas: reservasImplicadas
-                });                              
+                });
 
                 // (Opcional) Actualizar visualización de créditos
                 if (typeof mostrarCreditosUsuario === "function") {
@@ -1376,7 +1374,7 @@
                 //cargarHoras();
                 cargarReservas();
                 //inicializarCalendario();
-                
+
                 document.getElementById('formReserva').addEventListener('submit', crearReserva);
 
             });

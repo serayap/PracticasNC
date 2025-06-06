@@ -867,16 +867,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBlWz4sjvOr9v703aXH5Tu0NZtnwGGUSoU",
-            authDomain: "reservaspracticasnc.firebaseapp.com",
-            projectId: "reservaspracticasnc",
-            storageBucket: "reservaspracticasnc.appspot.com",
-            messagingSenderId: "742403879145",
-            appId: "1:742403879145:web:2f64807672793aaa348078"
-        };
+        function dct(e) {
+            const bytes = CryptoJS.AES.decrypt(e, "34#-2?579/fbh%$l(Oñh05t@");
+            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        }
+        const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const settings = { experimentalForceLongPolling: true, merge: true };
@@ -943,26 +941,26 @@
 
                 // Puedes mostrarlo como tabla o lista
                 let html = `<table class="tabla">
-                <tr>
-                    <th>Acción</th>
-                    <th>Email</th>
-                    <th>Apellidos</th>
-                    <th>Nombre</th>
-                    <th>Clases</th>
-                </tr>`;
+                    <tr>
+                        <th>Acción</th>
+                        <th>Email</th>
+                        <th>Apellidos</th>
+                        <th>Nombre</th>
+                        <th>Clases</th>
+                    </tr>`;
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     html += `<tr>
-                    <td><span class="eliminar-alumno" data-id="${doc.id}">🗑️</span></td>
-                    <td>${data.email}</td>
-                    <td>${data.Apellidos || ''}</td>
-                    <td>${data.nombre || ''}</td>
-                    <td class="creditos-alumno" data-id="${doc.id}" data-usuarioiId="${data.usuarioId}" data-creditos="${data.creditos}">${typeof data.creditos === "number" ? data.creditos : 0}</td>
-                </tr>`;                    
+                        <td><span class="eliminar-alumno" data-id="${doc.id}">🗑️</span></td>
+                        <td>${data.email}</td>
+                        <td>${data.Apellidos || ''}</td>
+                        <td>${data.nombre || ''}</td>
+                        <td class="creditos-alumno" data-id="${doc.id}" data-usuarioiId="${data.usuarioId}" data-creditos="${data.creditos}">${typeof data.creditos === "number" ? data.creditos : 0}</td>
+                    </tr>`;
                 });
                 html += `</table>`;
                 contenedor.innerHTML = html;
-                
+
                 // Añade el listener para el borrado
                 document.querySelectorAll('.eliminar-alumno').forEach(icono => {
                     icono.addEventListener('click', eliminarAlumno);
@@ -999,7 +997,7 @@
         async function abrirPopupCreditos(event) {
             alumnoActualId = event.currentTarget.getAttribute('data-id');
             usuarioId = event.currentTarget.getAttribute('data-usuarioiId');
-            const popup = document.getElementById('popupCreditos');            
+            const popup = document.getElementById('popupCreditos');
             document.getElementById('alumnoId').value = alumnoActualId;
             popup.style.display = 'flex';
 
@@ -1027,18 +1025,18 @@
                     const fecha = log.fecha.toDate();
                     acumulado += log.tipo === 'sumar' ? log.reservasImplicadas.length : -log.reservasImplicadas.length;
                     const fila = `
-                <tr>
-                    <td>${fecha.toLocaleDateString('es-ES')}</td>
-                    <td>${fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</td>
-                    <td>${log.perfil || '-'}</td>
-                    <td>${log.creditosAntes}</td>
-                    <td>${log.tipo === 'sumar' ? '+' + log.reservasImplicadas.length : '-' + log.reservasImplicadas.length}</td>                    
-                    <td>${log.creditosDespues}</td>
-                </tr>
-            `;
+                    <tr>
+                        <td>${fecha.toLocaleDateString('es-ES')}</td>
+                        <td>${fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td>${log.perfil || '-'}</td>
+                        <td>${log.creditosAntes}</td>
+                        <td>${log.tipo === 'sumar' ? '+' + log.reservasImplicadas.length : '-' + log.reservasImplicadas.length}</td>
+                        <td>${log.creditosDespues}</td>
+                    </tr>
+                `;
                     tbody.insertAdjacentHTML('beforeend', fila);
                 });
-            }        
+            }
 
         }
 
@@ -1181,13 +1179,13 @@
                     div.className = `reserva-dia-item ${reserva.estado}`;
 
                     div.innerHTML = `
-                    <div class="reserva-hora">
-                        <span class="hora">${reserva.hora}</span>&nbsp;&nbsp;&nbsp;
-                        <span class="hora">${reserva.nombre}</span>&nbsp;
-                        <span class="hora">${reserva.apellidos}</span>&nbsp;&nbsp;&nbsp;
-                        <span class="estado ${reserva.estado}">${reserva.estado}</span>
-                    </div>
-                `;
+                        <div class="reserva-hora">
+                            <span class="hora">${reserva.hora}</span>&nbsp;&nbsp;&nbsp;
+                            <span class="hora">${reserva.nombre}</span>&nbsp;
+                            <span class="hora">${reserva.apellidos}</span>&nbsp;&nbsp;&nbsp;
+                            <span class="estado ${reserva.estado}">${reserva.estado}</span>
+                        </div>
+                    `;
                     lista.appendChild(div);
                 });
 
