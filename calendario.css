@@ -1,0 +1,613 @@
+body {
+    background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 60%, #e0e0e0 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body.oculto {
+    visibility: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1000px;
+    margin: 0 auto;
+    gap: 0;
+}
+
+.subcabecera-creditos {
+    background: #e3f2fd;
+    color: #1976d2;
+    font-weight: 600;
+    font-size: 1.1em;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(25,103,210,0.07);
+}
+
+
+.cabecera-principal {
+    font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+    font-size: 1.3rem; /* Un poco más pequeño */
+    font-weight: 900;
+    background: linear-gradient(90deg, #1976d2 20%, #42a5f5 80%);
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px; /* Menos separación */
+    text-align: center;
+    margin: 16px auto 8px auto; /* Mucho menos margen arriba y abajo */
+    text-shadow: 0 1px 4px rgba(25, 118, 210, 0.08); /* Sombra más sutil */
+    animation: gradient-move 3s linear infinite alternate;
+    padding: 4px 0; /* Menos padding vertical */
+    border-bottom: 2px solid #1976d2; /* Más fino */
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 2px 12px rgba(25, 118, 210, 0.05); /* Sombra más pequeña */
+    max-width: 1000px; /* Más estrecho */
+}
+
+.reserva-item-compacta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Espacio entre texto y botón */
+    gap: 8px;
+    padding: 2px 0;
+    font-size: 0.95em;
+    white-space: nowrap; /* Evita saltos de línea */
+    border: 1px solid gray; /* Borde azul */
+    border-radius: 6px; /* Esquinas redondeadas */
+    background: #f5faff; /* Fondo suave opcional */
+}
+
+.cta-btn-solicitar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 6px auto; /* Centrado con margen vertical */
+    background: linear-gradient(90deg, #1976d2 60%, #63a4ff 100%);
+    color: #fff;
+    text-decoration: none;
+    padding: 4px 6px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s, transform 0.1s;
+    min-width: 150px;
+    max-width: 100%;
+}
+
+    .cta-btn-solicitar:hover {
+        background: linear-gradient(90deg, #1565c0 40%, #1976d2 100%);
+        box-shadow: 0 8px 24px rgba(25, 118, 210, 0.21);
+        color: #fff;
+        transform: scale(1.05);
+    }
+
+
+.cta-btn-pendiente {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: 8px;
+    background: linear-gradient(90deg, #ff9800 60%, #ffb347 100%); /* naranja vibrante */
+    color: #fff; /* texto oscuro para destacar sobre naranja claro */
+    text-decoration: none;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 0.8em;
+    font-weight: 300;
+    box-shadow: 0 2px 12px rgba(255, 152, 0, 0.10);
+    border: none;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+}
+
+    .cta-btn-pendiente:hover {
+        background: linear-gradient(90deg, #ff5722 30%, #ff9800 100%); /* naranja más intenso al pasar el ratón */
+        color: #fff; /* texto blanco para máximo contraste */
+        box-shadow: 0 4px 16px rgba(255, 152, 0, 0.18);
+    }
+
+.cta-btn-confirmada {
+    display: flex;
+    flex-shrink: 0; /* El botón nunca se encoge */
+    justify-content: flex-end; /* Alinea todo a la derecha */
+    gap: 8px; /* Espacio entre botones, opcional */
+    background: linear-gradient(90deg, #56ab2f 30%, #a8e063 100%);
+    color: #fff;
+    text-decoration: none;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: 0.8em;
+    font-weight: 300;
+    box-shadow: 0 2px 12px rgba(25,103,210,0.08);
+    border: none;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+    .cta-btn-confirmada:hover {
+        background: linear-gradient(90deg, #ff4b2b 30%, #ff416c 100%);
+        box-shadow: 0 4px 16px rgba(255, 65, 108, 0.15);
+        color: #fff; /* Opcional, por si quieres asegurar el color */
+        /* Puedes agregar más efectos si lo deseas */
+    }
+
+.cta-btn-confirmada-disabled {
+    background: linear-gradient(90deg, #bdbdbd 30%, #eeeeee 100%);
+    color: #757575;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 300;
+    padding: 2px 10px;
+    box-shadow: 0 2px 8px rgba(189, 189, 189, 0.13);
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: auto; /* Permite mostrar el tooltip aunque esté deshabilitado */
+    position: relative;
+    transition: background 0.2s, color 0.2s, opacity 0.2s;
+}
+
+    /* Tooltip personalizado al pasar el ratón */
+    .cta-btn-confirmada-disabled[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        left: 50%;
+        top: 110%;
+        transform: translateX(-50%);
+        background: #333;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-size: 0.85em;
+        white-space: nowrap;
+        z-index: 10;
+        opacity: 0.95;
+        pointer-events: none;
+    }
+
+
+@keyframes gradient-move {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+.cabecera {
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1976d2;
+    background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%);
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+    display: inline-block;
+}
+
+.arriba {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    width: 100%;
+}
+
+.form-reserva {
+    flex: 1 1 40%;
+    min-width: 300px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 5px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    margin-bottom: 0;
+}
+
+#formReserva .cta-btn {
+    display: block;
+    margin: 16px auto 0 auto; /* Centra horizontalmente */
+}
+
+#calendar-container {
+    width: 600px; /* Cambia a tu gusto */
+    margin: 0 auto; /* Centra el calendario */
+}
+
+#calendar {
+    min-width: 200px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    margin-bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+    height: 350px !important; /* Altura máxima total */
+}
+
+.fc-toolbar {
+    padding: 2px 0 !important; /* Reduce el espacio vertical */
+    min-height: 0 !important;
+    padding-bottom: 4px !important;
+    margin-bottom: 8px !important;
+}
+
+.fc-toolbar-title {
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    font-size: 1.5rem !important;
+    font-weight: 5700;
+    color: #1565c0;
+    padding: 2px 8px !important;
+    letter-spacing: 1px;
+}
+
+.fc .fc-button {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+    .fc .fc-button:hover,
+    .fc .fc-button:focus {
+        background: #1565c0;
+    }
+
+.seccion-derecha {
+    flex: 2;
+    max-width: 75%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Panel de reservas del día */
+.reservas-dia {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Elementos de la lista */
+#lista-reservas-dia, .reservasdia {
+    display: flex;
+    /*max-width: 200px;*/
+    flex-direction: column;
+    align-items: center; /* Centra horizontalmente los hijos */
+}
+
+.reserva-dia-item {
+    padding: 12px;
+    margin: 8px 0;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid transparent;
+}
+
+    .reserva-dia-item.pendiente {
+        border-color: #ff9800;
+    }
+
+    .reserva-dia-item.confirmada {
+        border-color: #4caf50;
+    }
+
+    .reserva-dia-item.anulada {
+        border-color: #ff6a6a;
+    }
+
+@media (max-width: 900px) {
+    .arriba {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    #calendar, .form-reserva {
+        min-width: 0;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .seccion-derecha {
+        width: 100%;
+    }
+
+    /* En tu media query para pantallas grandes */
+    #calendar-container {
+        width: 700px !important; /* Mayor ancho del contenedor */
+    }
+
+    .fc-daygrid-day {
+        min-width: 80px !important; /* Ancho mayor para celdas */
+    }
+}
+
+
+/* Añade esto para control general de altura */
+.fc .fc-daygrid-day {
+    height: 40px !important; /* Altura fija para todas las celdas */
+}
+
+.fc-daygrid-day-events {
+    /*min-height: 18px !important;
+            margin-top: auto;*/
+    min-height: 0 !important;
+    margin-top: auto !important; /* Empuja los eventos hacia abajo */
+    flex-grow: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.fc-daygrid-day-bg {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.fc-daygrid-day-number {
+    line-height: 1 !important;
+    padding: 2px !important;
+    font-size: 0.85em !important;
+}
+
+.fc-dot-pendiente,
+.fc-dot-confirmada {
+    transform: scale(0.7) !important;
+    margin: 0 1px !important;
+}
+
+.fc-daygrid-day {
+    height: 32px !important; /* Altura máxima de la celda */
+    min-height: 32px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.fc-daygrid-day-frame {
+    /*height: 100%;
+            display: flex;
+            flex-direction: column;*/
+    height: 100% !important;
+    min-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.fc-daygrid-day-top {
+    flex-wrap: nowrap !important;
+    gap: 2px !important;
+    height: 24px !important; /* Altura fija para la sección superior */
+    min-height: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Ajusta el header del calendario */
+.fc-col-header {
+    height: 30px !important;
+}
+
+.fc-col-header-cell {
+    height: 100% !important;
+    padding: 2px !important;
+}
+
+.fc-scrollgrid {
+    border: none !important;
+}
+
+.fc-daygrid-body tr {
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+}
+
+.fc-scrollgrid-sync-table {
+    height: 100% !important;
+    min-height: 0 !important;
+}
+
+/* Contenedor de la vista */
+.fc-view-harness {
+    min-height: 0 !important;
+}
+
+.leyenda-colores {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+}
+
+.leyenda-item {
+    display: flex;
+    align-items: center;
+}
+
+.dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 2px;
+    vertical-align: middle;
+}
+
+.dot-pendiente {
+    background: #FF9800;
+}
+
+.dot-confirmada {
+    background: #4CAF50;
+}
+
+.fc-today-button {
+    display: none !important;
+}
+
+.reserva-hora {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 4px;
+    margin-bottom: 2px;
+    background: #f5f7fa;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1;
+    box-shadow: none;
+    transition: background 0.2s;
+    min-height: 0;
+}
+
+    .reserva-hora:hover {
+        background: #e3f2fd;
+    }
+
+    .reserva-hora .hora {
+        font-weight: 500;
+        color: #1976d2;
+        min-width: 36px;
+        line-height: 1;
+        padding: 0 1px;
+    }
+
+    .reserva-hora .estado {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 0 5px;
+        border-radius: 7px;
+        margin-left: auto;
+        text-transform: capitalize;
+        line-height: 1;
+        height: 16px;
+        display: flex;
+        align-items: center;
+    }
+
+        /* Colores de estado */
+        .reserva-hora .estado.confirmada {
+            background: #c8e6c9;
+            color: #388e3c;
+            border: 1px solid #388e3c;
+        }
+
+        .reserva-hora .estado.pendiente {
+            background: #fff9c4;
+            color: #fbc02d;
+            border: 1px solid #fbc02d;
+        }
+
+        .reserva-hora .estado.anulada {
+            background: #ffcdd2;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+        }
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.popup-content {
+    background: #fff;
+    padding: 28px 32px;
+    border-radius: 16px;
+    max-width: 640px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+    transform: translateY(0);
+    animation: fadeInUp 0.4s ease-out;
+    border: 1px solid rgba(25,118,210,0.1);
+}
+
+    .popup-content h2 {
+        font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #1976d2;
+        margin-top: 0;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .popup-content h3 {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1976d2;
+        margin: 16px 0 8px 0;
+    }
+
+    .popup-content p, .popup-content ul, .popup-content li {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #444;
+        line-height: 1.6;
+        margin-bottom: 8px;
+    }
+
+    .popup-content ul {
+        padding-left: 24px;
+    }
+
+    .popup-content li {
+        margin-bottom: 6px;
+    }
+
+.close {
+    float: right;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.btn-ayuda {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #1976d2;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}

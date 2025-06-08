@@ -7,6 +7,78 @@
     <!-- FullCalendar JS -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Firebase (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        let usuarioActual = {};
+
+        function actualizarUI() {
+            document.getElementById('tituloReservas').textContent = `Administración de las reservas de prácticas con Carlos`;
+
+            cargarListadoAlumnos();
+            cargarReservas();
+
+            //document.getElementById('formReserva').addEventListener('submit', crearReserva);
+            document.getElementById('contenidoAyuda').innerHTML = ayudaCalendario;
+        }
+
+        function dct(e) {
+            const bytes = CryptoJS.AES.decrypt(e, "34#-2?579/fbh%$l(Oñh05t@");
+            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        }
+        const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        // Inicializa Firestore si no lo has hecho
+        const db = firebase.firestore();
+
+        auth.onAuthStateChanged(async user => {
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                const q = await db.collection('usuarios_registrados')
+                    .where('usuarioId', '==', user.uid)
+                    .get();
+                if (!q.empty) {
+                    usuarioActual.id = q.docs[0].id;
+                    usuarioActual.nombre = q.docs[0].data().nombre;
+                    usuarioActual.email = q.docs[0].data().email;
+                    usuarioActual.perfil = q.docs[0].data().perfil;
+                    usuarioActual.uid = user.uid;
+
+                    // Control de acceso por perfil
+                    if (usuarioActual.perfil !== "administracion") {
+                        window.location.href = "index.html";
+                        return;
+                    }
+
+                    document.body.classList.remove("oculto");
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', actualizarUI);
+                    } else {
+                        actualizarUI();
+                    }
+                } else {
+                    console.warn("No existe documento para ese usuarioId en usuarios_registrados");
+                    window.location.href = "index.html";
+                }
+            } catch (err) {
+                console.error("Error buscando documento de usuario registrado:", err);
+                //window.location.href = "index.html";
+            }
+        });
+
+    </script>
     <style>
         body {
             background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 60%, #e0e0e0 100%);
@@ -15,6 +87,10 @@
             padding: 0;
             min-height: 100vh;
         }
+
+            body.oculto {
+                visibility: hidden;
+            }
 
         .container {
             display: flex;
@@ -145,7 +221,7 @@
                 color: #fff; /* Opcional, por si quieres asegurar el color */
                 /* Puedes agregar más efectos si lo deseas */
             }
-        
+
         .cta-btn-confirmada-disabled {
             background: linear-gradient(90deg, #bdbdbd 30%, #eeeeee 100%);
             color: #757575;
@@ -162,23 +238,23 @@
             transition: background 0.2s, color 0.2s, opacity 0.2s;
         }
 
-        /* Tooltip personalizado al pasar el ratón */
-        .cta-btn-confirmada-disabled[title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            left: 50%;
-            top: 110%;
-            transform: translateX(-50%);
-            background: #333;
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 5px;
-            font-size: 0.85em;
-            white-space: nowrap;
-            z-index: 10;
-            opacity: 0.95;
-            pointer-events: none;
-        }
+            /* Tooltip personalizado al pasar el ratón */
+            .cta-btn-confirmada-disabled[title]:hover::after {
+                content: attr(title);
+                position: absolute;
+                left: 50%;
+                top: 110%;
+                transform: translateX(-50%);
+                background: #333;
+                color: #fff;
+                padding: 4px 10px;
+                border-radius: 5px;
+                font-size: 0.85em;
+                white-space: nowrap;
+                z-index: 10;
+                opacity: 0.95;
+                pointer-events: none;
+            }
 
 
         @keyframes gradient-move {
@@ -295,6 +371,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            width: 100%;
         }
 
         /* Panel de reservas del día */
@@ -348,9 +425,6 @@
                 margin-bottom: 20px;
             }
 
-            .seccion-derecha {
-                width: 100%;
-            }
 
             /* En tu media query para pantallas grandes */
             #calendar-container {
@@ -365,12 +439,12 @@
                 width: 100%;
             }
         }
-            
 
-            /* Añade esto para control general de altura */
-            .fc .fc-daygrid-day {
-                height: 40px !important; /* Altura fija para todas las celdas */
-            }
+
+        /* Añade esto para control general de altura */
+        .fc .fc-daygrid-day {
+            height: 40px !important; /* Altura fija para todas las celdas */
+        }
 
         .fc-daygrid-day-events {
             /*min-height: 18px !important;
@@ -382,6 +456,7 @@
             margin: 0 !important;
             box-sizing: border-box !important;
         }
+
         .fc-daygrid-day-bg {
             padding: 0 !important;
             margin: 0 !important;
@@ -429,7 +504,7 @@
             min-height: 24px !important;
             margin: 0 !important;
             padding: 0 !important;
-            flex-shrink: 0 !important;            
+            flex-shrink: 0 !important;
             box-sizing: border-box !important;
         }
 
@@ -475,7 +550,7 @@
             align-items: center;
         }
 
-        .dot {            
+        .dot {
             width: 16px;
             height: 16px;
             border-radius: 50%;
@@ -507,13 +582,13 @@
             width: 100%;
         }
 
-        .form-group label {
-            min-width: 80px;
-            /*margin-right: 8px;*/
-            font-size: 13px;
-            font-weight: 500;
-            text-align: right;
-        }
+            .form-group label {
+                min-width: 80px;
+                /*margin-right: 8px;*/
+                font-size: 13px;
+                font-weight: 500;
+                text-align: right;
+            }
 
         .input {
             flex: 1;
@@ -544,9 +619,9 @@
             min-height: 28px; /* Por si el texto es pequeño */
         }
 
-        .btn.cta-btn-confirmada:hover {
-            background: #2e7031;
-        }
+            .btn.cta-btn-confirmada:hover {
+                background: #2e7031;
+            }
 
         .tabla {
             width: 100%;
@@ -574,14 +649,14 @@
                 font-size: 14px;
             }
 
-            .tabla th:nth-child(54), .tabla td:nth-child(5) {
-                 width: 60px;
-                 min-width: 40px;
-                 max-width: 70px;
-                 text-align: center;
-                 padding-right: 0;
-                 padding-left: 0;
-            }
+                .tabla th:nth-child(54), .tabla td:nth-child(5) {
+                    width: 60px;
+                    min-width: 40px;
+                    max-width: 70px;
+                    text-align: center;
+                    padding-right: 0;
+                    padding-left: 0;
+                }
 
 
             .tabla tr:last-child td {
@@ -695,9 +770,9 @@
 
         .popup-content {
             background: #fff;
-            padding: 20px;
+            padding: 10px;
             border-radius: 10px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -766,13 +841,128 @@
                 background: #f5f7fa;
             }
 
+        th.eliminar-col, td.eliminar-col {
+            width: 40px;
+            min-width: 40px;
+            max-width: 40px;
+            text-align: center;
+            padding: 0;
+        }
+
+        .borrar-log {
+            cursor: pointer;
+            font-size: 18px;
+            color: #d32f2f;
+            transition: color 0.2s;
+        }
+
+            .borrar-log:hover {
+                color: #b71c1c;
+            }
+
+        @media (max-width: 600px) {
+            .tabla-responsive {
+                overflow-x: auto;
+                display: block;
+            }
+        }
+
+        #logCreditosTabla th, #logCreditosTabla td {
+            padding: 4px 8px;
+            font-size: 0.95em;
+        }
 
         .fc-today-button {
             display: none !important;
         }
+
+        .btn-admin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 6px auto; /* Centrado con margen vertical */
+            background: linear-gradient(90deg, #1976d2 60%, #63a4ff 100%);
+            color: #fff;
+            text-decoration: none;
+            padding: 4px 6px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s, color 0.2s, transform 0.1s;
+            min-width: 150px;
+            max-width: 100%;
+        }
+
+            .btn-admin:hover {
+                background: linear-gradient(90deg, #1565c0 40%, #1976d2 100%);
+                box-shadow: 0 8px 24px rgba(25, 118, 210, 0.21);
+                color: #fff;
+                transform: scale(1.05);
+            }
+        .btn-ayuda {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #1976d2;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .popup-content {
+            background: #fff;
+            padding: 28px 32px;
+            border-radius: 16px;
+            max-width: 640px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+            transform: translateY(0);
+            animation: fadeInUp 0.4s ease-out;
+            border: 1px solid rgba(25,118,210,0.1);
+        }
+
+            .popup-content h2 {
+                font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+                font-size: 1.7rem;
+                font-weight: 700;
+                color: #1976d2;
+                margin-top: 0;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .popup-content h3 {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #1976d2;
+                margin: 16px 0 8px 0;
+            }
     </style>
 </head>
-<body>
+<body class="oculto">
     <div class="container">
         <h2 class="cabecera-principal" id="tituloReservas"></h2>
         <!--<div id="subcabecera-creditos" class="subcabecera-creditos">
@@ -818,13 +1008,20 @@
                         <h2 class="cabecera" id="tituloReservasDia">Reservas del día</h2>
                         <div id="lista-reservas-dia"></div>
                     </div>
+                    <button id="btnAyuda" class="btn-ayuda">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
                 </div>
-                <!--<div class="seccion-derecha">
-                        <div class="reservas-dia">
-                            <h2 class="cabecera" id="tituloReservasDia">Reservas del día</h2>
-                            <div id="lista-reservas-dia"></div>
-                        </div>
-                    </div>-->
+            </div>
+        </div>
+    </div>
+
+    <div id="popupAyuda" class="popup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h2>Ayuda</h2>
+            <div id="contenidoAyuda">
+                <!-- Aquí va el contenido de ayuda específico para cada página -->
             </div>
         </div>
     </div>
@@ -833,7 +1030,7 @@
         <div class="popup-content">
             <span class="close">&times;</span>
             <h2 class="cabecera" id="titulocreditos"></h2>
-            <div id="datosAlumno"></div>
+            <div id="datosAlumno" class="tabla-responsive"></div>
             <!--<div id="logCreditos"></div>-->
             <table id="logCreditosTabla" class="tabla">
                 <thead>
@@ -841,9 +1038,10 @@
                         <th>Fecha</th>
                         <th>Hora</th>
                         <th>Perfil</th>
-                        <th>Total antes</th>
-                        <th>Anulación / Reserva</th>
-                        <th>Total despues</th>
+                        <th>Antes</th>
+                        <th>Reserva o Anulación</th>
+                        <th>Despues</th>
+                        <th>&nbsp;</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -855,37 +1053,24 @@
                 <label for="paqueteCreditos">Paquetes de clases:</label>
                 <select id="paqueteCreditos">
                     <option value="5">5 clases</option>
+                    <option value="3">3 clases</option>
                     <option value="1">1 clase</option>
                     <!-- Añade más opciones si lo necesitas -->
                 </select>
-                <button type="submit">Añadir clases</button>
+                <button class="btn cta-btn-confirmada" type="submit">Añadir clases</button>
             </form>
+            <div id="msgClases"></div>
         </div>
     </div>
-
-    <!-- Firebase (compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        function dct(e) {
-            const bytes = CryptoJS.AES.decrypt(e, "34#-2?579/fbh%$l(Oñh05t@");
-            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-        }
-        const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
         const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
-        const auth = firebase.auth();
 
         let calendar = null;
         let primeraCarga = true;
         let reservasTodas = {};
         let reservasUsuario = [];
-        let usuarioActual = null;
         let eventos = [];
 
         async function agregarAlumno() {
@@ -897,6 +1082,14 @@
             // Validación simple
             if (!email || !apellidos || !nombre) {
                 msg.textContent = "Por favor, completa todos los campos.";
+                msg.style.color = "#d32f2f";
+                return;
+            }
+
+            // Validación de formato de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                msg.textContent = "El email no tiene un formato válido.";
                 msg.style.color = "#d32f2f";
                 return;
             }
@@ -941,22 +1134,22 @@
 
                 // Puedes mostrarlo como tabla o lista
                 let html = `<table class="tabla">
-                    <tr>
-                        <th>Acción</th>
-                        <th>Email</th>
-                        <th>Apellidos</th>
-                        <th>Nombre</th>
-                        <th>Clases</th>
-                    </tr>`;
+                        <tr>
+                            <th>Acción</th>
+                            <th>Email</th>
+                            <th>Apellidos</th>
+                            <th>Nombre</th>
+                            <th>Clases</th>
+                        </tr>`;
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     html += `<tr>
-                        <td><span class="eliminar-alumno" data-id="${doc.id}">🗑️</span></td>
-                        <td>${data.email}</td>
-                        <td>${data.Apellidos || ''}</td>
-                        <td>${data.nombre || ''}</td>
-                        <td class="creditos-alumno" data-id="${doc.id}" data-usuarioiId="${data.usuarioId}" data-creditos="${data.creditos}">${typeof data.creditos === "number" ? data.creditos : 0}</td>
-                    </tr>`;
+                            <td><span class="eliminar-alumno" data-id="${doc.id}">🗑️</span></td>
+                            <td>${data.email}</td>
+                            <td>${data.Apellidos || ''}</td>
+                            <td>${data.nombre || ''}</td>
+                            <td class="creditos-alumno" data-id="${doc.id}" data-usuarioiId="${data.usuarioId}" data-creditos="${data.creditos}">${typeof data.creditos === "number" ? data.creditos : 0}</td>
+                        </tr>`;
                 });
                 html += `</table>`;
                 contenedor.innerHTML = html;
@@ -981,7 +1174,7 @@
             if (confirmar) {
                 try {
                     await db.collection('usuarios_registrados').doc(id).delete();
-                    alert('Alumno eliminado correctamente');
+                    //alert('Alumno eliminado correctamente');
                     cargarListadoAlumnos(); // Recarga la lista
                 } catch (error) {
                     alert('Error al eliminar alumno: ' + error.message);
@@ -1006,7 +1199,7 @@
             const alumno = alumnoDoc.data();
             //document.getElementById('datosAlumno').innerHTML = `<p><strong>Nombre:</strong> ${alumno.nombre}</p><p><strong>Apellidos:</strong> ${alumno.apellidos}</p><p><strong>Email:</strong> ${alumno.email}</p>`;
             document.getElementById('titulocreditos').innerHTML = `Historial de clases para ${alumno.nombre}`;
-            console.log(alumnoActualId);
+            //console.log(alumnoActualId);
             // Cargar log de créditos (colección independiente)
             const logSnapshot = await db.collection('logcreditos')
                 .where('usuarioId', '==', usuarioId)
@@ -1019,23 +1212,34 @@
                 tbody.innerHTML = '<tr><td colspan="5">No hay historial de clases</td></tr>';
             } else {
                 // Si necesitas el crédito puntual en cada momento, deberías calcularlo acumulando las operaciones
+                console.log(usuarioActual.perfil);
                 let acumulado = 0;
                 logSnapshot.forEach(doc => {
                     const log = doc.data();
                     const fecha = log.fecha.toDate();
                     acumulado += log.tipo === 'sumar' ? log.reservasImplicadas.length : -log.reservasImplicadas.length;
                     const fila = `
-                    <tr>
-                        <td>${fecha.toLocaleDateString('es-ES')}</td>
-                        <td>${fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</td>
-                        <td>${log.perfil || '-'}</td>
-                        <td>${log.creditosAntes}</td>
-                        <td>${log.tipo === 'sumar' ? '+' + log.reservasImplicadas.length : '-' + log.reservasImplicadas.length}</td>
-                        <td>${log.creditosDespues}</td>
-                    </tr>
-                `;
+                        <tr>
+                            <td>${fecha.toLocaleDateString('es-ES')}</td>
+                            <td>${fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</td>
+                            <td>${log.perfil || '-'}</td>
+                            <td>${log.creditosAntes}</td>
+                            <td>${log.tipo === 'sumar' ? '+' + log.reservasImplicadas.length : '-' + log.reservasImplicadas.length}</td>
+                            <td>${log.creditosDespues}</td>
+                            ${log.perfil === "administracion" ? `<td class="eliminar-col"><span class="borrar-log" data-logid="${doc.id}" data-cantidad="${log.reservasImplicadas.length}">🗑️</span></td>` : ''}
+                        </tr>
+                    `;
                     tbody.insertAdjacentHTML('beforeend', fila);
                 });
+
+                // Añade la fila totalizadora al final
+                const totalizador = `
+                <tr style="font-weight:bold;">
+                    <td colspan="5" style="text-align:right;">Clases actuales:</td>
+                    <td>${alumno.creditos}</td>
+                </tr>
+            `;
+                tbody.insertAdjacentHTML('beforeend', totalizador);
             }
 
         }
@@ -1044,31 +1248,87 @@
         // Cerrar popup
         document.querySelector('.close').addEventListener('click', () => {
             document.getElementById('popupCreditos').style.display = 'none';
+            msgClases.innerHTML = "";
         });
 
         document.getElementById('formSumarCreditos').addEventListener('submit', async function (e) {
             e.preventDefault();
             const id = document.getElementById('alumnoId').value;
-            const minutos = parseInt(document.getElementById('paqueteCreditos').value);
+            const clases = parseInt(document.getElementById('paqueteCreditos').value);
 
-            // Sumar clases al alumno
-            const alumnoRef = db.collection('usuarios_registrados').doc(id);
+            let creditosAntes = 0;
+            let creditosDespues = 0;
+            let alumno = null;
+            let usuarioId = null;
+
+            // Sumar clases al alumno en una transacción
             await db.runTransaction(async (transaction) => {
+                const alumnoRef = db.collection('usuarios_registrados').doc(id);
                 const alumnoDoc = await transaction.get(alumnoRef);
-                const creditosActuales = alumnoDoc.data().creditos || 0;
-                transaction.update(alumnoRef, { creditos: creditosActuales + minutos });
+                alumno = alumnoDoc.data();
+                creditosAntes = alumno.creditos || 0;
+                creditosDespues = creditosAntes + clases;
+                usuarioId = alumno.usuarioId; // Asegúrate de que este campo existe en el documento
+                transaction.update(alumnoRef, { creditos: creditosDespues });
             });
 
-            // Añadir entrada al log de créditos
-            await db.collection('usuarios_registrados').doc(id).collection('log_creditos').add({
-                cantidad: minutos,
-                operacion: 'suma',
+            // Añadir entrada al log de créditos (fuera de la transacción)
+            await db.collection('logcreditos').add({
+                usuarioId: usuarioId,
+                email: alumno.email,
+                perfil: usuarioActual.perfil,
+                creditosAntes: creditosAntes,
+                tipo: "sumar",
+                creditosDespues: creditosDespues,
+                reservasImplicadas: Array(clases).fill({}), // O ajusta según tu lógica
                 fecha: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            alert('Clase/s añadida/s correctamente');
-            abrirPopupCreditos({ currentTarget: { getAttribute: () => id } }); // Recargar popup
-            cargarUsuarios(); // Actualizar tabla
+            msgClases.style.color = "#388e3c";
+            msgClases.innerHTML = "Clase/s añadida/s correctamente.";
+            await abrirPopupCreditos({ currentTarget: { getAttribute: (attr) => attr === "data-id" ? id : usuarioId } });
+            cargarListadoAlumnos(); // Actualizar tabla
+        });
+
+        document.querySelector('#logCreditosTabla tbody').addEventListener('click', async function (event) {
+            if (event.target.classList.contains('borrar-log')) {
+                const logId = event.target.getAttribute('data-logid');
+                const cantidad = parseInt(event.target.getAttribute('data-cantidad'), 10);
+                // Recupera el documento del log
+                const logDoc = await db.collection('logcreditos').doc(logId).get();
+                const log = logDoc.data();
+                if (log.tipo !== "sumar") {
+                    alert("Solo se pueden borrar operaciones de suma.");
+                    return;
+                }
+                // Confirmación
+                if (!confirm(`¿Seguro que quieres borrar este registro y restar ${cantidad} clase(s)?`)) return;
+
+                // Transacción: borrar log y restar créditos
+                const alumnoRef = db.collection('usuarios_registrados').doc(alumnoActualId);
+                await db.runTransaction(async (transaction) => {
+                    const alumnoDoc = await transaction.get(alumnoRef);
+                    const creditosActuales = alumnoDoc.data().creditos || 0;
+                    const creditosDespues = Math.max(0, creditosActuales - cantidad);
+                    transaction.update(alumnoRef, { creditos: creditosDespues });
+                    transaction.delete(db.collection('logcreditos').doc(logId));
+                });
+
+                // Recarga el popup para reflejar los cambios
+
+                msgClases.style.color = "#388e3c";
+                msgClases.innerHTML = "Clase/s eliminada/s correctamente.";
+                await abrirPopupCreditos({
+                    currentTarget: {
+                        getAttribute: (attr) => {
+                            if (attr === "data-id") return alumnoActualId;
+                            if (attr === "data-usuarioiId") return usuarioId; // Asegúrate de tener este valor disponible
+                            return null;
+                        }
+                    }
+                });
+                cargarListadoAlumnos(); // Actualizar tabla
+            }
         });
 
 
@@ -1179,13 +1439,13 @@
                     div.className = `reserva-dia-item ${reserva.estado}`;
 
                     div.innerHTML = `
-                        <div class="reserva-hora">
-                            <span class="hora">${reserva.hora}</span>&nbsp;&nbsp;&nbsp;
-                            <span class="hora">${reserva.nombre}</span>&nbsp;
-                            <span class="hora">${reserva.apellidos}</span>&nbsp;&nbsp;&nbsp;
-                            <span class="estado ${reserva.estado}">${reserva.estado}</span>
-                        </div>
-                    `;
+                            <div class="reserva-hora">
+                                <span class="hora">${reserva.hora}</span>&nbsp;&nbsp;&nbsp;
+                                <span class="hora">${reserva.nombre}</span>&nbsp;
+                                <span class="hora">${reserva.apellidos}</span>&nbsp;&nbsp;&nbsp;
+                                <span class="estado ${reserva.estado}">${reserva.estado}</span>
+                            </div>
+                        `;
                     lista.appendChild(div);
                 });
 
@@ -1470,54 +1730,33 @@
             }
         }
 
-        // Autenticación y carga inicial
-        document.addEventListener('DOMContentLoaded', function () {
-            auth.onAuthStateChanged(async user => {
-                if (!user) {
-                    //alert("Debes iniciar sesión para acceder al calendario.");
-                    window.location.href = "index.html";
-                    return;
-                } else {
-                    //const nombre = capitalizarPrimeraLetra(user.displayName || "");
-                    //const email = user.email || "";
-                    document.getElementById('tituloReservas').textContent = `Administración de las reservas de prácticas con Carlos`;
-                    //document.getElementById('tituloReservas').textContent = `Reservas de prácticas para ${nombre || email} con Carlos`;
-                    usuarioActual = user;
-                }
+        const btnAyuda = document.getElementById('btnAyuda');
+        const popupAyuda = document.getElementById('popupAyuda');
+        const closeBtn = document.querySelector('.close');
 
-                // --- Busca el documento en Firestore por usuarioId ---
-                let docIdUsuarioRegistrado = null;
-                try {
-                    const q = await db.collection('usuarios_registrados')
-                        .where('usuarioId', '==', usuarioActual.uid)
-                        .get();
-                    if (!q.empty) {
-                        docIdUsuarioRegistrado = q.docs[0].id; // <--- ID del documento en Firestore
-                        nombre = q.docs[0].data().nombre;      // <-- Así accedes al campo 'nombre'
-                        // Puedes guardar este ID en una variable global si lo necesitas luego:
-                        usuarioActual.docIdUsuarioRegistrado = docIdUsuarioRegistrado;
-                        usuarioActual.usuarioNombre = nombre;
-                    } else {
-                        console.warn("No existe documento para ese usuarioId en usuarios_registrados");
-                    }
-                } catch (err) {
-                    console.error("Error buscando documento de usuario registrado:", err);
-                }
-                // ------------------------------------------------------------
+        const ayudaCalendario = `<h3>Uso de la administracion de reservas para practicas</h3>
+<p>Aquí puedes ver todas las reservas solicitadas al profesor de practicas. Asignar un nuevo alumno al profesor. Verás las clases que les quedan a los alumnos por realizar. Añadir o borrar clases a los alumnos. Verás un historico de solicitudes de clases realizadas por los alumnos, ya sean solicitadas, anuladas o confirmadas.</p>
+<ul>
+        <li><strong>Nuevo alumno:</strong> Podrás añadir un nuevo alumno al profesor.</li>
+        <li><strong>Listado de alumnos:</strong> Podrás visualizar el listado de alumnos que tiene asignado el profesor. Borrar alumnos. En clases podrás añadirles y borrarles clases, así como visualizar un historico de los movimientos producidos en la gestion de sus clases.</li>
+        <li><strong>Calendario:</strong> Podrás ver todas las peticiones de reservas al profesor de practicas solicitadas por todos los alumnos, ya esten pendientes de confirmar por él, ó bien ya confirmadas.</li>
+        <li><strong>Reservas del día:</strong> Si haces clic en una fecha del calendario, visualizaras en este apartado todas las reservas solicitadas por todos los alumnos para ese dia tanto si están pendientes como confirmadas.</li>
+</ul>
+`;
 
+        btnAyuda.addEventListener('click', () => {
+            popupAyuda.style.display = 'flex';
+        });
 
-                //mostrarCreditosUsuario();
-                cargarListadoAlumnos();
-                //cargarTimeSlots();
-                //cargarDias();
-                //cargarHoras();
-                cargarReservas();
-                //inicializarCalendario();
+        closeBtn.addEventListener('click', () => {
+            popupAyuda.style.display = 'none';
+        });
 
-
-                //document.getElementById('formReserva').addEventListener('submit', crearReserva);
-
-            });
+        // Cierra el popup si se hace clic fuera del contenido
+        popupAyuda.addEventListener('click', (e) => {
+            if (e.target === popupAyuda) {
+                popupAyuda.style.display = 'none';
+            }
         });
 
     </script>

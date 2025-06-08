@@ -3,17 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <title>Planificación Semanal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        let usuarioActual = {};
+
+        function actualizarUI() {
+            document.getElementById('week-range').textContent = 'Planificación semanal de prácticas para ' + usuarioActual.nombre;
+
+            cargarTimeSlots();
+            createCalendar();
+
+            document.getElementById('calendar-grid').addEventListener('click', function (e) {
+                const reservaDiv = e.target.closest('.reserva.pendiente');
+                if (reservaDiv) {
+                    e.stopPropagation();
+                    const reservaId = reservaDiv.dataset.reservaId;
+                    const email = reservaDiv.dataset.email;
+                    mostrarMenuContextualPendiente(reservaId, email, reservaDiv);
+                } else {
+                    cerrarMenusContextuales();
+                }
+            });
+
+            document.getElementById('contenidoAyuda').innerHTML = ayudaCalendario;
+        }
+
+        function dct(e) {
+            const bytes = CryptoJS.AES.decrypt(e, "34#-2?579/fbh%$l(Oñh05t@");
+            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        }
+        const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        // Inicializa Firestore si no lo has hecho
+        const db = firebase.firestore();
+
+        auth.onAuthStateChanged(async user => {
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                const q = await db.collection('usuarios_registrados')
+                    .where('usuarioId', '==', user.uid)
+                    .get();
+                if (!q.empty) {
+                    usuarioActual.id = q.docs[0].id;
+                    usuarioActual.nombre = q.docs[0].data().nombre;
+                    usuarioActual.email = q.docs[0].data().email;
+                    usuarioActual.perfil = q.docs[0].data().perfil;
+                    usuarioActual.uid = user.uid;
+
+                    // Control de acceso por perfil
+                    if (usuarioActual.perfil !== "profesor") {
+                        window.location.href = "index.html";
+                        return;
+                    }
+
+                    document.body.classList.remove("oculto");
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', actualizarUI);
+                    } else {
+                        actualizarUI();
+                    }
+                } else {
+                    console.warn("No existe documento para ese usuarioId en usuarios_registrados");
+                    window.location.href = "index.html";
+                }
+            } catch (err) {
+                console.error("Error buscando documento de usuario registrado:", err);
+                window.location.href = "index.html";
+            }
+        });
+    </script>
     <style>
         body {
             background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
-            min-height: 100vh;
+            height: 100vh;
+            overflow-y: auto;
         }
+
+            body.oculto {
+                visibility: hidden;
+            }
 
         .calendar-container {
             max-width: 900px;
-            margin: 24px auto;
+            margin: 0 auto;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(25,118,210,0.07);
@@ -41,6 +127,15 @@
                 border-radius: 4px;
                 padding: 2px 10px;
             }
+
+        .seccion-derecha {
+            flex: 2;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
 
         .nav-button {
             padding: 0 10px;
@@ -240,10 +335,74 @@
             display: none !important;
         }
 
+        .btn-ayuda {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #1976d2;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .popup-content {
+            background: #fff;
+            padding: 28px 32px;
+            border-radius: 16px;
+            max-width: 640px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+            transform: translateY(0);
+            animation: fadeInUp 0.4s ease-out;
+            border: 1px solid rgba(25,118,210,0.1);
+        }
+
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+            .popup-content h2 {
+                font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+                font-size: 1.7rem;
+                font-weight: 700;
+                color: #1976d2;
+                margin-top: 0;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .popup-content h3 {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #1976d2;
+                margin: 16px 0 8px 0;
+            }
     </style>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:600&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="oculto">
     <div class="calendar-container">
         <div class="calendar-header">
             <button class="nav-button" title="Semana anterior" onclick="previousWeek()">&#8592;</button>
@@ -263,29 +422,28 @@
                 <div class="color-box confirmada"></div>
                 <span>Confirmada</span>
             </div>
-            <!--<div class="leyenda-item">
-                <div class="color-box anulada"></div>
-                <span>Anulada</span>
-            </div>-->
         </div>
     </div>
-    <!-- Firebase (compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script>
-        function dct(e) {
-            const bytes = CryptoJS.AES.decrypt(e, "34#-2?579/fbh%$l(Oñh05t@");
-            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-        }
-        const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    <div class="seccion-derecha">
+        <button id="btnAyuda" class="btn-ayuda">
+            <i class="fas fa-question-circle"></i>
+        </button>
+    </div>
+
+    <div id="popupAyuda" class="popup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h2>Ayuda</h2>
+            <div id="contenidoAyuda">
+                <!-- Aquí va el contenido de ayuda específico para cada página -->
+            </div>
+        </div>
+    </div>
+    <script>
+
         const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
-        const auth = firebase.auth();
 
         function clearCollection(path) {
             const ref = db.collection(path)
@@ -376,6 +534,14 @@
             grid.innerHTML = '';
 
             const weekDates = getWeekDatesArray(currentDate);
+
+            // 1. Fila del mes (esquina + mes)
+            // Obtén el mes y el año del primer día de la semana
+            const mes = weekDates[0].toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            // Esquina superior izquierda vacía
+            grid.innerHTML += `<div class="time-slot"></div>`;
+            // Mes (ocupa 5 columnas, igual que los días)
+            grid.innerHTML += `<div class="month-header" style="grid-column: 2 / span 5; text-align:center; font-weight:bold; font-size:1.1em; background:#e3eafc; color:#1976d2; border-radius:6px 6px 0 0;">${mes.charAt(0).toUpperCase() + mes.slice(1)}</div>`;
 
             // Esquina superior izquierda
             grid.innerHTML += `<div class="time-slot"></div>`;
@@ -647,7 +813,6 @@
             }
         }
 
-
         async function logCredito({
             usuarioId,
             email,
@@ -657,16 +822,21 @@
             creditosDespues,
             reservasImplicadas
         }) {
-            await db.collection("creditos").add({
-                fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                usuarioId,
-                email,
-                perfil,
-                creditosAntes,
-                tipo,
-                creditosDespues,
-                reservasImplicadas
-            });
+            try {
+                await db.collection("logcreditos").add({
+                    fecha: firebase.firestore.FieldValue.serverTimestamp(),
+                    usuarioId,
+                    email,
+                    perfil,
+                    creditosAntes,
+                    tipo,
+                    creditosDespues,
+                    reservasImplicadas
+                });
+                console.log("Log de crédito guardado correctamente");
+            } catch (error) {
+                console.error("Error al guardar el log de créditos:", error);
+            }
         }
 
         async function enviarEmailReserva(email, nuevoEstado) {
@@ -686,84 +856,30 @@
             });
         }
 
-        // Autenticación y carga inicial
-        document.addEventListener('DOMContentLoaded', function () {
-            auth.onAuthStateChanged(async user => {
-                if (!user) {
-                    //alert("Debes iniciar sesión para acceder al calendario.");
-                    window.location.href = "index.html";
-                    return;
-                } else {
-                    usuarioActual = user;
-                }
-                //console.log(usuarioActual);
-                // --- Busca el documento en Firestore por usuarioId ---
-                let docIdUsuarioRegistrado = null;
-                try {
-                    const q = await db.collection('usuarios_registrados')
-                        .where('usuarioId', '==', usuarioActual.uid)
-                        .get();
-                    if (!q.empty) {
-                        docIdUsuarioRegistrado = q.docs[0].id; // <--- ID del documento en Firestore
-                        nombre = q.docs[0].data().nombre;      // <-- Así accedes al campo 'nombre'
-                        perfil = q.docs[0].data().perfil;
-                        // Puedes guardar este ID en una variable global si lo necesitas luego:
-                        usuarioActual.docIdUsuarioRegistrado = docIdUsuarioRegistrado;
-                        usuarioActual.usuarioNombre = nombre;
-                        usuarioActual.perfil = perfil;
-                        document.getElementById('week-range').textContent = 'Planificación semanal de prácticas para ' + nombre;
-                    } else {
-                        console.warn("No existe documento para ese usuarioId en usuarios_registrados");
-                    }
-                } catch (err) {
-                    console.error("Error buscando documento de usuario registrado:", err);
-                }
+        const btnAyuda = document.getElementById('btnAyuda');
+        const popupAyuda = document.getElementById('popupAyuda');
+        const closeBtn = document.querySelector('.close');
 
-                async function logCredito({
-                    usuarioId,
-                    email,
-                    perfil,
-                    creditosAntes,
-                    tipo, // "sumar" o "restar"
-                    creditosDespues,
-                    reservasImplicadas
-                }) {
-                    try {
-                        await db.collection("logcreditos").add({
-                            fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                            usuarioId,
-                            email,
-                            perfil,
-                            creditosAntes,
-                            tipo,
-                            creditosDespues,
-                            reservasImplicadas
-                        });
-                        console.log("Log de crédito guardado correctamente");
-                    } catch (error) {
-                        console.error("Error al guardar el log de créditos:", error);
-                    }
-                }
+        const ayudaCalendario = `<h3>Uso de la planificacion de las reservas para practicas</h3>
+<p>Aquí puedes ver todas las reservas solicitadas al profesor de practicas y anular o confirmar clases.</p>
+<ul>
+                <li><strong>Planificación semanal de prácticas:</strong> Visualizarás las practicas solicitadas por los alumnos. Al clickar en una reserva podrás anularla o confirmarla.</li>
+</ul>
+`;
 
+        btnAyuda.addEventListener('click', () => {
+            popupAyuda.style.display = 'flex';
+        });
 
-                // Inicializar
-                cargarTimeSlots();
-                //updateWeekDisplay();
-                createCalendar();
+        closeBtn.addEventListener('click', () => {
+            popupAyuda.style.display = 'none';
+        });
 
-                document.getElementById('calendar-grid').addEventListener('click', function (e) {
-                    const reservaDiv = e.target.closest('.reserva.pendiente');
-                    if (reservaDiv) {
-                        e.stopPropagation();
-                        const reservaId = reservaDiv.dataset.reservaId;
-                        const email = reservaDiv.dataset.email;
-                        mostrarMenuContextualPendiente(reservaId, email, reservaDiv);
-                    } else {
-                        cerrarMenusContextuales();
-                    }
-                });
-
-            });
+        // Cierra el popup si se hace clic fuera del contenido
+        popupAyuda.addEventListener('click', (e) => {
+            if (e.target === popupAyuda) {
+                popupAyuda.style.display = 'none';
+            }
         });
     </script>
 </body>
