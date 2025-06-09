@@ -1259,7 +1259,7 @@
             let creditosAntes = 0;
             let creditosDespues = 0;
             let alumno = null;
-            let usuarioId = null;
+            //let usuarioId = null;
 
             // Sumar clases al alumno en una transacción
             await db.runTransaction(async (transaction) => {
@@ -1268,7 +1268,7 @@
                 alumno = alumnoDoc.data();
                 creditosAntes = alumno.creditos || 0;
                 creditosDespues = creditosAntes + clases;
-                usuarioId = alumno.usuarioId; // Asegúrate de que este campo existe en el documento
+                //usuarioId = alumno.usuarioId; // Asegúrate de que este campo existe en el documento
                 transaction.update(alumnoRef, { creditos: creditosDespues });
             });
 
