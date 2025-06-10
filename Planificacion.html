@@ -464,8 +464,18 @@
                 const doc = await db.collection("configuracion").doc("horarios").get();
                 if (doc.exists && Array.isArray(doc.data().slots)) {
                     timeSlots = doc.data().slots;
-                    //console.log("Tramos horarios cargados:", timeSlots);
-                    //updateWeekDisplay();
+
+                    // Ordenar los tramos horarios por la hora de inicio
+                    timeSlots.sort((a, b) => {
+                        // Extrae la hora de inicio (antes del primer espacio o "a")
+                        const horaA = a.split(" a ")[0];
+                        const horaB = b.split(" a ")[0];
+                        // Convierte a minutos para comparar
+                        const [hA, mA] = horaA.split(":").map(Number);
+                        const [hB, mB] = horaB.split(":").map(Number);
+                        return hA * 60 + mA - (hB * 60 + mB);
+                    });
+
                     createCalendar();
                 } else {
                     console.error("No se encontraron tramos horarios en Firestore.");
