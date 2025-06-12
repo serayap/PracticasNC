@@ -311,6 +311,11 @@
 
         #listadoAlumnos {
             width: 100%;
+            max-height: 300px; /* Ajusta la altura máxima según tu diseño */
+            overflow-y: auto; /* Activa el scroll vertical cuando sea necesario */
+            border: 1px solid #e0e0e0; /* Opcional: para delimitar visualmente el área */
+            padding: 8px 0;
+            background: #fff;
         }
 
         #formReserva .cta-btn {
@@ -378,7 +383,7 @@
         .reservas-dia {
             background: #fff;
             border-radius: 12px;
-            padding: 2px 10px 10px 10px;
+            padding: 2px 2px 2px 2px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
             max-height: 400px;
             overflow-y: auto;

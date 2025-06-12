@@ -46,7 +46,7 @@
                 window.location.href = "index.html";
                 return;
             }
-
+            
             try {
                 const q = await db.collection('usuarios_registrados')
                     .where('usuarioId', '==', user.uid)
@@ -57,7 +57,7 @@
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
                     usuarioActual.uid = user.uid;
-
+                    
                     // Control de acceso por perfil
                     if (usuarioActual.perfil !== "alumno") {
                         window.location.href = "index.html";
@@ -80,6 +80,7 @@
                 window.location.href = "index.html";
             }
         });
+
     </script>
 
 </head>
@@ -154,9 +155,10 @@
         </div>
     </div>
     <script>        
+        
         const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
-
+        
         let calendar = null;
         let primeraCarga = true;
         let reservasTodas = {};
@@ -185,15 +187,6 @@
             const nombre = capitalizarPrimeraLetra(usuarioActual.usuarioNombre || "");
             document.getElementById("creditosUsuario").textContent = "Clases para reservar de " + nombre + ": " + creditos;
 
-            /*const doc = await db.collection("usuarios_registrados").doc(usuarioActual.docIdUsuarioRegistrado).get();
-            const datos = doc.data();
-            console.log(usuarioActual.docIdUsuarioRegistrado);
-            console.log("Datos obtenidos:", datos);
-            let creditos = 0;
-            if (datos && datos.creditos !== undefined && datos.creditos !== null) {
-                creditos = Number(datos.creditos);
-            }
-            document.getElementById("creditosUsuario").textContent = creditos;*/
         }
 
         function capitalizarPrimeraLetra(str) {
