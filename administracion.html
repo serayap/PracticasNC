@@ -1147,6 +1147,7 @@
                             <th>Apellidos</th>
                             <th>Nombre</th>
                             <th>Clases</th>
+                            <th>Examen</th>
                         </tr>`;
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -1231,7 +1232,7 @@
                             <td>${fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</td>
                             <td>${log.perfil || '-'}</td>
                             <td>${log.creditosAntes}</td>
-                            <td>${log.tipo === 'sumar' ? '+' + log.reservasImplicadas.length : '-' + log.reservasImplicadas.length}</td>
+                            <td>${log.tipo === 'sumar' ? '+' + log.reservasImplicadas.length : log.tipo === 'confirmar' ? 'confirmada' : '-' + log.reservasImplicadas.length}</td>
                             <td>${log.creditosDespues}</td>
                             ${log.perfil === "administracion" ? `<td class="eliminar-col"><span class="borrar-log" data-logid="${doc.id}" data-cantidad="${log.reservasImplicadas.length}">🗑️</span></td>` : ''}
                         </tr>
