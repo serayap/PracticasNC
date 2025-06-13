@@ -1395,7 +1395,7 @@
                     .where("fecha", ">=", fechaInicio)
                     .where("fecha", "<=", fechaFin)
                     .where('estado', 'in', ['confirmada', 'pendiente']); // Solo estos estados
-
+                
                 const querySnapshot = await q.get();
 
                 if (querySnapshot.empty) {
@@ -1409,11 +1409,12 @@
                     const reserva = doc.data();
                     reserva.id = doc.id;
                     reservas.push(reserva);
+                    //console.log(reserva.usuarioNombre);
                 });
-
+                //console.table(reservas);
                 // Obtener usuarioIds únicos
                 const usuarioIds = [...new Set(reservas.map(r => r.usuarioId))];
-
+                
                 // Consultar los usuarios (en lotes de 10)
                 let usuarios = {};
                 for (let i = 0; i < usuarioIds.length; i += 10) {
@@ -1421,14 +1422,16 @@
                     const usuariosSnapshot = await db.collection("usuarios_registrados")
                         .where("usuarioId", "in", batchIds)
                         .get();
+                    
                     usuariosSnapshot.forEach(doc => {
-                        const data = doc.data();
+                        const data = doc.data();                        
                         usuarios[data.usuarioId] = {
                             nombre: data.nombre,
                             apellidos: data.Apellidos
                         };
                     });
                 }
+                //console.table(usuarios);
 
                 // Añadir nombre y apellidos a cada reserva
                 reservas.forEach(reserva => {

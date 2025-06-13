@@ -184,9 +184,9 @@
             }
             const datos = doc.data();
             const creditos = datos.creditos !== undefined && datos.creditos !== null ? Number(datos.creditos) : 0;
-            const nombre = capitalizarPrimeraLetra(usuarioActual.usuarioNombre || "");
+            const nombre = capitalizarPrimeraLetra(datos.nombre || "");
             document.getElementById("creditosUsuario").textContent = "Clases para reservar de " + nombre + ": " + creditos;
-
+            //console.table(datos);
         }
 
         function capitalizarPrimeraLetra(str) {
@@ -467,6 +467,7 @@
                 lista.innerHTML = "<em>No tienes reservas aún.</em>";
                 return;
             }
+            //console.table(reservasUsuario);
             reservasUsuario
                 .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
                 .forEach(r => {
@@ -559,16 +560,20 @@
                     reservasUsuario = [];
                     snapshot.forEach(doc => {
                         const d = doc.data();
-                        if (d.fecha?.toDate) { // <-- Añade validación aquí
+                        if (d.fecha?.toDate) {
+                            const fechaLocal = d.fecha.toDate();
+                            const fechaStr = fechaLocal.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+                            //console.log(fechaStr);
                             reservasUsuario.push({
                                 ...d,
-                                fecha: d.fecha.toDate().toISOString().split('T')[0],
+                                fecha: fechaStr,
                                 id: doc.id
                             });
                         } else {
                             console.error("Documento del usuario sin 'fecha' válida:", doc.id);
                         }
                     });
+                    //console.table(reservasUsuario);
                     mostrarReservasUsuario();
                 });
         }
