@@ -17,6 +17,9 @@
 
             cargarTimeSlots();
             createCalendar();
+            cargarDias();
+            cargarAlumnosSelect();
+            
 
             document.getElementById('calendar-grid').addEventListener('click', function (e) {
                 const reservaDiv = e.target.closest('.reserva.pendiente');
@@ -194,6 +197,11 @@
             .color-box.anulada, .reserva.anulada {
                 background-color: #FFCDD2;
                 border-color: #EF5350;
+            }
+
+            .color-box.examen, .reserva.examen {
+                background-color: #cfdef3;
+                border-color: #4c4c4c;
             }
 
         .calendar-grid {
@@ -399,6 +407,99 @@
                 color: #1976d2;
                 margin: 16px 0 8px 0;
             }
+        .examen-item {
+            max-width: 720px; /* Ampliado para más espacio horizontal */
+            margin: 12px auto;
+            background: #f7fafc;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(25, 103, 210, 0.08);
+            padding: 2px 3px 1px 3px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            border: 1.2px solid #e3eafc;
+        }
+
+        #reserva-examen {
+            text-align: center;
+            color: #1976d2;
+            font-size: 0.9em;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 0.4px;
+        }
+
+        .selects-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+            .selects-row label {
+                font-weight: 500;
+                color: #1976d2;
+                font-size: 0.9em;
+                margin-bottom: 0;
+                white-space: nowrap;
+            }
+
+            .selects-row select {
+                min-width: 0;
+                font-size: 0.9em;
+                color: #1976d2;
+                border-radius: 5px;
+                border: 1px solid #bcdffb;
+                background: #fff;
+                padding: 5px 10px;
+                outline: none;
+                transition: border 0.2s;
+                flex: 1 1 0;
+            }
+
+        #alumno {
+            flex: 2 1 0; /* El select de alumno ocupa el doble de espacio */
+            max-width: 350px; /* Puedes ajustar según el largo de los nombres */
+        }
+
+        .selects-row select:focus {
+            border-color: #1976d2;
+            background: #e3eafc;
+        }
+
+        .cta-btn-solicitar {
+            width: 100%;
+            padding: 8px 0;
+            background: linear-gradient(90deg, #1976d2 60%, #63a4ff 100%);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(25, 103, 210, 0.09);
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.18s, box-shadow 0.18s;
+        }
+
+            .cta-btn-solicitar:hover, .cta-btn-solicitar:focus {
+                background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+                box-shadow: 0 4px 16px rgba(25, 103, 210, 0.13);
+            }
+
+        #examenMsg {
+            margin-top: 10px;
+            min-height: 18px;
+            text-align: center;
+            font-size: 0.96em;
+            font-weight: 500;
+            color: #388e3c;
+            background: #eafaf1;
+            border-radius: 4px;
+            padding: 5px 0;
+            display: none;
+        }
+
+
+
     </style>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:600&display=swap" rel="stylesheet">
 </head>
@@ -422,7 +523,27 @@
                 <div class="color-box confirmada"></div>
                 <span>Confirmada</span>
             </div>
+            <div class="leyenda-item">
+                <div class="color-box examen"></div>
+                <span>Examen</span>
+            </div>
         </div>
+        <div class="examen-item">
+            <h2 id="reserva-examen">Reservas para exámenes</h2>
+            <form id="formExamen">
+                <div class="form-row selects-row">
+                    <label for="alumno">Alumno:</label>
+                    <select id="alumno" required></select>
+                    <label for="dia">Día:</label>
+                    <select id="dia" required></select>
+                    <label for="hora">Hora:</label>
+                    <select id="hora" required></select>
+                </div>
+                <button type="submit" class="cta-btn-solicitar">Reservar examen</button>
+                <div id="examenMsg"></div>
+            </form>
+        </div>
+
     </div>
 
     <div class="seccion-derecha">
@@ -477,6 +598,7 @@
                     });
 
                     createCalendar();
+                    cargarHoras();
                 } else {
                     console.error("No se encontraron tramos horarios en Firestore.");
                     // Usar valores por defecto si es necesario
@@ -493,6 +615,74 @@
             }
         }
 
+        // Utilidad: formato YYYY-MM-DD
+        function toISODate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Cargar días de la semana actual y la siguiente
+        function cargarDias() {
+            const selectDia = document.getElementById('dia');
+            selectDia.innerHTML = "";
+            const hoy = new Date();
+            for (let i = 1; i < 15; i++) {
+                const fecha = new Date(hoy);
+                fecha.setDate(hoy.getDate() + i);
+                const diaSemana = fecha.getDay(); // 0=domingo, 6=sábado
+                if (diaSemana !== 0 && diaSemana !== 6) { // Excluye sábados y domingos
+                    const fechaISO = toISODate(fecha);
+                    const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+                    const option = document.createElement('option');
+                    option.value = fechaISO;
+                    option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+                    selectDia.appendChild(option);
+                }
+
+            }
+        }
+        
+        async function cargarHoras() {
+            // Añade cada tramo como opción
+            //console.table(timeSlots);
+            //let timeExams = ["08:00 a 08:30", "08:30 a 09:00", "09:00 a 09:30", "09:30 a 10:00", "10:00 a 10:30", "10:30 a 11:00", "11:00 a 11:30"];
+            const selectHora = document.getElementById('hora');
+            if (!selectHora) return;
+
+            // Limpia las opciones anteriores
+            selectHora.innerHTML = '';
+
+            timeSlots.forEach(timeslot => {
+                const option = document.createElement('option');
+                option.value = timeslot;
+                option.textContent = timeslot;
+                selectHora.appendChild(option);
+            });
+        }
+
+        async function cargarAlumnosSelect() {
+            const select = document.getElementById('alumno');
+            select.innerHTML = '<option value="">Selecciona un alumno</option>';
+
+            try {
+                const snapshot = await db.collection("usuarios_registrados")
+                    .where("perfil", "==", "alumno")
+                    .orderBy("nombre") // Opcional: ordena por nombre
+                    .get();
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    // Usa "apellidos" o "Apellidos" según tu base de datos
+                    const apellidos = data.apellidos || data.Apellidos || "";
+                    const option = document.createElement('option');
+                    option.value = doc.id; // O data.usuarioId, según tu lógica
+                    option.textContent = `${data.nombre} ${apellidos}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error al cargar alumnos:", error);
+                select.innerHTML = '<option value="">Error al cargar alumnos</option>';
+            }
+        }
 
         let currentDate = new Date(); // Fecha actual
         currentDate.setHours(0, 0, 0, 0); // Normaliza la hora
@@ -597,11 +787,10 @@
                 const q = db.collection("reservas")
                     .where("fecha", ">=", firebase.firestore.Timestamp.fromDate(start))
                     .where("fecha", "<=", firebase.firestore.Timestamp.fromDate(end))
-                    .where('estado', 'in', ['confirmada', 'pendiente']) // Solo estos estados
+                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen']) // Solo estos estados
                     .orderBy('fecha', 'desc');
 
                 const querySnapshot = await q.get();
-                //console.log("Reservas encontradas:", querySnapshot.size);
 
                 // Limpia reservas anteriores
                 document.querySelectorAll('.reserva').forEach(el => el.remove());
@@ -613,9 +802,19 @@
                     const fecha = reserva.fecha.toDate();
                     const fechaFormateada = formatDate(fecha);
                     const hora = reserva.hora.trim();
-                    const estado = reserva.estado.toLowerCase(); // Asegura minúsculas
-
+                    const estado = reserva.estado.toLowerCase(); // Asegura minúsculas                    
                     const cell = document.querySelector(`[data-date="${fechaFormateada}"][data-hora="${hora}"]`);
+                    /*const cells = document.querySelectorAll(`[data-date="${fechaFormateada}"]`);
+                    cells.forEach(cell => {
+                        console.log('estado:', estado);
+                        console.log('fecha Firestore:', fechaFormateada);
+                        console.log('Posible hora:', cell.getAttribute('data-hora'));
+                        console.log('hora Firestore:', hora);
+                    });*/
+                    //console.log('Buscando celda:', `[data-date="${fechaFormateada}"][data-hora="${hora}"]`);
+                    
+                    //console.log('Reserva:', fechaFormateada, hora);
+                    //console.log('¿Existe cells?', !!cells, cells);
 
                     if (cell) {
                         const reservaElement = document.createElement('div');
@@ -624,9 +823,9 @@
                         reservaElement.innerHTML = `<span>${reserva.usuarioNombre}</span>`;
                         reservaElement.dataset.reservaId = reserva.id; // Añade el id
                         reservaElement.dataset.estado = estado;
-                        reservaElement.dataset.email = reserva.usuarioEmail || ''; // Si tienes el email
-
-                        if (estado === 'pendiente' || estado === 'confirmada') {
+                        reservaElement.dataset.email = reserva.usuarioEmail || ''; // Si tienes el email                                                   
+                       
+                        if (estado === 'pendiente' || estado === 'confirmada' || estado === 'examen') {
                             reservaElement.addEventListener('click', function (e) {
                                 e.stopPropagation();
                                 mostrarMenuContextual(reserva, reservaElement, estado);
@@ -891,6 +1090,44 @@
                 popupAyuda.style.display = 'none';
             }
         });
+
+        document.getElementById('formExamen').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const alumnoId = document.getElementById('alumno').value;
+            const dia = document.getElementById('dia').value; // formato YYYY-MM-DD
+            const hora = document.getElementById('hora').value;
+
+            // Recuperar nombre y apellidos del alumno seleccionado
+            const alumnoDoc = await db.collection('usuarios_registrados').doc(alumnoId).get();
+            if (!alumnoDoc.exists) {
+                document.getElementById('examenMsg').textContent = "No se encontró el alumno seleccionado.";
+                document.getElementById('examenMsg').style.display = "block";
+                return;
+            }
+            const alumno = alumnoDoc.data();
+
+            // Convertir el día seleccionado a Timestamp de Firestore
+            const fechaTimestamp = firebase.firestore.Timestamp.fromDate(new Date(dia + "T00:00:00"));
+
+            // Crear la reserva en Firestore
+            await db.collection('reservas').add({
+                usuarioId: alumnoId,
+                usuarioNombre: alumno.nombre,
+                Apellidos: alumno.apellidos || alumno.Apellidos || "",
+                fecha: fechaTimestamp, // Ahora es un Timestamp igual que 'timestamp'
+                hora: hora,
+                estado: "examen",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            document.getElementById('examenMsg').textContent = "Reserva de examen registrada correctamente.";
+            document.getElementById('examenMsg').style.display = "block";
+            document.getElementById('formExamen').reset();
+            await createCalendar();
+        });
+
+
     </script>
 </body>
 </html>

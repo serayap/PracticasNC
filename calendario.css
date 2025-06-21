@@ -317,6 +317,10 @@ body.oculto {
         border-color: #ff6a6a;
     }
 
+    .reserva-dia-item.examen {
+        border-color: #cfdef3;
+    }
+
 @media (max-width: 900px) {
     .arriba {
         flex-direction: column;
@@ -469,6 +473,10 @@ body.oculto {
     background: #4CAF50;
 }
 
+.dot-examen {
+    background-color: #cfdef3;
+}
+
 .fc-today-button {
     display: none !important;
 }
@@ -530,6 +538,12 @@ body.oculto {
             background: #ffcdd2;
             color: #d32f2f;
             border: 1px solid #d32f2f;
+        }
+
+        .reserva-hora .estado.examen {
+            background: #e0e0e0;
+            color: #424242;
+            border: 1px solid #757575;
         }
 
 .popup {

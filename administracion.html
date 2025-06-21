@@ -418,6 +418,10 @@
                 border-color: #ff6a6a;
             }
 
+            .reserva-dia-item.examen {
+                border-color: #cfdef3;
+            }
+
         @media (max-width: 900px) {
             .arriba {
                 flex-direction: column;
@@ -571,7 +575,11 @@
             background: #4CAF50;
         }
 
-        .form {
+        .dot-examen {
+            background-color: #cfdef3;
+        }
+            
+            .form {
             max-width: 280px;
             margin: 0 auto;
             display: flex;
@@ -742,6 +750,13 @@
                     color: #d32f2f;
                     border: 1px solid #d32f2f;
                 }
+
+                .reserva-hora .estado.examen {
+                    background: #e0e0e0;
+                    color: #424242; 
+                    border: 1px solid #757575;
+                }
+
 
         #lista-reservas-dia, #datosAlumno, .reservasdia {
             display: flex;
@@ -1009,6 +1024,7 @@
                 <div class="leyenda-colores">
                     <span class="leyenda-item"><span class="dot dot-pendiente"></span>Pendiente</span>
                     <span class="leyenda-item"><span class="dot dot-confirmada"></span>Confirmada</span>
+                    <span class="leyenda-item"><span class="dot dot-examen"></span>Examen</span>
                 </div>
                 <div class="seccion-derecha">
                     <div class="reservas-dia">
@@ -1147,7 +1163,6 @@
                             <th>Apellidos</th>
                             <th>Nombre</th>
                             <th>Clases</th>
-                            <th>Examen</th>
                         </tr>`;
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -1395,7 +1410,7 @@
                 const q = db.collection("reservas")
                     .where("fecha", ">=", fechaInicio)
                     .where("fecha", "<=", fechaFin)
-                    .where('estado', 'in', ['confirmada', 'pendiente']); // Solo estos estados
+                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen']); // Solo estos estados
                 
                 const querySnapshot = await q.get();
 
@@ -1529,15 +1544,18 @@
                     const fechaLocal = new Date(info.date.getTime() - (info.date.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); // Formato YYYY-MM-DD local
 
                     // 2. Verifica que la fecha exista en reservasTodas
-                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
-                    let dotp = '', dotc = '';
+                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0, examen: 0 };
+                    let dotp = '', dotc = '', dote = '';
+                    if (reservas.examen > 0) {
+                        dote = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #CFDEF3;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.examen}</span>`;
+                    }
                     if (reservas.pendientes > 0) {
                         dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #FF9800;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.pendientes}</span>`;
                     }
                     if (reservas.confirmadas > 0) {
                         dotc = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #4CAF50;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.confirmadas}</span>`;
-                    }
-                    return { html: info.dayNumberText + dotp + dotc };
+                    }                    
+                    return { html: info.dayNumberText + dote + dotp + dotc };
                 }
             });
             calendar.render();
@@ -1547,26 +1565,34 @@
         function mostrarReservasCalendario() {
             calendar.removeAllEvents();
 
-            // Creamos el array de eventos solo con los días que tienen reservas (arrays)
             const eventos = Object.values(reservasTodas)
                 .flatMap(reservasDelDia => {
                     // Si reservasDelDia tiene la propiedad 'reservas' y es un array:
                     if (reservasDelDia && Array.isArray(reservasDelDia.reservas)) {
-                        return reservasDelDia.reservas.map(r => ({
-                            start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
-                            backgroundColor: r.estado === 'confirmada' ? '#4CAF50' : '#FF9800',
-                            textColor: '#fff'
-                        }));
+                        return reservasDelDia.reservas
+                            .filter(r => ['confirmada', 'pendiente', 'examen'].includes(r.estado)) // Incluye "examen"
+                            .map(r => ({
+                                start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
+                                backgroundColor:
+                                    r.estado === 'confirmada' ? '#4CAF50' :
+                                        r.estado === 'examen' ? '#1976d2' : // Color especial para examen
+                                            '#FF9800',
+                                textColor: '#fff'
+                            }));
                     }
-                    // Si reservasDelDia ES un array directamente (estructura de calendario.html):
+                    // Si reservasDelDia ES un array directamente:
                     if (Array.isArray(reservasDelDia)) {
-                        return reservasDelDia.map(r => ({
-                            start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
-                            backgroundColor: r.estado === 'confirmada' ? '#4CAF50' : '#FF9800',
-                            textColor: '#fff'
-                        }));
+                        return reservasDelDia
+                            .filter(r => ['confirmada', 'pendiente', 'examen'].includes(r.estado))
+                            .map(r => ({
+                                start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
+                                backgroundColor:
+                                    r.estado === 'confirmada' ? '#4CAF50' :
+                                        r.estado === 'examen' ? '#1976d2' :
+                                            '#FF9800',
+                                textColor: '#fff'
+                            }));
                     }
-                    // Si reservasDelDia es un objeto de totales, no devolvemos nada
                     return [];
                 });
 
@@ -1637,11 +1663,12 @@
                         }).split("/").reverse().join("-"); // Formato YYYY-MM-DD
 
                         if (!reservasTodas[fechaStr]) {
-                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0 };
+                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0, examen: 0 };
                         }
 
                         if (reserva.estado === 'confirmada') reservasTodas[fechaStr].confirmadas++;
                         if (reserva.estado === 'pendiente') reservasTodas[fechaStr].pendientes++;
+                        if (reserva.estado === 'examen') reservasTodas[fechaStr].examen++;
                         //console.log("Datos cargados (LOCALES):", reservasTodas);
                     } else {
                         console.error("Documento sin campo 'fecha':", doc.id);

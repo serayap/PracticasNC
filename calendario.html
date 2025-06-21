@@ -126,6 +126,7 @@
                 <div class="leyenda-colores">
                     <span class="leyenda-item"><span class="dot dot-pendiente"></span>Pendiente</span>
                     <span class="leyenda-item"><span class="dot dot-confirmada"></span>Confirmada</span>
+                    <span class="leyenda-item"><span class="dot dot-examen"></span>Examen</span>
                 </div>
                 <div class="seccion-derecha">
                     <div class="reservas-dia">
@@ -271,7 +272,7 @@
                 const q = db.collection("reservas")
                     .where("fecha", ">=", fechaInicio)
                     .where("fecha", "<=", fechaFin)
-                    .where('estado', 'in', ['confirmada', 'pendiente']); // Solo estos estados
+                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen']); // Solo estos estados
 
                 const querySnapshot = await q.get();
                 lista.innerHTML = '';
@@ -430,14 +431,17 @@
 
                     // 2. Verifica que la fecha exista en reservasTodas
                     const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
-                    let dotp = '', dotc = '';
+                    let dotp = '', dotc = '', dote = '';
+                    if (reservas.examen > 0) {
+                        dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #e0e0e0;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.examen}</span>`;
+                    }
                     if (reservas.pendientes > 0) {
                         dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #FF9800;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.pendientes}</span>`;
                     }
                     if (reservas.confirmadas > 0) {
                         dotc = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #4CAF50;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.confirmadas}</span>`;
                     }
-                    return { html: info.dayNumberText + dotp + dotc };
+                    return { html: info.dayNumberText + dote + dotp + dotc };
                 }
             });
             calendar.render();
@@ -528,9 +532,10 @@
                         }).split("/").reverse().join("-"); // Formato YYYY-MM-DD
 
                         if (!reservasTodas[fechaStr]) {
-                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0 };
+                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0, examen: 0 };
                         }
 
+                        if (reserva.estado === 'examen') reservasTodas[fechaStr].examen++;
                         if (reserva.estado === 'confirmada') reservasTodas[fechaStr].confirmadas++;
                         if (reserva.estado === 'pendiente') reservasTodas[fechaStr].pendientes++;
                         //console.log("Datos cargados (LOCALES):", reservasTodas);
