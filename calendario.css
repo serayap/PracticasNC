@@ -318,7 +318,7 @@ body.oculto {
     }
 
     .reserva-dia-item.examen {
-        border-color: #cfdef3;
+        border-color: #ef63f8;
     }
 
 @media (max-width: 900px) {
@@ -474,7 +474,7 @@ body.oculto {
 }
 
 .dot-examen {
-    background-color: #cfdef3;
+    background-color: #ef63f8;
 }
 
 .fc-today-button {

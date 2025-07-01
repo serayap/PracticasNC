@@ -212,7 +212,8 @@
                 const diaSemana = fecha.getDay(); // 0=domingo, 6=sábado
                 if (diaSemana !== 0 && diaSemana !== 6) { // Excluye sábados y domingos
                     const fechaISO = toISODate(fecha);
-                    const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+                    //const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+                    const texto = formatDateForDisplay(fecha);
                     const option = document.createElement('option');
                     option.value = fechaISO;
                     option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
@@ -477,7 +478,7 @@
                 .forEach(r => {
                     const div = document.createElement('div');
                     div.className = `reserva-item ${r.estado}`;
-                    const fechaTexto = new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+                    const fechaTexto = new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });                    
                     if (r.estado == 'pendiente') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><button onclick="anularReserva('${r.fecha}', '${r.hora}', 'pendiente')" class='cta-btn-pendiente'>anular</button></div>`;
                     //if (r.estado == 'confirmada') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><div class='cta-btn'style ='background: linear-gradient(90deg, #56ab2f 30%, #a8e063 100%); box-shadow: 0 4px 16px rgba(255, 65, 108, 0.15);'>confirmada</div></div>`;
                     if (r.estado == 'confirmada') {
@@ -591,148 +592,151 @@
             const lista = document.getElementById('lista-reservas-dia');
             lista.innerHTML = '';
             const tituloDia = document.getElementById('tituloReservasDia');
-            tituloDia.textContent = "Reservas del dia"
+            tituloDia.textContent = "Reservas del dia";
 
             const dia = document.getElementById('dia').value;
-            const hora = document.getElementById('hora').value;
+            const hora = document.getElementById('hora').value.trim(); // Asegurar sin espacios
             const bloque = document.getElementById('bloqueSemana').checked;
             let fechas = [dia];
 
-            // 1. Consultar créditos del usuario
-            const doc = await getUsuarioRegistradoDoc(usuarioActual.uid);
-            const datos = doc ? doc.data() : null;
-            const creditos = datos && typeof datos.creditos === "number" ? datos.creditos : 0;
+            // 1. Obtener usuario y créditos
+            const usuarioDoc = await getUsuarioRegistradoDoc(usuarioActual.uid);
+            if (!usuarioDoc || !usuarioDoc.exists) {
+                reservaMsg.style.color = "#d32f2f";
+                reservaMsg.textContent = "Error: Usuario no encontrado";
+                return;
+            }
+            const datos = usuarioDoc.data();
+            const creditos = typeof datos.creditos === "number" ? datos.creditos : 0;
 
-            /*const doc = await db.collection("usuarios_registrados").doc(usuarioActual.docIdUsuarioRegistrado).get();
-            const datos = doc.data();
-            const creditos = datos && typeof datos.creditos === "number" ? datos.creditos : 0;*/
-
-            // 2. Si es bloque, buscar 5 días laborables consecutivos (sin sábados ni domingos)
-            let creditosNecesarios = 1; // Individual por defecto
+            // 2. Generar fechas para bloque semanal
             if (bloque) {
                 let fechaActual = new Date(dia);
                 fechas = [];
-                while (fechas.length < 5) {
-                    const diaSemana = fechaActual.getDay();
-                    if (diaSemana !== 0 && diaSemana !== 6) { // 0 = domingo, 6 = sábado
-                        fechas.push(toISODate(fechaActual));
-                    }
-                    fechaActual.setDate(fechaActual.getDate() + 1);
-                }
-                creditosNecesarios = 1 * fechas.length;
-            }
+                let diasLaborables = 0;
 
-            // 3. Comprobar si tiene créditos suficientes
+                while (diasLaborables < 5) {
+                    fechaActual.setDate(fechaActual.getDate() + 1);
+                    const diaSemana = fechaActual.getDay();
+                    if (diaSemana !== 0 && diaSemana !== 6) {
+                        fechas.push(toISODate(fechaActual));
+                        diasLaborables++;
+                    }
+                }
+            }
+            const creditosNecesarios = fechas.length;
+
+            // 3. Verificar créditos
             if (creditos < creditosNecesarios) {
                 reservaMsg.style.color = "#d32f2f";
                 reservaMsg.innerHTML = `No tienes clases suficientes para reservar.<br>Necesitas: ${creditosNecesarios} clases. Dispones: ${creditos} clases`;
                 return;
             }
 
-            // 4. Verifica que el usuario no tenga ya una reserva ese día
+            // 4. Verificar disponibilidad
             for (const fecha of fechas) {
+                const fechaFirestore = new Date(fecha);
+
+                // 4.1. Verificar reserva existente del usuario
                 const yaTieneReserva = await db.collection('reservas')
-                    .where('fecha', '==', new Date(fecha))
+                    .where('fecha', '==', fechaFirestore)
                     .where('usuarioId', '==', usuarioActual.uid)
-                    .where('estado', 'in', ['confirmada', 'pendiente']) // Solo estos estados
+                    .where('estado', 'in', ['confirmada', 'pendiente'])
                     .where('hora', '==', hora)
                     .get();
-                //console.log("Reservas encontradas:", yaTieneReserva.docs.map(d => d.data()));
+
                 if (!yaTieneReserva.empty) {
-                    const fechaObj = new Date(fecha);
-                    const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'short'
-                    });
+                    const fechaFormateada = formatDateForDisplay(fechaFirestore);
                     reservaMsg.style.color = "#d32f2f";
-                    reservaMsg.innerHTML = `Ya tienes una reserva el ${fechaFormateada}.<br>No puedes reservar más en la misma fecha<br> y hora.`;
-                    //console.log(fecha);
+                    reservaMsg.innerHTML = `Ya tienes una reserva el ${fechaFormateada}.<br>No puedes reservar más en la misma fecha y hora.`;
                     return;
                 }
-            }
 
-            // 5. Verifica disponibilidad para ese día, hora y usuario
-            for (const fecha of fechas) {
-                const existe = await db.collection('reservas')
-                    .where('fecha', '==', new Date(fecha))
+                // 4.2. Verificar reserva confirmada de otro usuario
+                const reservaOcupada = await db.collection('reservas')
+                    .where('fecha', '==', fechaFirestore)
                     .where('hora', '==', hora)
-                    .where('usuarioId', '==', usuarioActual.uid.trim()) // <-- Filtro por usuario
-                    .where('estado', 'in', ['confirmada', 'pendiente']) // Solo estos estados
+                    .where('estado', '==', 'confirmada')
                     .get();
 
-                if (!existe.empty) {
-                    const fechaObj = new Date(fecha);
-                    const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'short'
-                    });
+                const otraReserva = reservaOcupada.docs.find(doc =>
+                    doc.data().usuarioId !== usuarioActual.uid
+                );
+
+                if (otraReserva) {
+                    const fechaFormateada = formatDateForDisplay(fechaFirestore);
                     reservaMsg.style.color = "#d32f2f";
-                    reservaMsg.textContent = `Ya tienes una reserva el ${fechaFormateada} a las ${hora}`;
+                    reservaMsg.innerHTML = `Ya existe una reserva confirmada para ${fechaFormateada} a las ${hora}.<br>Por favor, selecciona otro tramo.`;
                     return;
                 }
             }
 
-
-            // 6. Crear reservas
+            // 5. Crear reservas
             const reservasImplicadas = [];
+            const batch = db.batch(); // Usar batch para múltiples escrituras
 
             for (const fecha of fechas) {
-                const reservaRef = await db.collection('reservas').add({
-                    usuarioId: usuarioActual.uid.trim(),
-                    usuarioNombre: usuarioActual.nombre || usuarioActual.email,
+                const reservaRef = db.collection('reservas').doc();
+                batch.set(reservaRef, {
+                    usuarioId: usuarioActual.uid,
+                    usuarioNombre: datos.nombre || usuarioActual.email,
                     fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
                     hora: hora,
                     estado: 'pendiente',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
                 reservasImplicadas.push({
-                    id: reservaRef.id, // <-- El id generado por Firestore
-                    fecha: fecha,      // YYYY-MM-DD
+                    id: reservaRef.id,
+                    fecha: fecha,
                     hora: hora
                 });
             }
 
-            const creditoantes = creditos;
-
-            // 7. Descontar créditos usados
-            await db.collection("usuarios_registrados").doc(doc.id).update({
-                creditos: creditos - creditosNecesarios
+            // 6. Actualizar créditos
+            const nuevosCreditos = creditos - creditosNecesarios;
+            batch.update(db.collection("usuarios_registrados").doc(usuarioDoc.id), {
+                creditos: nuevosCreditos
             });
 
-            // 8. Actualizar visualización de créditos (si tienes una función para ello)
+            // Ejecutar batch
+            await batch.commit();
+
+            // 7. Actualizar UI
             if (typeof mostrarCreditosUsuario === "function") {
                 mostrarCreditosUsuario();
             }
 
-            // 9. Llama al log de créditos con las reservas implicadas
-            /*console.log("Llamando a logCredito con:", {
-                usuarioId: usuarioActual.uid,
-                email: datos.email || usuarioActual.email,
-                perfil: datos.perfil,
-                creditosAntes: creditoantes,
-                tipo: "restar",
-                creditosDespues: creditos - creditosNecesarios,
-                reservasImplicadas: reservasImplicadas
-            });*/
-
+            // 8. Registrar en log
             await logCredito({
                 usuarioId: datos.usuarioId,
-                email: datos.email,
+                email: datos.email || usuarioActual.email,
                 perfil: datos.perfil,
-                creditosAntes: creditoantes,
+                creditosAntes: creditos,
                 tipo: "restar",
-                creditosDespues: creditos - creditosNecesarios,
+                creditosDespues: nuevosCreditos,
                 reservasImplicadas: reservasImplicadas
             });
 
+            // 9. Mensaje de éxito
             reservaMsg.style.color = "#388e3c";
-            reservaMsg.innerHTML = "Reserva(s) solicitada(s) correctamente.<br>RECUERDA: cuando se confirme, tienes<br> hasta 24 horas antes para anularla.";
+            reservaMsg.innerHTML = "Reserva(s) solicitada(s) correctamente.<br>RECUERDA: cuando se confirme, tienes hasta 24 horas antes para anularla.";
             document.getElementById('formReserva').reset();
-            calendar.render();
+
+            // 10. Actualizar calendario si es necesario
+            if (typeof calendar !== 'undefined' && typeof calendar.render === 'function') {
+                calendar.render();
+            }
         }
+
+        // Función auxiliar para formatear fechas
+        function formatDateForDisplay(date) {
+            return date.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'short'
+            });
+        }
+
 
 
         async function anularReserva(fechaStr, hora, estado) {
