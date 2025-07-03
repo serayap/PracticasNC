@@ -243,10 +243,13 @@
             selectHora.innerHTML = '';
 
             timeSlots.forEach(timeslot => {
-                const option = document.createElement('option');
-                option.value = timeslot;
-                option.textContent = timeslot;
-                selectHora.appendChild(option);
+                if (timeslot != "15:10 a 16:30") {
+                    const option = document.createElement('option');
+                    option.value = timeslot;
+                    option.textContent = timeslot;
+                    selectHora.appendChild(option);
+                }
+                    
             });
         }
 
