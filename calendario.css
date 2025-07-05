@@ -541,7 +541,7 @@ body.oculto {
         }
 
         .reserva-hora .estado.examen {
-            background: #e0e0e0;
+            background: #ef63f8;
             color: #424242;
             border: 1px solid #757575;
         }
@@ -608,10 +608,10 @@ body.oculto {
         margin-bottom: 6px;
     }
 
-.close {
+.closeAyuda, .closeInfo {
     float: right;
     cursor: pointer;
-    font-size: 24px;
+    font-size: 48px;
 }
 
 .btn-ayuda {
@@ -625,3 +625,30 @@ body.oculto {
     right: 20px;
     z-index: 100;
 }
+
+.btnInfo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 6px auto; /* Centrado con margen vertical */
+    background: linear-gradient(90deg, #1976d2 60%, #63a4ff 100%);
+    color: #fff;
+    text-decoration: none;
+    padding: 4px 6px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s, transform 0.1s;
+    min-width: 150px;
+    max-width: 100%;
+}
+
+    .btnInfo:hover {
+        background: linear-gradient(90deg, #1565c0 40%, #1976d2 100%);
+        box-shadow: 0 8px 24px rgba(25, 118, 210, 0.21);
+        color: #fff;
+        transform: scale(1.05);
+    }

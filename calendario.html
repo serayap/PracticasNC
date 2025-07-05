@@ -28,6 +28,7 @@
 
             document.getElementById('formReserva').addEventListener('submit', crearReserva);
             document.getElementById('contenidoAyuda').innerHTML = ayudaCalendario;
+            document.getElementById('contenidoInfo').innerHTML = infoNormas;
         }
 
         function dct(e) {
@@ -57,6 +58,7 @@
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
                     usuarioActual.uid = user.uid;
+                    usuarioActual.info = q.docs[0].info;
                     
                     // Control de acceso por perfil
                     if (usuarioActual.perfil !== "alumno") {
@@ -146,9 +148,19 @@
             </div>
         </div>
     </div>
+    <div id="popupInfo" class="popup">
+        <div class="popup-content">
+            <span class="closeInfo">&times;</span>
+            <h2>Normas de las clases Practicas</h2>
+            <div id="contenidoInfo">
+                <!-- Aquí va el contenido de ayuda específico para cada página -->
+            </div>
+            <button class="btnInfo" id="btnInfo">Entendido</button>
+        </div>
+    </div>
     <div id="popupAyuda" class="popup">
         <div class="popup-content">
-            <span class="close">&times;</span>
+            <span class="closeAyuda">&times;</span>
             <h2>Ayuda</h2>
             <div id="contenidoAyuda">
                 <!-- Aquí va el contenido de ayuda específico para cada página -->
@@ -166,6 +178,7 @@
         let reservasUsuario = [];
         //let usuarioActual = null;
         let eventos = [];
+        let info = false;
 
         async function getUsuarioRegistradoDoc(uid) {
             const q = await db.collection("usuarios_registrados")
@@ -187,6 +200,8 @@
             const creditos = datos.creditos !== undefined && datos.creditos !== null ? Number(datos.creditos) : 0;
             const nombre = capitalizarPrimeraLetra(datos.nombre || "");
             document.getElementById("creditosUsuario").textContent = "Clases para reservar de " + nombre + ": " + creditos;
+
+            if (!datos.info) popupInfo.style.display = 'flex';
             //console.table(datos);
         }
 
@@ -437,7 +452,7 @@
                     const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
                     let dotp = '', dotc = '', dote = '';
                     if (reservas.examen > 0) {
-                        dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #e0e0e0;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.examen}</span>`;
+                        dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #ef63f8;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.examen}</span>`;
                     }
                     if (reservas.pendientes > 0) {
                         dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #FF9800;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.pendientes}</span>`;
@@ -886,9 +901,22 @@
             }
         }
 
+        const popupInfo = document.getElementById('popupInfo');
+        const btnInfo = document.getElementById('btnInfo');
+        const closeInfoBtn = document.querySelector('.closeInfo');
+
+        const infoNormas = `<h3>Normas de las clases practicas</h3>
+<ul>
+    <li><strong>No asistencia:</strong> Si por alguna circunstacia no pudieras asistir a una clase práctica, deberás avisar al profesor al menos con 24 horas de antelacion para que pueda cubrir ese hueco. Si no lo hicieras, tendriás que abonar la clase práctica y perderías tu hora de clase.</li>
+    <li><strong>Presentacion a examén:</strong> Antes de ir al examén práctico, debes dejarlo todo abonado.</li>
+    <li><strong>Minimo de clases prácticas:</strong> La autoescuela te obliga para a dar un minimo de 3 clases prácticasde 80 minutos.</li>
+    <li><strong>Horario de clases:</strong> La clase práctica comineza a la hora fijada y termina a la hora fijada. En caso de impuntualidad por parte del alumnado será éste el que pierda minutos de clase.</li>
+</ul>
+`;
+
         const btnAyuda = document.getElementById('btnAyuda');
         const popupAyuda = document.getElementById('popupAyuda');
-        const closeBtn = document.querySelector('.close');
+        const closeAyudaBtn = document.querySelector('.closeAyuda');
 
         const ayudaCalendario = `<h3>Uso de las reservas para las practicas</h3>
 <p>Aquí puedes ver todas las reservas solicitadas al profesor de practicas. Verás el numero de clases que te quedan por realizar. Podrás solicitar practicas, anularlas y ver si el profesor las ha confirmado.</p>
@@ -899,13 +927,22 @@
     <li><strong>Reservas del día:</strong> Si haces clic en una fecha del calendario, visualizaras en este apartado todas las reservas solicitadas por todos los alumnos para ese dia tanto si están pendientes como confirmadas.</li>
 </ul>
 `;
-
         btnAyuda.addEventListener('click', () => {
             popupAyuda.style.display = 'flex';
         });
 
-        closeBtn.addEventListener('click', () => {
+        closeAyudaBtn.addEventListener('click', () => {
             popupAyuda.style.display = 'none';
+        });
+
+        btnInfo.addEventListener('click', () => {
+            // 1. Confirma informacion de las normas
+            db.collection("usuarios_registrados").doc(usuarioActual.id).update({ info: true });
+            popupInfo.style.display = 'none';
+        });
+
+        closeInfoBtn.addEventListener('click', () => {
+            popupInfo.style.display = 'none';
         });
 
         // Cierra el popup si se hace clic fuera del contenido

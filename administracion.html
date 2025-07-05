@@ -1229,7 +1229,8 @@
                     nombre: nombre,
                     perfil: "alumno",
                     creditos: 0,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    info: false
                 });
 
                 msg.textContent = "Alumno registrado correctamente.";
