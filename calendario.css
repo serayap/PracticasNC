@@ -608,7 +608,7 @@ body.oculto {
         margin-bottom: 6px;
     }
 
-.closeAyuda, .closeInfo {
+.closeAyuda, .closeInfo, .closeHolidays {
     float: right;
     cursor: pointer;
     font-size: 48px;

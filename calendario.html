@@ -29,6 +29,7 @@
             document.getElementById('formReserva').addEventListener('submit', crearReserva);
             document.getElementById('contenidoAyuda').innerHTML = ayudaCalendario;
             document.getElementById('contenidoInfo').innerHTML = infoNormas;
+            document.getElementById('contenidoHolidays').innerHTML = infoVacaciones;
         }
 
         function dct(e) {
@@ -58,7 +59,7 @@
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
                     usuarioActual.uid = user.uid;
-                    usuarioActual.info = q.docs[0].info;
+                    usuarioActual.info = q.docs[0].data().info;
                     
                     // Control de acceso por perfil
                     if (usuarioActual.perfil !== "alumno") {
@@ -158,6 +159,15 @@
             <button class="btnInfo" id="btnInfo">Entendido</button>
         </div>
     </div>
+    <div id="popupHolidays" class="popup">
+        <div class="popup-content">
+            <span class="closeHolidays">&times;</span>
+            <h2>Cierre de las clases Practicas por vacaciones</h2>
+            <div id="contenidoHolidays">
+                <!-- Aquí va el contenido de ayuda específico para cada página -->
+            </div>
+        </div>
+    </div>
     <div id="popupAyuda" class="popup">
         <div class="popup-content">
             <span class="closeAyuda">&times;</span>
@@ -167,11 +177,11 @@
             </div>
         </div>
     </div>
-    <script>        
-        
+    <script>
+
         const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
-        
+
         let calendar = null;
         let primeraCarga = true;
         let reservasTodas = {};
@@ -264,7 +274,7 @@
                     option.textContent = timeslot;
                     selectHora.appendChild(option);
                 }
-                    
+
             });
         }
 
@@ -328,11 +338,11 @@
 
                     // Formato visual mejorado
                     div.innerHTML = `
-                        <div class="reserva-hora">
-                            <span class="hora">${reserva.hora}</span>
-                            <span class="estado ${reserva.estado}">${reserva.estado}</span>
-                        </div>
-                    `;
+                            <div class="reserva-hora">
+                                <span class="hora">${reserva.hora}</span>
+                                <span class="estado ${reserva.estado}">${reserva.estado}</span>
+                            </div>
+                        `;
                     lista.appendChild(div);
                 });
 
@@ -496,7 +506,7 @@
                 .forEach(r => {
                     const div = document.createElement('div');
                     div.className = `reserva-item ${r.estado}`;
-                    const fechaTexto = new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });                    
+                    const fechaTexto = new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
                     if (r.estado == 'pendiente') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><button onclick="anularReserva('${r.fecha}', '${r.hora}', 'pendiente')" class='cta-btn-pendiente'>anular</button></div>`;
                     //if (r.estado == 'confirmada') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><div class='cta-btn'style ='background: linear-gradient(90deg, #56ab2f 30%, #a8e063 100%); box-shadow: 0 4px 16px rgba(255, 65, 108, 0.15);'>confirmada</div></div>`;
                     if (r.estado == 'confirmada') {
@@ -644,18 +654,35 @@
             }
             const creditosNecesarios = fechas.length;
 
-            // 3. Verificar créditos
+            // 3. Comprobar vacaciones profesor            
+            const vacacionesprofe = await db.collection('usuarios_registrados')
+                .where('perfil', '==', 'profesor')
+                .get();
+
+            const data = vacacionesprofe.docs[0].data();
+
+            // Convertimos los campos a Date (en caso de ser Timestamp o string)
+            const inicioVac = data.fechainivacaciones?.toDate ? data.fechainivacaciones.toDate() : new Date(data.fechainivacaciones);
+            const finVac = data.fechafinvacaciones?.toDate ? data.fechafinvacaciones.toDate() : new Date(data.fechafinvacaciones);
+            const fechaDia = new Date(dia);
+            // Ahora comparamos en formato Date (milisegundos)
+            if (fechaDia >= inicioVac && fechaDia <= finVac) {
+                popupHolidays.style.display = 'flex';
+                return;
+            }
+
+            // 4. Verificar créditos
             if (creditos < creditosNecesarios) {
                 reservaMsg.style.color = "#d32f2f";
                 reservaMsg.innerHTML = `No tienes clases suficientes para reservar.<br>Necesitas: ${creditosNecesarios} clases. Dispones: ${creditos} clases`;
                 return;
             }
 
-            // 4. Verificar disponibilidad
+            // 5. Verificar disponibilidad
             for (const fecha of fechas) {
                 const fechaFirestore = new Date(fecha);
 
-                // 4.1. Verificar reserva existente del usuario
+                // 5.1. Verificar reserva existente del usuario
                 const yaTieneReserva = await db.collection('reservas')
                     .where('fecha', '==', fechaFirestore)
                     .where('usuarioId', '==', usuarioActual.uid)
@@ -670,7 +697,7 @@
                     return;
                 }
 
-                // 4.2. Verificar reserva confirmada de otro usuario
+                // 5.2. Verificar reserva confirmada de otro usuario
                 const reservaOcupada = await db.collection('reservas')
                     .where('fecha', '==', fechaFirestore)
                     .where('hora', '==', hora)
@@ -689,7 +716,7 @@
                 }
             }
 
-            // 5. Crear reservas
+            // 6. Crear reservas
             const reservasImplicadas = [];
             const batch = db.batch(); // Usar batch para múltiples escrituras
 
@@ -710,7 +737,7 @@
                 });
             }
 
-            // 6. Actualizar créditos
+            // 7. Actualizar créditos
             const nuevosCreditos = creditos - creditosNecesarios;
             batch.update(db.collection("usuarios_registrados").doc(usuarioDoc.id), {
                 creditos: nuevosCreditos
@@ -719,12 +746,12 @@
             // Ejecutar batch
             await batch.commit();
 
-            // 7. Actualizar UI
+            // 8. Actualizar UI
             if (typeof mostrarCreditosUsuario === "function") {
                 mostrarCreditosUsuario();
             }
 
-            // 8. Registrar en log
+            // 9. Registrar en log
             await logCredito({
                 usuarioId: datos.usuarioId,
                 email: datos.email || usuarioActual.email,
@@ -735,12 +762,12 @@
                 reservasImplicadas: reservasImplicadas
             });
 
-            // 9. Mensaje de éxito
+            // 10. Mensaje de éxito
             reservaMsg.style.color = "#388e3c";
             reservaMsg.innerHTML = "Reserva(s) solicitada(s) correctamente.<br>RECUERDA: cuando se confirme, tienes hasta 24 horas antes para anularla.";
             document.getElementById('formReserva').reset();
 
-            // 10. Actualizar calendario si es necesario
+            // 11. Actualizar calendario si es necesario
             if (typeof calendar !== 'undefined' && typeof calendar.render === 'function') {
                 calendar.render();
             }
@@ -754,7 +781,34 @@
                 month: 'short'
             });
         }
+        /*function formatDateForDisplay(fecha, formato = 'largo') {
+            // Si es Timestamp de Firestore
+            if (fecha && typeof fecha.toDate === 'function') {
+                fecha = fecha.toDate();
+            }
+            // Si es string
+            if (typeof fecha === 'string') {
+                fecha = new Date(fecha);
+            }
+            // Chequeo tipo Date válido
+            if (!(fecha instanceof Date) || isNaN(fecha)) {
+                return '-';
+            }
 
+            if (formato === 'dd/mm/aaaa') {
+                const dia = ('0' + fecha.getDate()).slice(-2);
+                const mes = ('0' + (fecha.getMonth() + 1)).slice(-2);
+                const anio = fecha.getFullYear();
+                return `${dia}/${mes}/${anio}`;
+            } else {
+                // Formato largo por defecto (ejemplo: lunes, 28 jul)
+                return fecha.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'short'
+                });
+            }
+        }*/
 
 
         async function anularReserva(fechaStr, hora, estado) {
@@ -901,16 +955,21 @@
             }
         }
 
+        const popupHolidays = document.getElementById('popupHolidays');
+        const closeVacacionesBtn = document.querySelector('.closeHolidays');
+
+        const infoVacaciones = `<h3>Durante esta semana no impartiré clases prácticas por encontrarme de vacaciones</h3>`;
+
         const popupInfo = document.getElementById('popupInfo');
         const btnInfo = document.getElementById('btnInfo');
         const closeInfoBtn = document.querySelector('.closeInfo');
 
         const infoNormas = `<h3>Normas de las clases practicas</h3>
 <ul>
-    <li><strong>No asistencia:</strong> Si por alguna circunstacia no pudieras asistir a una clase práctica, deberás avisar al profesor al menos con 24 horas de antelacion para que pueda cubrir ese hueco. Si no lo hicieras, tendriás que abonar la clase práctica y perderías tu hora de clase.</li>
-    <li><strong>Presentacion a examén:</strong> Antes de ir al examén práctico, debes dejarlo todo abonado.</li>
-    <li><strong>Minimo de clases prácticas:</strong> La autoescuela te obliga para a dar un minimo de 3 clases prácticasde 80 minutos.</li>
-    <li><strong>Horario de clases:</strong> La clase práctica comineza a la hora fijada y termina a la hora fijada. En caso de impuntualidad por parte del alumnado será éste el que pierda minutos de clase.</li>
+        <li><strong>No asistencia:</strong> Si por alguna circunstacia no pudieras asistir a una clase práctica, deberás avisar al profesor al menos con 24 horas de antelacion para que pueda cubrir ese hueco. Si no lo hicieras, tendriás que abonar la clase práctica y perderías tu hora de clase.</li>
+        <li><strong>Presentacion a examén:</strong> Antes de ir al examén práctico, debes dejarlo todo abonado.</li>
+        <li><strong>Minimo de clases prácticas:</strong> La autoescuela te obliga para a dar un minimo de 3 clases prácticasde 80 minutos.</li>
+        <li><strong>Horario de clases:</strong> La clase práctica comineza a la hora fijada y termina a la hora fijada. En caso de impuntualidad por parte del alumnado será éste el que pierda minutos de clase.</li>
 </ul>
 `;
 
@@ -921,12 +980,16 @@
         const ayudaCalendario = `<h3>Uso de las reservas para las practicas</h3>
 <p>Aquí puedes ver todas las reservas solicitadas al profesor de practicas. Verás el numero de clases que te quedan por realizar. Podrás solicitar practicas, anularlas y ver si el profesor las ha confirmado.</p>
 <ul>
-    <li><strong>Calendario:</strong> Podrás ver todas las peticiones de reservas al profesor de practicas solicitadas por todos los alumnos, ya esten pendientes de confirmar por él, ó bien ya confirmadas.</li>
-    <li><strong>Nueva solicitud de reserva:</strong> Podrás solicitar una reserva, eligiendo el dia y hora. Si chequeas la opcion de "Reservar este horario para 5 dias seguidos" se haran reserva de 5 dias a partir del dia elegido y a la misma hora.</li>
-    <li><strong>Mis solicitudes de reserva:</strong> Visualizarás un listado con sólo tus solicitudes de reservas de prácticas. En el listado podrás anular las solicitudes, ya estén en el estado de "pendientes" ó "confirmadas". Pero estas últimas tiene un límite para su anulación de hasta 24 horas antes del dia y hora de las reserva.</li>
-    <li><strong>Reservas del día:</strong> Si haces clic en una fecha del calendario, visualizaras en este apartado todas las reservas solicitadas por todos los alumnos para ese dia tanto si están pendientes como confirmadas.</li>
+        <li><strong>Calendario:</strong> Podrás ver todas las peticiones de reservas al profesor de practicas solicitadas por todos los alumnos, ya esten pendientes de confirmar por él, ó bien ya confirmadas.</li>
+        <li><strong>Nueva solicitud de reserva:</strong> Podrás solicitar una reserva, eligiendo el dia y hora. Si chequeas la opcion de "Reservar este horario para 5 dias seguidos" se haran reserva de 5 dias a partir del dia elegido y a la misma hora.</li>
+        <li><strong>Mis solicitudes de reserva:</strong> Visualizarás un listado con sólo tus solicitudes de reservas de prácticas. En el listado podrás anular las solicitudes, ya estén en el estado de "pendientes" ó "confirmadas". Pero estas últimas tiene un límite para su anulación de hasta 24 horas antes del dia y hora de las reserva.</li>
+        <li><strong>Reservas del día:</strong> Si haces clic en una fecha del calendario, visualizaras en este apartado todas las reservas solicitadas por todos los alumnos para ese dia tanto si están pendientes como confirmadas.</li>
 </ul>
 `;
+        closeVacacionesBtn.addEventListener('click', () => {
+            popupHolidays.style.display = 'none';
+        });
+
         btnAyuda.addEventListener('click', () => {
             popupAyuda.style.display = 'flex';
         });
@@ -950,7 +1013,7 @@
             if (e.target === popupAyuda) {
                 popupAyuda.style.display = 'none';
             }
-        });  
+        });
 
     </script>
 </body>
