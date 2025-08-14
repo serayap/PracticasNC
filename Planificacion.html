@@ -865,7 +865,7 @@
             menu.className = 'reserva-context-menu';
             menu.style.position = 'fixed';
 
-            menu.innerHTML = `<div class="menu-header">${reserva.nombre} ${reserva.Apellidos}</div>`;
+            menu.innerHTML = `<div class="menu-header">${reserva.usuarioNombre} ${reserva.usuarioApellidos}</div>`;
             menu.innerHTML = menu.innerHTML + `<div class="menu-item" onclick="anularReservaProfesor('${reserva.id}', '${reserva.usuarioEmail}')">Anular</div>`;
 
             if (estado == "pendiente") menu.innerHTML = menu.innerHTML + `<div class="menu-item" onclick="confirmarReservaProfesor('${reserva.id}', '${reserva.usuarioEmail}')">Confirmar</div>`;
