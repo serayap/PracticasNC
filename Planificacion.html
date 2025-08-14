@@ -20,7 +20,6 @@
             cargarDias();
             cargarAlumnosSelect();
             
-
             document.getElementById('calendar-grid').addEventListener('click', function (e) {
                 const reservaDiv = e.target.closest('.reserva.pendiente');
                 if (reservaDiv) {
@@ -58,12 +57,12 @@
                     .where('usuarioId', '==', user.uid)
                     .get();
                 if (!q.empty) {
-                    usuarioActual.id = q.docs[0].id;
+                    //usuarioActual.id = q.docs[0].id;
                     usuarioActual.nombre = q.docs[0].data().nombre;
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
                     usuarioActual.uid = user.uid;
-
+                    //console.log("Document snapshot:", q.docs[0].data());
                     // Control de acceso por perfil
                     if (usuarioActual.perfil !== "profesor") {
                         window.location.href = "index.html";
@@ -866,7 +865,8 @@
             menu.className = 'reserva-context-menu';
             menu.style.position = 'fixed';
 
-            menu.innerHTML = `<div class="menu-item" onclick="anularReservaProfesor('${reserva.id}', '${reserva.usuarioEmail}')">Anular</div>`;
+            menu.innerHTML = `<div class="menu-header">${reserva.nombre} ${reserva.Apellidos}</div>`;
+            menu.innerHTML = menu.innerHTML + `<div class="menu-item" onclick="anularReservaProfesor('${reserva.id}', '${reserva.usuarioEmail}')">Anular</div>`;
 
             if (estado == "pendiente") menu.innerHTML = menu.innerHTML + `<div class="menu-item" onclick="confirmarReservaProfesor('${reserva.id}', '${reserva.usuarioEmail}')">Confirmar</div>`;
 

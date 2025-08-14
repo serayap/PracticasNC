@@ -726,6 +726,7 @@
                 batch.set(reservaRef, {
                     usuarioId: usuarioActual.uid,
                     usuarioNombre: datos.nombre || usuarioActual.email,
+                    usuarioApellidos: datos.Apellidos,
                     fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
                     hora: hora,
                     estado: 'pendiente',
@@ -959,7 +960,7 @@
         const popupHolidays = document.getElementById('popupHolidays');
         const closeVacacionesBtn = document.querySelector('.closeHolidays');
 
-        const infoVacaciones = `<h3>Durante esta semana no impartiré clases prácticas por encontrarme de vacaciones</h3>`;
+        const infoVacaciones = `<h3>Durante este dia no impartiré clases prácticas por encontrarme de vacaciones</h3>`;
 
         const popupInfo = document.getElementById('popupInfo');
         const btnInfo = document.getElementById('btnInfo');
