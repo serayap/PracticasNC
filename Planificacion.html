@@ -579,11 +579,11 @@
         // Tramos horarios como en tu select
         let timeSlots = []; // Inicialmente vacío
 
-        async function cargarTimeSlots() {
+        async function cargarTimeSlotsANT() {
             timeSlots = ["07:30 a 08:50", "08:50 a 10:10", "10:10 a 11:30", "11:30 a 12:50", "12:50 a 14:10", "15:10 a 16:30", "16:30 a 17:50", "17:50 a 19:10", "19:10 a 20:30", "20:30 a 21:50"];
         }
 
-        async function cargarTimeSlotsÄNT() {
+        async function cargarTimeSlots() {
             try {
                 const doc = await db.collection("configuracion").doc("horarios").get();
                 if (doc.exists && Array.isArray(doc.data().slots)) {
