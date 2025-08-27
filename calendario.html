@@ -268,7 +268,7 @@
             selectHora.innerHTML = '';
 
             timeSlots.forEach(timeslot => {
-                if (timeslot != "15:10 a 16:30" || timeslot != "20:30 a 21:50") {
+                if (timeslot != "15:10 a 16:30" && timeslot != "20:30 a 21:50") {
                     const option = document.createElement('option');
                     option.value = timeslot;
                     option.textContent = timeslot;
