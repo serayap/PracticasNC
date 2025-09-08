@@ -137,6 +137,19 @@
         const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
 
+        // *** MODIFICACIÓN PARA PERSISTENCIA OFFLINE ***
+        db.enablePersistence({ synchronizeTabs: true })
+            .catch(function (err) {
+                // Solo una pestaña puede tener persistencia, maneja los errores aquí
+                if (err.code == 'failed-precondition') {
+                    // Probablemente hay múltiples pestañas abiertas
+                    console.warn('Persistencia no habilitada: varias pestañas abiertas');
+                } else if (err.code == 'unimplemented') {
+                    // El navegador no soporta persistencia
+                    console.warn('Persistencia no soportada por el navegador');
+                }
+            });
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             //alert("Submit ejecutado");
