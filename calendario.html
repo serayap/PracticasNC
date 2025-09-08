@@ -178,6 +178,7 @@
         </div>
     </div>
     <script>
+
         const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
 
@@ -185,7 +186,9 @@
         let primeraCarga = true;
         let reservasTodas = {};
         let reservasUsuario = [];
-        let cacheReservasPorDia = {}; // Caché local para evitar consultas repetidas
+        //let usuarioActual = null;
+        let eventos = [];
+        let info = false;
 
         async function getUsuarioRegistradoDoc(uid) {
             const q = await db.collection("usuarios_registrados")
@@ -209,6 +212,7 @@
             document.getElementById("creditosUsuario").textContent = "Clases para reservar de " + nombre + ": " + creditos;
 
             if (!datos.info) popupInfo.style.display = 'flex';
+            //console.table(datos);
         }
 
         function capitalizarPrimeraLetra(str) {
@@ -217,10 +221,12 @@
             });
         }
 
+        // Utilidad: formato YYYY-MM-DD
         function toISODate(date) {
             return date.toISOString().split('T')[0];
         }
 
+        // Cargar días de la semana actual y la siguiente
         function cargarDias() {
             const selectDia = document.getElementById('dia');
             selectDia.innerHTML = "";
@@ -228,44 +234,39 @@
             for (let i = 1; i < 15; i++) {
                 const fecha = new Date(hoy);
                 fecha.setDate(hoy.getDate() + i);
-                const diaSemana = fecha.getDay();
-                if (diaSemana !== 0 && diaSemana !== 6) {
+                const diaSemana = fecha.getDay(); // 0=domingo, 6=sábado
+                if (diaSemana !== 0 && diaSemana !== 6) { // Excluye sábados y domingos
                     const fechaISO = toISODate(fecha);
+                    //const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
                     const texto = formatDateForDisplay(fecha);
                     const option = document.createElement('option');
                     option.value = fechaISO;
                     option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
                     selectDia.appendChild(option);
                 }
+
             }
         }
 
+        // Cargar horas desde firestore
         async function cargarTimeSlots() {
-            const cacheKey = "timeSlotsCache";
-            const cacheData = localStorage.getItem(cacheKey);
-            if (cacheData) {
-                try {
-                    timeSlots = JSON.parse(cacheData);
-                    cargarOpcionesHorarios();
-                    return;
-                } catch { }
-            }
-
             try {
                 const h = await db.collection("configuracion").doc("horarios").get();
                 timeSlots = h.data().slots;
-                localStorage.setItem(cacheKey, JSON.stringify(timeSlots));
+                //console.log("Tramos horarios cargados:", timeSlots);
             } catch (error) {
                 console.error("Error al cargar los tramos horarios:", error);
+                // Usar valores por defecto si hay error
                 timeSlots = ["07:30 a 08:50", "09:00 a 10:20", "10:30 a 11:50", "12:00 a 13:20", "13:30 a 14:50"];
             }
-            cargarOpcionesHorarios();
-        }
 
-        function cargarOpcionesHorarios() {
+            // Añade cada tramo como opción
             const selectHora = document.getElementById('hora');
             if (!selectHora) return;
+
+            // Limpia las opciones anteriores
             selectHora.innerHTML = '';
+
             timeSlots.forEach(timeslot => {
                 if (timeslot != "15:10 a 16:30" && timeslot != "20:30 a 21:50") {
                     const option = document.createElement('option');
@@ -273,19 +274,17 @@
                     option.textContent = timeslot;
                     selectHora.appendChild(option);
                 }
+
             });
         }
 
+        // Función para cargar reservas del día
         async function cargarReservasDelDia(fechaStr) {
             const lista = document.getElementById('lista-reservas-dia');
             lista.innerHTML = '<div class="cargando">Cargando...</div>';
 
-            if (cacheReservasPorDia[fechaStr]) {
-                mostrarReservasEnLista(cacheReservasPorDia[fechaStr]);
-                return;
-            }
-
             try {
+                // Actualizar título con formato "Reservas del lunes, 12 de mayo"
                 const tituloDia = document.getElementById('tituloReservasDia');
                 if (tituloDia) {
                     const fecha = new Date(fechaStr);
@@ -296,22 +295,23 @@
                     })}`;
                 }
 
+                // Consulta a Firestore (sin ordenar)
                 const fechaInicio = new Date(fechaStr + 'T00:00:00');
                 const fechaFin = new Date(fechaStr + 'T23:59:59');
-
                 const q = db.collection("reservas")
                     .where("fecha", ">=", fechaInicio)
                     .where("fecha", "<=", fechaFin)
-                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen']);
+                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen']); // Solo estos estados
 
                 const querySnapshot = await q.get();
+                lista.innerHTML = '';
 
                 if (querySnapshot.empty) {
                     lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día</em></div>';
-                    cacheReservasPorDia[fechaStr] = [];
                     return;
                 }
 
+                // Convertir documentos a array y filtrar horas inválidas
                 const reservas = [];
                 querySnapshot.forEach(doc => {
                     const reserva = doc.data();
@@ -320,11 +320,31 @@
                     }
                 });
 
-                reservas.sort((a, b) => horaAminutos(a.hora) - horaAminutos(b.hora));
+                // Depuración: ver horas originales y minutos calculados
+                //console.log("Reservas sin ordenar:", reservas.map(r => r.hora));
 
-                cacheReservasPorDia[fechaStr] = reservas;
+                // Ordenar por hora de inicio (ascendente)
+                reservas.sort((a, b) => {
+                    return horaAminutos(a.hora) - horaAminutos(b.hora);
+                });
 
-                mostrarReservasEnLista(reservas);
+                // Depuración: ver orden después de ordenar
+                //console.log("Reservas ordenadas:", reservas.map(r => r.hora));
+
+                // Mostrar en el DOM
+                reservas.forEach(reserva => {
+                    const div = document.createElement('div');
+                    div.className = `reserva-dia-item ${reserva.estado}`;
+
+                    // Formato visual mejorado
+                    div.innerHTML = `
+                            <div class="reserva-hora">
+                                <span class="hora">${reserva.hora}</span>
+                                <span class="estado ${reserva.estado}">${reserva.estado}</span>
+                            </div>
+                        `;
+                    lista.appendChild(div);
+                });
 
             } catch (error) {
                 console.error("Error:", error);
@@ -332,73 +352,243 @@
             }
         }
 
-        function mostrarReservasEnLista(reservas) {
-            const lista = document.getElementById('lista-reservas-dia');
-            lista.innerHTML = '';
-            reservas.forEach(reserva => {
-                const div = document.createElement('div');
-                div.className = `reserva-dia-item ${reserva.estado}`;
-                div.innerHTML = `
-                    <div class="reserva-hora">
-                      <span class="hora">${reserva.hora}</span>
-                      <span class="estado ${reserva.estado}">${reserva.estado}</span>
-                    </div>`;
-                lista.appendChild(div);
-            });
-        }
-
         function horaAminutos(horaRango) {
             try {
-                const [inicio] = horaRango.split(' a ');
+                const [inicio] = horaRango.split(' a '); // Extrae la hora inicial
                 const [hora, minutos] = inicio.split(':').map(Number);
                 return hora * 60 + minutos;
             } catch (error) {
                 console.error("Error al parsear la hora:", horaRango);
-                return 0;
+                return 0; // Si hay error, trata como 0 minutos (puedes ajustarlo)
             }
         }
 
+
+        function mostrarEventosDelDia(fechaStr) {
+            const eventos = calendar.getEvents();
+            const eventosDelDia = eventos.filter(evento => {
+                const inicio = evento.start?.toISOString().split('T')[0];
+                return inicio === fechaStr;
+            });
+
+            //console.log("Eventos en", fechaStr, ":", eventosDelDia);
+        }
+
+        // Inicializar FullCalendar
+        function inicializarCalendario() {
+            const calendarEl = document.getElementById('calendar');
+            if (!calendarEl) {
+                alert("No se encontró el div con id 'calendar'");
+                return;
+            }
+
+            const fechaActual = new Date(); // O fija la fecha si es para pruebas
+            const year = fechaActual.getFullYear();
+            const month = fechaActual.getMonth(); // 0-indexed
+
+            // Primer día del mes actual
+            const start = new Date(year, month, 1);
+            // Último día del mes siguiente
+            const end = new Date(year, month + 2, 0); // Día 0 del mes+2 es el último del mes+1
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                //plugins: [dayGridPlugin, interactionPlugin],
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                titleFormat: { year: 'numeric', month: 'long' },
+                firstDay: 1,
+                /*validRange: {
+                    start: start.toISOString().split('T')[0],
+                    end: end.toISOString().split('T')[0]
+                },*/
+                //height: 'auto',
+                aspectRatio: 0.8, // Menor = más compacto verticalmente
+                showNonCurrentDates: true,
+                fixedWeekCount: false, // Elimina filas vacías
+                expandRows: false, // Evita que las filas se expandan
+                //events: [],
+                dateClick: function (info) {
+                    cargarReservasDelDia(info.dateStr);
+                },
+                /*dayCellDidMount: (info) => {
+                    cargarReservasDelDia(info.dateStr);
+                    const fecha = info.date.toISOString().split('T')[0];
+
+                    // Añadir event listener al elemento de la celda
+                    info.el.addEventListener('click', () => {
+                        mostrarEventosDelDia(fecha);
+                 });*/
+                /*eventDidMount: function (info) {
+                    // Colores según estado
+                    if (info.event.extendedProps.estado === 'pendiente') {
+                        info.el.style.backgroundColor = '#ff9800';
+                        info.el.style.borderColor = '#ff9800';
+                    }
+                    if (info.event.extendedProps.estado === 'confirmada') {
+                        info.el.style.backgroundColor = '#4caf50';
+                        info.el.style.borderColor = '#4caf50';
+                    }
+                },*/
+                /*dayCellDidMount: function (info) {
+                    // Corrige la fecha para la zona horaria local
+                    const fechaLocal = new Date(info.date.getTime() - (info.date.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); // Formato YYYY-MM-DD local
+
+                    // 2. Verifica que la fecha exista en reservasTodas
+                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
+                    console.log('Fecha:', fechaLocal, 'Pendientes:', reservas.pendientes);
+
+                    if (reservas.pendientes > 0) {
+                        //setTimeout(() => {
+                            let eventsContainer = info.el.querySelector('.fc-daygrid-day-events');
+                            if (!eventsContainer) {
+                                eventsContainer = document.createElement('div');
+                                //eventsContainer.className = 'fc-daygrid-day-events';
+                                const frame = info.el.querySelector('.fc-daygrid-day-frame');
+                                if (frame) frame.appendChild(eventsContainer);
+                            }
+                            const dot = document.createElement('div');
+                            //dot.className = 'fc-dot-custom';
+                            //dot.style.cssText = 'width:20px;height:20px;border-radius:50%;background:#FF9800;margin:2px auto;';
+                            dot.style.cssText = 'width: 18px;height: 18px;border - radius: 50 %;background: #FF9800;margin: 0 auto;margin - top: 2px;display: flex;align - items: center;justify - content: center;color: black;font - size: 12px;font - weight: bold;';
+                            dot.textContent = reservas.pendiente;
+                            eventsContainer.appendChild(dot);
+                        //}, 50);
+                    }
+                }*/
+                dayCellContent: function (info) {
+                    // Corrige la fecha para la zona horaria local
+                    const fechaLocal = new Date(info.date.getTime() - (info.date.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); // Formato YYYY-MM-DD local
+
+                    // 2. Verifica que la fecha exista en reservasTodas
+                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0 };
+                    let dotp = '', dotc = '', dote = '';
+                    if (reservas.examen > 0) {
+                        dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #ef63f8;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.examen}</span>`;
+                    }
+                    if (reservas.pendientes > 0) {
+                        dotp = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #FF9800;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.pendientes}</span>`;
+                    }
+                    if (reservas.confirmadas > 0) {
+                        dotc = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #4CAF50;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.confirmadas}</span>`;
+                    }
+                    return { html: info.dayNumberText + dote + dotp + dotc };
+                }
+            });
+            calendar.render();
+        }
+
+        // Mostrar todas las reservas en el calendario
+        function mostrarReservasCalendario() {
+            //console.table(reservasTodas);
+            calendar.removeAllEvents();
+            const eventos = Object.values(reservasTodas)
+                .flatMap(reservasDelDia =>
+                    reservasDelDia.reservas.map(r => ({
+                        start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
+                        backgroundColor: r.estado === 'confirmada' ? '#4CAF50' : '#FF9800',
+                        textColor: '#fff'
+                    }))
+                );
+            //console.table(eventos);
+            calendar.addEventSource(eventos);
+        }
+
+        // Mostrar reservas del usuario autenticado
+        function mostrarReservasUsuario() {
+            const lista = document.getElementById('lista-reservas');
+            lista.innerHTML = "";
+            if (reservasUsuario.length === 0) {
+                lista.innerHTML = "<em>No tienes reservas aún.</em>";
+                return;
+            }
+            //console.table(reservasUsuario);
+            reservasUsuario
+                .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+                .forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = `reserva-item ${r.estado}`;
+                    const fechaTexto = new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+                    if (r.estado == 'pendiente') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><button onclick="anularReserva('${r.fecha}', '${r.hora}', 'pendiente')" class='cta-btn-pendiente'>anular</button></div>`;
+                    //if (r.estado == 'confirmada') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><div class='cta-btn'style ='background: linear-gradient(90deg, #56ab2f 30%, #a8e063 100%); box-shadow: 0 4px 16px rgba(255, 65, 108, 0.15);'>confirmada</div></div>`;
+                    if (r.estado == 'confirmada') {
+
+                        if (esMenosDe24Horas(r.fecha, r.hora)) {
+                            // Botón deshabilitado
+                            div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${fechaTexto}</span><span class="reserva-hora">⏰ ${r.hora}</span><button disabled class='cta-btn-confirmada-disabled' title="No se puede anular a menos de 24h o reservas pasadas">confirmada</button></div>`;
+                        } else {
+                            div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><button onclick="anularReserva('${r.fecha}', '${r.hora}', 'confirmada')" class='cta-btn-confirmada'>confirmada</button></div>`;
+
+                        }
+                    }
+                    //if (r.estado == 'anulada') div.innerHTML = `<div class="reserva-item-compacta"><span class="reserva-fecha">📅 ${new Date(r.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}</span ><span class="reserva-hora">⏰ ${r.hora}</span ><div class='cta-btn'style ='background: linear-gradient(90deg, #ff6a6a 30%, #ffe0e0 100%);'>anulada</div></div>`;
+
+                    lista.appendChild(div);
+                });
+        }
+
+        // Función para saber si faltan menos de 24h para la reserva
+        function esMenosDe24Horas(fechaStr, horaStr) {
+            // fechaStr: 'YYYY-MM-DD', horaStr: 'HH:MM a HH:MM'
+            const ahora = new Date();
+            const [anio, mes, dia] = fechaStr.split('-').map(Number);
+            const horaInicioStr = horaStr.split('a')[0].trim(); // "HH:MM"
+            const [h, m] = horaInicioStr.split(':').map(Number);
+            const fechaHoraReserva = new Date(anio, mes - 1, dia, h, m, 0, 0);
+            const diferenciaMs = fechaHoraReserva - ahora;
+            const horasRestantes = diferenciaMs / (1000 * 60 * 60);
+            return horasRestantes < 24;
+        }
+
         async function cargarReservas() {
-            if (!usuarioActual?.uid) {
+            // Todas las reservas para el calendario
+            if (!usuarioActual.uid) {
                 console.error("usuarioActual.uid no está definido. No se puede cargar reservas del usuario.");
                 return;
             }
 
-            const ahora = new Date();
-            const limiteFecha = new Date();
-            limiteFecha.setDate(ahora.getDate() + 30);
+            db.collection('reservas').onSnapshot(snapshot => {
+                reservasTodas = {};
+                snapshot.forEach(doc => {
+                    const reserva = doc.data();
+                    //console.log(reserva);
+                    if (reserva.fecha?.toDate) { // Validar existencia de fecha
+                        const fechaDate = reserva.fecha.toDate();
+                        // Convertir a fecha local (ej: España)
+                        const fechaStr = fechaDate.toLocaleDateString("es-ES", {
+                            timeZone: "Europe/Madrid",
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit"
+                        }).split("/").reverse().join("-"); // Formato YYYY-MM-DD
 
-            db.collection('reservas')
-                .where('fecha', '>=', firebase.firestore.Timestamp.fromDate(ahora))
-                .where('fecha', '<=', firebase.firestore.Timestamp.fromDate(limiteFecha))
-                .onSnapshot(snapshot => {
-                    reservasTodas = {};
-                    snapshot.forEach(doc => {
-                        const reserva = doc.data();
-                        if (reserva.fecha?.toDate) {
-                            const fechaDate = reserva.fecha.toDate();
-                            const fechaStr = fechaDate.toLocaleDateString("es-ES", {
-                                timeZone: "Europe/Madrid",
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit"
-                            }).split("/").reverse().join("-");
-                            if (!reservasTodas[fechaStr]) {
-                                reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0, examen: 0, reservas: [] };
-                            }
-                            if (reserva.estado === 'examen') reservasTodas[fechaStr].examen++;
-                            if (reserva.estado === 'confirmada') reservasTodas[fechaStr].confirmadas++;
-                            if (reserva.estado === 'pendiente') reservasTodas[fechaStr].pendientes++;
-                            reservasTodas[fechaStr].reservas.push(reserva);
+                        if (!reservasTodas[fechaStr]) {
+                            reservasTodas[fechaStr] = { confirmadas: 0, pendientes: 0, examen: 0 };
                         }
-                    });
-                    if (calendar) calendar.refetchEvents();
-                    if (primeraCarga) {
-                        inicializarCalendario();
-                        primeraCarga = false;
+
+                        if (reserva.estado === 'examen') reservasTodas[fechaStr].examen++;
+                        if (reserva.estado === 'confirmada') reservasTodas[fechaStr].confirmadas++;
+                        if (reserva.estado === 'pendiente') reservasTodas[fechaStr].pendientes++;
+                        //console.log("Datos cargados (LOCALES):", reservasTodas);
+                    } else {
+                        console.error("Documento sin campo 'fecha':", doc.id);
                     }
+
+                    //console.log("Datos actualizados (LOCALES):", reservasTodas);
+                    if (calendar) calendar.refetchEvents(); // Actualizar calendario
                 });
 
+                // Solo inicializa el calendario la primera vez
+                if (primeraCarga) {
+                    inicializarCalendario();
+                    primeraCarga = false;
+                }
+                //console.table(reservasTodas);
+                //console.log("Datos actualizados:", reservasTodas);
+                //mostrarReservasCalendario();
+            });
+
+
+            // Reservas del usuario autenticado
             db.collection('reservas')
                 .where('usuarioId', '==', usuarioActual.uid)
                 .onSnapshot(snapshot => {
@@ -408,17 +598,22 @@
                         if (d.fecha?.toDate) {
                             const fechaLocal = d.fecha.toDate();
                             const fechaStr = fechaLocal.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+                            //console.log(fechaStr);
                             reservasUsuario.push({
                                 ...d,
                                 fecha: fechaStr,
                                 id: doc.id
                             });
+                        } else {
+                            console.error("Documento del usuario sin 'fecha' válida:", doc.id);
                         }
                     });
+                    //console.table(reservasUsuario);
                     mostrarReservasUsuario();
                 });
         }
 
+        // Crear reservas (una o bloque semanal)
         async function crearReserva(e) {
             e.preventDefault();
             const reservaMsg = document.getElementById('reservaMsg');
@@ -429,10 +624,11 @@
             tituloDia.textContent = "Reservas del dia";
 
             const dia = document.getElementById('dia').value;
-            const hora = document.getElementById('hora').value.trim();
+            const hora = document.getElementById('hora').value.trim(); // Asegurar sin espacios
             const bloque = document.getElementById('bloqueSemana').checked;
             let fechas = [dia];
 
+            // 1. Obtener usuario y créditos
             const usuarioDoc = await getUsuarioRegistradoDoc(usuarioActual.uid);
             if (!usuarioDoc || !usuarioDoc.exists) {
                 reservaMsg.style.color = "#d32f2f";
@@ -442,10 +638,12 @@
             const datos = usuarioDoc.data();
             const creditos = typeof datos.creditos === "number" ? datos.creditos : 0;
 
+            // 2. Generar fechas para bloque semanal
             if (bloque) {
                 let fechaActual = new Date(dia);
                 fechas = [];
                 let diasLaborables = 0;
+
                 while (diasLaborables < 5) {
                     fechaActual.setDate(fechaActual.getDate() + 1);
                     const diaSemana = fechaActual.getDay();
@@ -457,58 +655,71 @@
             }
             const creditosNecesarios = fechas.length;
 
+            // 3. Comprobar vacaciones profesor            
             const vacacionesprofe = await db.collection('usuarios_registrados')
                 .where('perfil', '==', 'profesor')
                 .get();
+
             const data = vacacionesprofe.docs[0].data();
+
+            // Convertimos los campos a Date (en caso de ser Timestamp o string)
             const inicioVac = data.fechainivacaciones?.toDate ? data.fechainivacaciones.toDate() : new Date(data.fechainivacaciones);
             const finVac = data.fechafinvacaciones?.toDate ? data.fechafinvacaciones.toDate() : new Date(data.fechafinvacaciones);
             const fechaDia = new Date(dia);
+            // Ahora comparamos en formato Date (milisegundos)
             if (fechaDia >= inicioVac && fechaDia <= finVac) {
                 popupHolidays.style.display = 'flex';
                 return;
             }
 
+            // 4. Verificar créditos
             if (creditos < creditosNecesarios) {
                 reservaMsg.style.color = "#d32f2f";
                 reservaMsg.innerHTML = `No tienes clases suficientes para reservar.<br>Necesitas: ${creditosNecesarios} clases. Dispones: ${creditos} clases`;
                 return;
             }
 
-            const fechasFirestore = fechas.map(fecha => firebase.firestore.Timestamp.fromDate(new Date(fecha)));
-            const reservasExistentesSnap = await db.collection('reservas')
-                .where('fecha', 'in', fechasFirestore)
-                .where('hora', '==', hora)
-                .where('estado', 'in', ['confirmada', 'pendiente'])
-                .get();
+            // 5. Verificar disponibilidad
+            for (const fecha of fechas) {
+                const fechaFirestore = new Date(fecha);
 
-            for (const fecha of fechasFirestore) {
-                const reservaExiste = reservasExistentesSnap.docs.some(doc => {
-                    const data = doc.data();
-                    return data.fecha.toMillis() === fecha.toMillis() && data.usuarioId === usuarioActual.uid;
-                });
-                if (reservaExiste) {
+                // 5.1. Verificar reserva existente del usuario
+                const yaTieneReserva = await db.collection('reservas')
+                    .where('fecha', '==', fechaFirestore)
+                    .where('usuarioId', '==', usuarioActual.uid)
+                    .where('estado', 'in', ['confirmada', 'pendiente'])
+                    .where('hora', '==', hora)
+                    .get();
+
+                if (!yaTieneReserva.empty) {
+                    const fechaFormateada = formatDateForDisplay(fechaFirestore);
                     reservaMsg.style.color = "#d32f2f";
-                    reservaMsg.innerHTML = `Ya tienes una reserva para el día seleccionado a esta hora.<br>No puedes reservar más en la misma fecha y hora.`;
+                    reservaMsg.innerHTML = `Ya tienes una reserva el ${fechaFormateada}.<br>No puedes reservar más en la misma fecha y hora.`;
+                    return;
+                }
+
+                // 5.2. Verificar reserva confirmada de otro usuario
+                const reservaOcupada = await db.collection('reservas')
+                    .where('fecha', '==', fechaFirestore)
+                    .where('hora', '==', hora)
+                    .where('estado', '==', 'confirmada')
+                    .get();
+
+                const otraReserva = reservaOcupada.docs.find(doc =>
+                    doc.data().usuarioId !== usuarioActual.uid
+                );
+
+                if (otraReserva) {
+                    const fechaFormateada = formatDateForDisplay(fechaFirestore);
+                    reservaMsg.style.color = "#d32f2f";
+                    reservaMsg.innerHTML = `Ya existe una reserva confirmada para ${fechaFormateada} a las ${hora}.<br>Por favor, selecciona otro tramo.`;
                     return;
                 }
             }
 
-            const reservasConfirmadasSnap = await db.collection('reservas')
-                .where('fecha', 'in', fechasFirestore)
-                .where('hora', '==', hora)
-                .where('estado', '==', 'confirmada')
-                .get();
-
-            const otraReserva = reservasConfirmadasSnap.docs.find(doc => doc.data().usuarioId !== usuarioActual.uid);
-            if (otraReserva) {
-                reservaMsg.style.color = "#d32f2f";
-                reservaMsg.innerHTML = `Ya existe una reserva confirmada para una de esas fechas a las ${hora}.<br>Por favor, selecciona otro tramo.`;
-                return;
-            }
-
+            // 6. Crear reservas
             const reservasImplicadas = [];
-            const batch = db.batch();
+            const batch = db.batch(); // Usar batch para múltiples escrituras
 
             for (const fecha of fechas) {
                 const reservaRef = db.collection('reservas').doc();
@@ -528,16 +739,21 @@
                 });
             }
 
+            // 7. Actualizar créditos
             const nuevosCreditos = creditos - creditosNecesarios;
             batch.update(db.collection("usuarios_registrados").doc(usuarioDoc.id), {
                 creditos: nuevosCreditos
             });
+
+            // Ejecutar batch
             await batch.commit();
 
+            // 8. Actualizar UI
             if (typeof mostrarCreditosUsuario === "function") {
                 mostrarCreditosUsuario();
             }
 
+            // 9. Registrar en log
             await logCredito({
                 usuarioId: datos.usuarioId,
                 email: datos.email || usuarioActual.email,
@@ -548,15 +764,18 @@
                 reservasImplicadas: reservasImplicadas
             });
 
+            // 10. Mensaje de éxito
             reservaMsg.style.color = "#388e3c";
             reservaMsg.innerHTML = "Reserva(s) solicitada(s) correctamente.<br>RECUERDA: cuando se confirme, tienes hasta 24 horas antes para anularla.";
             document.getElementById('formReserva').reset();
 
+            // 11. Actualizar calendario si es necesario
             if (typeof calendar !== 'undefined' && typeof calendar.render === 'function') {
                 calendar.render();
             }
         }
 
+        // Función auxiliar para formatear fechas
         function formatDateForDisplay(date) {
             return date.toLocaleDateString('es-ES', {
                 weekday: 'long',
@@ -564,31 +783,65 @@
                 month: 'short'
             });
         }
+        /*function formatDateForDisplay(fecha, formato = 'largo') {
+            // Si es Timestamp de Firestore
+            if (fecha && typeof fecha.toDate === 'function') {
+                fecha = fecha.toDate();
+            }
+            // Si es string
+            if (typeof fecha === 'string') {
+                fecha = new Date(fecha);
+            }
+            // Chequeo tipo Date válido
+            if (!(fecha instanceof Date) || isNaN(fecha)) {
+                return '-';
+            }
+
+            if (formato === 'dd/mm/aaaa') {
+                const dia = ('0' + fecha.getDate()).slice(-2);
+                const mes = ('0' + (fecha.getMonth() + 1)).slice(-2);
+                const anio = fecha.getFullYear();
+                return `${dia}/${mes}/${anio}`;
+            } else {
+                // Formato largo por defecto (ejemplo: lunes, 28 jul)
+                return fecha.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'short'
+                });
+            }
+        }*/
+
 
         async function anularReserva(fechaStr, hora, estado) {
             try {
                 const lista = document.getElementById('lista-reservas-dia');
                 lista.innerHTML = '';
                 const tituloDia = document.getElementById('tituloReservasDia');
-                tituloDia.textContent = "Reservas del dia";
+                tituloDia.textContent = "Reservas del dia"
 
+                // 1. Convertir fecha a Timestamp
                 const [anio, mes, dia] = fechaStr.split('-').map(Number);
                 const inicioDia = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 0, 0, 0, 0));
                 const finDia = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 23, 59, 59, 999));
+                //console.log("Rango de búsqueda:", inicioDia.toDate(), finDia.toDate());
+                //console.log(usuarioActual.uid);
 
+                // 2. Buscar reservas en ese día y hora
                 const q = await db.collection("reservas")
                     .where("fecha", ">=", inicioDia)
                     .where("fecha", "<=", finDia)
                     .where("hora", "==", hora)
                     .where("estado", "==", estado)
-                    .where("usuarioId", "==", usuarioActual.uid.trim())
+                    .where("usuarioId", "==", usuarioActual.uid.trim()) // <-- Filtro por usuario
                     .get();
 
                 if (q.empty) {
                     reservaMsg.textContent = "No se encontró la reserva para anular.";
                     return;
                 }
-
+                //console.log("Reservas encontradas:", q.docs.map(d => d.data()));
+                // 3. Actualizar estado a "anulada" y contar cuántas se anulan
                 let reservasAnuladas = 0;
                 const updatePromises = [];
                 const reservasImplicadas = [];
@@ -600,23 +853,28 @@
                     const reserva = doc.data();
                     reservasImplicadas.push({
                         id: doc.id,
-                        fecha: reserva.fecha.toDate().toISOString().split('T')[0],
+                        fecha: reserva.fecha.toDate().toISOString().split('T')[0], // YYYY-MM-DD
                         hora: reserva.hora
                     });
                 });
                 await Promise.all(updatePromises);
+                //console.log("Reservas anuladas:", reservasAnuladas);
 
+                // 4. Sumar clases a los créditos del usuario
                 const clasesASumar = reservasAnuladas;
 
+                // Obtener créditos actuales
                 const userDocRef = db.collection("usuarios_registrados").doc(usuarioActual.id);
                 const userDoc = await userDocRef.get();
                 const datos = userDoc.data();
                 const creditosActuales = datos && typeof datos.creditos === "number" ? datos.creditos : 0;
 
+                // Actualizar créditos
                 await userDocRef.update({
                     creditos: creditosActuales + clasesASumar
                 });
 
+                // Llama al log de creditos
                 await logCredito({
                     usuarioId: datos.usuarioId,
                     email: datos.email,
@@ -627,6 +885,7 @@
                     reservasImplicadas: reservasImplicadas
                 });
 
+                // (Opcional) Actualizar visualización de créditos
                 if (typeof mostrarCreditosUsuario === "function") {
                     mostrarCreditosUsuario();
                 }
@@ -635,8 +894,41 @@
                 reservaMsg.innerHTML = `Reserva anulada correctamente.<br>Se han sumado ${clasesASumar} clases a tus créditos.`;
                 calendar.render();
             } catch (error) {
+                //console.error("Error al anular la reserva:", error);
                 alert("Error al anular la reserva.");
             }
+        }
+
+
+        function parseFechaFirestore(fechaStr) {
+            // Traducir el mes de español a inglés
+            const meses = {
+                'enero': 'Enero', 'febrero': 'Febrero', 'marzo': 'Marzo', 'abril': 'Abril', 'mayo': 'Mayo',
+                'junio': 'Junio', 'julio': 'Julio', 'agosto': 'Agosto', 'septiembre': 'Septiembre', 'octubre': 'Octubre',
+                'noviembre': 'Noviembre', 'diciembre': 'Diciembre'
+            };
+            let fechaEn = fechaStr;
+            for (let [es, en] of Object.entries(meses)) {
+                if (fechaEn.includes(es)) {
+                    fechaEn = fechaEn.replace(es, en);
+                    break;
+                }
+            }
+            // Eliminar 'UTC+2' y ajustar am/pm
+            fechaEn = fechaEn.split(' UTC')[0]
+                .replace(' a.m.', ' AM')
+                .replace(' p.m.', ' PM')
+                .replace(' de ', ' ');
+
+            // Parsear a Date
+            // Ejemplo: '12 May 2025, 2:00:00 AM'
+            const fechaDate = new Date(Date.parse(fechaEn));
+
+            // Ajustar a UTC si es necesario (ejemplo: restar 2 horas si era UTC+2)
+            // En este ejemplo, la hora ya está en local, así que para UTC:
+            fechaDate.setHours(fechaDate.getHours() - 2);
+
+            return fechaDate;
         }
 
         async function logCredito({
@@ -644,7 +936,7 @@
             email,
             perfil,
             creditosAntes,
-            tipo,
+            tipo, // "sumar" o "restar"
             creditosDespues,
             reservasImplicadas
         }) {
@@ -659,6 +951,7 @@
                     creditosDespues,
                     reservasImplicadas
                 });
+                //console.log("Log de crédito guardado correctamente");
             } catch (error) {
                 console.error("Error al guardar el log de créditos:", error);
             }
@@ -674,28 +967,27 @@
         const closeInfoBtn = document.querySelector('.closeInfo');
 
         const infoNormas = `<h3>Normas de las clases practicas</h3>
-        <ul>
-            <li><strong>No asistencia:</strong> Si por alguna circunstacia no pudieras asistir a una clase práctica, deberás avisar al profesor al menos con 24 horas de antelacion para que pueda cubrir ese hueco. Si no lo hicieras, tendriás que abonar la clase práctica y perderías tu hora de clase.</li>
-            <li><strong>Presentacion a examén:</strong> Antes de ir al examén práctico, debes dejarlo todo abonado.</li>
-            <li><strong>Minimo de clases prácticas:</strong> La autoescuela te obliga para a dar un minimo de 3 clases prácticasde 80 minutos.</li>
-            <li><strong>Horario de clases:</strong> La clase práctica comineza a la hora fijada y termina a la hora fijada. En caso de impuntualidad por parte del alumnado será éste el que pierda minutos de clase.</li>
-        </ul>
-        `;
+<ul>
+        <li><strong>No asistencia:</strong> Si por alguna circunstacia no pudieras asistir a una clase práctica, deberás avisar al profesor al menos con 24 horas de antelacion para que pueda cubrir ese hueco. Si no lo hicieras, tendriás que abonar la clase práctica y perderías tu hora de clase.</li>
+        <li><strong>Presentacion a examén:</strong> Antes de ir al examén práctico, debes dejarlo todo abonado.</li>
+        <li><strong>Minimo de clases prácticas:</strong> La autoescuela te obliga para a dar un minimo de 3 clases prácticasde 80 minutos.</li>
+        <li><strong>Horario de clases:</strong> La clase práctica comineza a la hora fijada y termina a la hora fijada. En caso de impuntualidad por parte del alumnado será éste el que pierda minutos de clase.</li>
+</ul>
+`;
 
         const btnAyuda = document.getElementById('btnAyuda');
         const popupAyuda = document.getElementById('popupAyuda');
         const closeAyudaBtn = document.querySelector('.closeAyuda');
 
         const ayudaCalendario = `<h3>Uso de las reservas para las practicas</h3>
-        <p>Aquí puedes ver todas las reservas solicitadas al profesor de practicas. Verás el numero de clases que te quedan por realizar. Podrás solicitar practicas, anularlas y ver si el profesor las ha confirmado.</p>
-        <ul>
-            <li><strong>Calendario:</strong> Podrás ver todas las peticiones de reservas al profesor de practicas solicitadas por todos los alumnos, ya esten pendientes de confirmar por él, ó bien ya confirmadas.</li>
-            <li><strong>Nueva solicitud de reserva:</strong> Podrás solicitar una reserva, eligiendo el dia y hora. Si chequeas la opcion de "Reservar este horario para 5 dias seguidos" se haran reserva de 5 dias a partir del dia elegido y a la misma hora.</li>
-            <li><strong>Mis solicitudes de reserva:</strong> Visualizarás un listado con sólo tus solicitudes de reservas de prácticas. En el listado podrás anular las solicitudes, ya estén en el estado de "pendientes" ó "confirmadas". Pero estas últimas tiene un límite para su anulación de hasta 24 horas antes del dia y hora de las reserva.</li>
-            <li><strong>Reservas del día:</strong> Si haces clic en una fecha del calendario, visualizaras en este apartado todas las reservas solicitadas por todos los alumnos para ese dia tanto si están pendientes como confirmadas.</li>
-        </ul>
-        `;
-
+<p>Aquí puedes ver todas las reservas solicitadas al profesor de practicas. Verás el numero de clases que te quedan por realizar. Podrás solicitar practicas, anularlas y ver si el profesor las ha confirmado.</p>
+<ul>
+        <li><strong>Calendario:</strong> Podrás ver todas las peticiones de reservas al profesor de practicas solicitadas por todos los alumnos, ya esten pendientes de confirmar por él, ó bien ya confirmadas.</li>
+        <li><strong>Nueva solicitud de reserva:</strong> Podrás solicitar una reserva, eligiendo el dia y hora. Si chequeas la opcion de "Reservar este horario para 5 dias seguidos" se haran reserva de 5 dias a partir del dia elegido y a la misma hora.</li>
+        <li><strong>Mis solicitudes de reserva:</strong> Visualizarás un listado con sólo tus solicitudes de reservas de prácticas. En el listado podrás anular las solicitudes, ya estén en el estado de "pendientes" ó "confirmadas". Pero estas últimas tiene un límite para su anulación de hasta 24 horas antes del dia y hora de las reserva.</li>
+        <li><strong>Reservas del día:</strong> Si haces clic en una fecha del calendario, visualizaras en este apartado todas las reservas solicitadas por todos los alumnos para ese dia tanto si están pendientes como confirmadas.</li>
+</ul>
+`;
         closeVacacionesBtn.addEventListener('click', () => {
             popupHolidays.style.display = 'none';
         });
@@ -709,6 +1001,7 @@
         });
 
         btnInfo.addEventListener('click', () => {
+            // 1. Confirma informacion de las normas
             db.collection("usuarios_registrados").doc(usuarioActual.id).update({ info: true });
             popupInfo.style.display = 'none';
         });
@@ -717,12 +1010,13 @@
             popupInfo.style.display = 'none';
         });
 
+        // Cierra el popup si se hace clic fuera del contenido
         popupAyuda.addEventListener('click', (e) => {
             if (e.target === popupAyuda) {
                 popupAyuda.style.display = 'none';
             }
         });
-    </script>
 
+    </script>
 </body>
 </html>
