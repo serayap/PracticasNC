@@ -458,14 +458,14 @@
                             <button onclick="anularReserva('${r.fecha}', '${r.hora}', 'confirmada')" class="cta-btn-confirmada">confirmada</button>
                         </div>`;
                         }
-                    } else if (r.estado === 'anulada') {
+                    } /*else if (r.estado === 'anulada') {
                         contenidoHTML = `
                     <div class="reserva-item-compacta">
                         <span class="reserva-fecha">📅 ${fechaTexto}</span>
                         <span class="reserva-hora">⏰ ${r.hora}</span>
                         <div class="cta-btn" style="background: linear-gradient(90deg, #ff6a6a 30%, #ffe0e0 100%)">anulada</div>
                     </div>`;
-                    }
+                    }*/
 
                     div.innerHTML = contenidoHTML;
                     lista.appendChild(div);
@@ -598,15 +598,18 @@
                 return;
             }
 
+            // 4. Verificar créditos
             if (creditos < creditosNecesarios) {
                 reservaMsg.style.color = "#d32f2f";
                 reservaMsg.innerHTML = `No tienes clases suficientes para reservar.<br>Necesitas: ${creditosNecesarios} clases. Dispones: ${creditos} clases`;
                 return;
             }
 
+            // 5.1. Verificar reserva existente del usuario
             const fechasFirestore = fechas.map(fecha => firebase.firestore.Timestamp.fromDate(new Date(fecha)));
             const reservasExistentesSnap = await db.collection('reservas')
-                .where('fecha', 'in', fechasFirestore)
+                .where('usuarioId', '==', usuarioActual.uid)
+                .where('fecha', '==', fechasFirestore)
                 .where('hora', '==', hora)
                 .where('estado', 'in', ['confirmada', 'pendiente'])
                 .get();
@@ -623,6 +626,7 @@
                 }
             }
 
+            // 5.2. Verificar reserva confirmada de otro usuario
             const reservasConfirmadasSnap = await db.collection('reservas')
                 .where('fecha', 'in', fechasFirestore)
                 .where('hora', '==', hora)
@@ -636,6 +640,7 @@
                 return;
             }
 
+            // 6. Crear reservas
             const reservasImplicadas = [];
             const batch = db.batch();
 
@@ -657,16 +662,21 @@
                 });
             }
 
+            // 7. Actualizar créditos
             const nuevosCreditos = creditos - creditosNecesarios;
             batch.update(db.collection("usuarios_registrados").doc(usuarioDoc.id), {
                 creditos: nuevosCreditos
             });
+
+            // Ejecutar batch
             await batch.commit();
 
+            // 8. Actualizar UI
             if (typeof mostrarCreditosUsuario === "function") {
                 mostrarCreditosUsuario();
             }
 
+            // 9. Registrar en log
             await logCredito({
                 usuarioId: datos.usuarioId,
                 email: datos.email || usuarioActual.email,
@@ -677,10 +687,12 @@
                 reservasImplicadas: reservasImplicadas
             });
 
+            // 10. Mensaje de éxito
             reservaMsg.style.color = "#388e3c";
             reservaMsg.innerHTML = "Reserva(s) solicitada(s) correctamente.<br>RECUERDA: cuando se confirme, tienes hasta 24 horas antes para anularla.";
             document.getElementById('formReserva').reset();
 
+            // 11. Actualizar calendario si es necesario
             if (typeof calendar !== 'undefined' && typeof calendar.render === 'function') {
                 calendar.render();
             }
