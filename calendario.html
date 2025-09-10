@@ -59,8 +59,10 @@
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
                     usuarioActual.uid = user.uid;
+                    //usuarioActual.uid = ""; //prueba con otro uid
                     usuarioActual.info = q.docs[0].data().info;
-                    
+                    //console.log(usuarioActual.uid);
+
                     // Control de acceso por perfil
                     if (usuarioActual.perfil !== "alumno") {
                         window.location.href = "index.html";
@@ -472,7 +474,18 @@
                 });
         }
 
-
+        // Función para saber si faltan menos de 24h para la reserva
+        function esMenosDe24Horas(fechaStr, horaStr) {
+            // fechaStr: 'YYYY-MM-DD', horaStr: 'HH:MM a HH:MM'
+            const ahora = new Date();
+            const [anio, mes, dia] = fechaStr.split('-').map(Number);
+            const horaInicioStr = horaStr.split('a')[0].trim(); // "HH:MM"
+            const [h, m] = horaInicioStr.split(':').map(Number);
+            const fechaHoraReserva = new Date(anio, mes - 1, dia, h, m, 0, 0);
+            const diferenciaMs = fechaHoraReserva - ahora;
+            const horasRestantes = diferenciaMs / (1000 * 60 * 60);
+            return horasRestantes < 24;
+        }
 
         async function cargarReservas() {
             if (!usuarioActual?.uid) {
