@@ -572,6 +572,19 @@
 
             const dia = document.getElementById('dia').value;
             const hora = document.getElementById('hora').value.trim();
+
+            // --- Restricción tardes de viernes ---
+            const fechaDiaObj = new Date(dia);
+            const esViernes = fechaDiaObj.getDay() === 5; // viernes = 5
+            // Hora en formato "hh:mm", por ejemplo "16:30"
+            const [horaSolicitada, minutosSolicitados] = hora.split(":").map(Number);
+
+            if (esViernes && (horaSolicitada > 15 || (horaSolicitada === 15 && minutosSolicitados > 0))) {
+                reservaMsg.style.color = "#d32f2f";
+                reservaMsg.innerHTML = "No está permitido reservar horas posteriores a las 15:00h los viernes. Selecciona otro horario.";
+                return;
+            }
+
             const bloque = document.getElementById('bloqueSemana').checked;
             let fechas = [dia];
 
