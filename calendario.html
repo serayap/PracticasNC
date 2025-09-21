@@ -354,71 +354,111 @@
                     if (reservas.confirmadas > 0) dotc = `<span style="display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #4CAF50;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.confirmadas}</span>`;
                     return { html: info.dayNumberText + dote + dotp + dotc };
                 },
-                dateClick: info => cargarReservasDelDia(info.dateStr)
+                dateClick: info => cargarReservasDelDia(info.dateStr, "listado")
             });
             calendar.render();
         }     
 
         // --- Carga reservas para un día con caché dual (memoria + localStorage) para ahorro de lecturas ---
-        async function cargarReservasDelDia(fechaStr) {
-            const lista = document.getElementById('lista-reservas-dia');
-            lista.innerHTML = '<div class="cargando">Cargando...</div>';
+        async function cargarReservasDelDia(fechaStr, tipo) {
+            if (tipo == "listado") {
+                const lista = document.getElementById('lista-reservas-dia');
+                lista.innerHTML = '<div class="cargando">Cargando...</div>';
 
-            const cacheKey = `reservasDia_${fechaStr}`;
-            const cacheTTL = 3600 * 1000; // 1 hora
+                const cacheKey = `reservasDia_${fechaStr}`;
+                const cacheTTL = 3600 * 1000; // 1 hora
 
-            // Primero revisar caché localStorage con control de caducidad
-            const cacheRaw = localStorage.getItem(cacheKey);
-            if (cacheRaw) {
-                try {
-                    const cacheObj = JSON.parse(cacheRaw);
-                    if (Date.now() - cacheObj.timestamp < cacheTTL) {
-                        mostrarReservasEnLista(cacheObj.data);
-                        return;
-                    } else {
+                // Primero revisar caché localStorage con control de caducidad
+                const cacheRaw = localStorage.getItem(cacheKey);
+                if (cacheRaw) {
+                    try {
+                        const cacheObj = JSON.parse(cacheRaw);
+                        if (Date.now() - cacheObj.timestamp < cacheTTL) {
+                            mostrarReservasEnLista(cacheObj.data);
+                            return;
+                        } else {
+                            localStorage.removeItem(cacheKey);
+                        }
+                    } catch {
                         localStorage.removeItem(cacheKey);
                     }
-                } catch {
-                    localStorage.removeItem(cacheKey);
+                }
+
+                // No hay caché válida, consulta Firebase
+                try {
+                    const tituloDia = document.getElementById('tituloReservasDia');
+                    if (tituloDia) {
+                        const fecha = new Date(fechaStr);
+                        tituloDia.textContent = `Reservas del ${formatDateForDisplay(fecha)}`;
+                    }
+                    const fechaInicio = new Date(fechaStr + 'T00:00:00');
+                    const fechaFin = new Date(fechaStr + 'T23:59:59');
+                    const q = db.collection("reservas")
+                        .where("fecha", ">=", fechaInicio)
+                        .where("fecha", "<=", fechaFin)
+                        .where('estado', 'in', ['confirmada', 'pendiente', 'examen']);
+                    const querySnapshot = await q.get();
+
+                    if (querySnapshot.empty) {
+                        lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día</em></div>';
+                        localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: [] }));
+                        cacheReservasPorDia[fechaStr] = [];
+                        return;
+                    }
+
+                    const reservas = [];
+                    querySnapshot.forEach(doc => {
+                        const r = doc.data();
+                        if (typeof r.hora === 'string') reservas.push(r);
+                    });
+
+                    reservas.sort((a, b) => horaAminutos(a.hora) - horaAminutos(b.hora));
+                    cacheReservasPorDia[fechaStr] = reservas;
+                    localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: reservas }));
+
+                    mostrarReservasEnLista(reservas);
+                } catch (error) {
+                    console.error("Error:", error);
+                    lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
                 }
             }
-
-            // No hay caché válida, consulta Firebase
-            try {
-                const tituloDia = document.getElementById('tituloReservasDia');
-                if (tituloDia) {
-                    const fecha = new Date(fechaStr);
-                    tituloDia.textContent = `Reservas del ${formatDateForDisplay(fecha)}`;
-                }
+            if (tipo == "contar") {
                 const fechaInicio = new Date(fechaStr + 'T00:00:00');
                 const fechaFin = new Date(fechaStr + 'T23:59:59');
                 const q = db.collection("reservas")
                     .where("fecha", ">=", fechaInicio)
                     .where("fecha", "<=", fechaFin)
                     .where('estado', 'in', ['confirmada', 'pendiente', 'examen']);
+
                 const querySnapshot = await q.get();
 
-                if (querySnapshot.empty) {
-                    lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día</em></div>';
-                    localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: [] }));
-                    cacheReservasPorDia[fechaStr] = [];
-                    return;
+                // Inicializa conteos
+                const conteos = {
+                    confirmadas: 0,
+                    pendientes: 0,
+                    examen: 0
+                };
+
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        switch (data.estado) {
+                            case 'confirmada':
+                                conteos.confirmadas++;
+                                break;
+                            case 'pendiente':
+                                conteos.pendientes++;
+                                break;
+                            case 'examen':
+                                conteos.examen++;
+                                break;
+                        }
+                    });
                 }
 
-                const reservas = [];
-                querySnapshot.forEach(doc => {
-                    const r = doc.data();
-                    if (typeof r.hora === 'string') reservas.push(r);
-                });
-
-                reservas.sort((a, b) => horaAminutos(a.hora) - horaAminutos(b.hora));
-                cacheReservasPorDia[fechaStr] = reservas;
-                localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: reservas }));
-
-                mostrarReservasEnLista(reservas);
-            } catch (error) {
-                console.error("Error:", error);
-                lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
+                reservasTodas[fechaStr].confirmadas = conteos.confirmadas;
+                reservasTodas[fechaStr].pendientes = conteos.pendientes;
+                reservasTodas[fechaStr].examen = conteos.examen;
             }
         }
 
@@ -596,13 +636,10 @@
             tituloDia.textContent = "Reservas del dia";
             const dia = document.getElementById('dia').value;
             const hora = document.getElementById('hora').value.trim();
-
-            // --- Restricción tardes de viernes ---
+                        
             const fechaDiaObj = new Date(dia);
-            const esViernes = fechaDiaObj.getDay() === 5; // viernes = 5
-            // Hora en formato "hh:mm", por ejemplo "16:30"
+            const esViernes = fechaDiaObj.getDay() === 5;
             const [horaSolicitada, minutosSolicitados] = hora.split(":").map(Number);
-
             if (esViernes && (horaSolicitada > 15 || (horaSolicitada === 15 && minutosSolicitados > 0))) {
                 reservaMsg.style.color = "#d32f2f";
                 reservaMsg.innerHTML = "No está permitido reservar horas posteriores a las 15:00h los viernes. Selecciona otro horario.";
@@ -611,7 +648,6 @@
 
             const bloque = document.getElementById('bloqueSemana').checked;
             let fechas = [dia];
-
             const usuarioDoc = await getUsuarioRegistradoDoc(usuarioActual.uid);
             if (!usuarioDoc || !usuarioDoc.exists) {
                 reservaMsg.style.color = "#d32f2f";
@@ -634,8 +670,8 @@
                     }
                 }
             }
-            const creditosNecesarios = fechas.length;
 
+            const creditosNecesarios = fechas.length;
             const vacacionesprofe = await db.collection('usuarios_registrados')
                 .where('perfil', '==', 'profesor')
                 .get();
@@ -655,37 +691,87 @@
             }
 
             const fechasFirestore = fechas.map(fecha => firebase.firestore.Timestamp.fromDate(new Date(fecha)));
-
-            // Validaciones omitidas para brevedad: reservas existentes, reservas confirmadas de otro usuario
+            const existereservaSnap = await db.collection('reservas')
+                .where('fecha', 'in', fechasFirestore)
+                .where('hora', '==', hora)
+                .get();
+            const reservasFiltradas = existereservaSnap.docs.filter(doc => {
+                const estado = doc.data().estado;
+                return estado === 'confirmada' || estado === 'pendiente';
+            });
+            const hayConfirmada = reservasFiltradas.some(doc => doc.data().estado === 'confirmada');
+            const hayPendienteUsuario = reservasFiltradas.some(doc => doc.data().estado === 'pendiente' && doc.data().usuarioId === usuarioActual.uid);
+            if (hayConfirmada) {
+                reservaMsg.style.color = "#d32f2f";
+                reservaMsg.innerHTML = `Ya existe una reserva confirmada para una de esas fechas a las ${hora}.<br>Por favor, selecciona otro tramo.`;
+                return;
+            }
+            if (hayPendienteUsuario) {
+                reservaMsg.style.color = "#d32f2f";
+                reservaMsg.innerHTML = `Ya tienes una reserva para el día seleccionado a esta hora.<br>No puedes reservar más en la misma fecha y hora.`;
+                return;
+            }
 
             const batch = db.batch();
             const reservasImplicadas = [];
             for (const fecha of fechas) {
                 const reservaRef = db.collection('reservas').doc();
+
                 batch.set(reservaRef, {
                     usuarioId: usuarioActual.uid,
                     usuarioNombre: datos.nombre || usuarioActual.email,
-                    usuarioApellidos: datos.Apellidos,
+                    usuarioApellidos: datos.Apellidos || "",
                     fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
                     hora: hora,
                     estado: 'pendiente',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 reservasImplicadas.push({ id: reservaRef.id, fecha, hora });
-            }
-            batch.update(db.collection("usuarios_registrados").doc(usuarioDoc.id), { creditos: creditos - creditosNecesarios });
-            await batch.commit();
+                                
+                const existe = reservasTodas[fecha].reservas.some(r =>
+                    r.usuarioId === datos.usuarioId && r.fecha.seconds === firebase.firestore.Timestamp.fromDate(new Date(fecha)).seconds && r.hora === hora);
+                if (!existe) {
+                    reservasTodas[fecha].reservas.push({
+                        usuarioId: datos.usuarioId,
+                        usuarioNombre: datos.nombre || usuarioActual.email,
+                        usuarioApellidos: datos.Apellidos || "",
+                        fecha: firebase.firestore.Timestamp.fromDate(new Date(fecha)),
+                        hora: hora,
+                        estado: 'pendiente',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
 
-            // Limpieza explícita de caché tras crear reserva:
+                    console.log("pendientes antes: " + reservasTodas[fecha].pendientes);
+                    console.log("confirmadas antes: " + reservasTodas[fecha].confirmadas);
+                    cargarReservasDelDia(fecha, "contar");
+                    console.log("pendientes despues: " + reservasTodas[fecha].pendientes);
+                    console.log("confirmadas adespuesntes: " + reservasTodas[fecha].confirmadas);
+                }               
+
+            }
+
+            batch.update(db.collection("usuarios_registrados").doc(usuarioActual.id), { creditos: creditos - creditosNecesarios });
+
+            try {
+                await batch.commit();
+                console.log("Batch commit exitoso, reservas creadas.");                
+                if (calendar) calendar.render();
+                //calendar.destroy();
+                //inicializarCalendario();
+
+            } catch (error) {
+                console.error("Error al hacer commit del batch:", error);
+                reservaMsg.style.color = "#d32f2f";
+                reservaMsg.textContent = "Error al crear las reservas, inténtalo más tarde.";
+                return;
+            }
+
             fechas.forEach(fecha => localStorage.removeItem(`reservasDia_${fecha}`));
             localStorage.removeItem(`usuarioDoc_${usuarioActual.uid}`);
 
-            // Refrescar UI y datos de usuario:
             await mostrarCreditosUsuario();
-            if (typeof calendar !== 'undefined' && typeof calendar.render === 'function') calendar.render();
-            cargarReservas();
+            //cargarReservas();
 
-            // Registrar log crédito
             await logCredito({
                 usuarioId: datos.usuarioId,
                 email: datos.email || usuarioActual.email,
@@ -701,6 +787,8 @@
             document.getElementById('formReserva').reset();
         }
 
+
+
         // --- Función para eliminar reservas y devolver créditos correctamente ---
         async function anularReserva(fechaStr, hora, estado) {
             try {
@@ -710,14 +798,12 @@
                 tituloDia.textContent = "Reservas del dia";
 
                 const [anio, mes, dia] = fechaStr.split('-').map(Number);
-                //const inicioDia = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 0, 0, 0, 0));
-                //const finDia = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 23, 59, 59, 999));
-                const fechaBuscada = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 0, 0, 0, 0));
-
+                const inicioDia = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 0, 0, 0, 0));
+                const finDia = firebase.firestore.Timestamp.fromDate(new Date(anio, mes - 1, dia, 23, 59, 59, 999));
+                                
                 const q = await db.collection("reservas")
-                    //.where("fecha", ">=", inicioDia)
-                    //.where("fecha", "<=", finDia)
-                    .where("fecha", "==", fechaBuscada)
+                    .where("fecha", ">=", inicioDia)
+                    .where("fecha", "<=", finDia)
                     .where("hora", "==", hora)
                     .where("estado", "==", estado)
                     .where("usuarioId", "==", usuarioActual.uid.trim())
@@ -784,7 +870,13 @@
                 //reservaMsg.innerHTML = `Reserva eliminada correctamente.<br>Se han sumado ${reservasEliminadas} clases a tus créditos.`;
                 reservaMsg.innerHTML = `Reserva eliminada correctamente.<br>Se han sumado una clase a tus créditos.`;
 
-                if (calendar) calendar.render();
+                if (reservasTodas[fechaStr] && reservasTodas[fechaStr][estado] > 0) {
+                    reservasTodas[fechaStr][estado] = (reservasTodas[fechaStr][estado] || 0) - 1;
+                }
+
+                //if (calendar) calendar.render();
+                calendar.destroy();
+                inicializarCalendario();
             } catch (error) {
                 alert("Error al eliminar la reserva.");
                 console.error("Error en anularReserva:", error);
