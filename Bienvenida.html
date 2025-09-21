@@ -95,7 +95,7 @@
 <body>
     <div class="container">
         <div class="icon">🚗</div>
-        <div class="bienvenida" id="saludo">¡Bienvenido!</div>
+        <div class="bienvenida" id="saludo">¡Bienvenid@!</div>
         <div class="info"> a la reserva de las clases prácticas de autoescuela</div>
         <div class="info"><strong> Nuevos Conductores </strong></div>
             <div class="user-email" id="userEmail"></div>
@@ -128,8 +128,8 @@
                     const nombre = capitalizarPrimeraLetra(user.displayName || "");
                     const email = user.email || "";
                     document.getElementById('saludo').textContent = nombre
-                        ? `¡Bienvenido, ${nombre}!`
-                        : "¡Bienvenido!";
+                        ? `¡Bienvenid@, ${nombre}!`
+                        : "¡Bienvenid@!";
                     document.getElementById('userEmail').textContent = email;
                 }
             }); 
