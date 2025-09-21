@@ -423,6 +423,12 @@
                 }
             }
             if (tipo == "contar") {
+                /*console.log("confirmadas antes: " + reservasTodas[fechaStr].confirmadas);
+                console.log("pendientes antes: " + reservasTodas[fechaStr].pendientes);*/
+
+                //reservasTodas[fechaStr].pendientes = conteos.pendientes;
+                //reservasTodas[fechaStr].examen = conteos.examen;
+
                 const fechaInicio = new Date(fechaStr + 'T00:00:00');
                 const fechaFin = new Date(fechaStr + 'T23:59:59');
                 const q = db.collection("reservas")
@@ -459,6 +465,11 @@
                 reservasTodas[fechaStr].confirmadas = conteos.confirmadas;
                 reservasTodas[fechaStr].pendientes = conteos.pendientes;
                 reservasTodas[fechaStr].examen = conteos.examen;
+
+                if (calendar) calendar.render();
+
+                /*console.log("confirmadas despues: " + reservasTodas[fechaStr].confirmadas);
+                console.log("pendientes despues: " + reservasTodas[fechaStr].pendientes);*/
             }
         }
 
@@ -741,11 +752,7 @@
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
-                    console.log("pendientes antes: " + reservasTodas[fecha].pendientes);
-                    console.log("confirmadas antes: " + reservasTodas[fecha].confirmadas);
                     cargarReservasDelDia(fecha, "contar");
-                    console.log("pendientes despues: " + reservasTodas[fecha].pendientes);
-                    console.log("confirmadas adespuesntes: " + reservasTodas[fecha].confirmadas);
                 }               
 
             }
@@ -755,7 +762,7 @@
             try {
                 await batch.commit();
                 console.log("Batch commit exitoso, reservas creadas.");                
-                if (calendar) calendar.render();
+                //if (calendar) calendar.render();
                 //calendar.destroy();
                 //inicializarCalendario();
 
@@ -864,19 +871,17 @@
                     creditosDespues: creditosActuales + 1,
                     reservasImplicadas
                 });
-
-                if (typeof mostrarCreditosUsuario === "function") mostrarCreditosUsuario();
+                
                 reservaMsg.style.color = "#388e3c";
                 //reservaMsg.innerHTML = `Reserva eliminada correctamente.<br>Se han sumado ${reservasEliminadas} clases a tus créditos.`;
                 reservaMsg.innerHTML = `Reserva eliminada correctamente.<br>Se han sumado una clase a tus créditos.`;
 
-                if (reservasTodas[fechaStr] && reservasTodas[fechaStr][estado] > 0) {
-                    reservasTodas[fechaStr][estado] = (reservasTodas[fechaStr][estado] || 0) - 1;
-                }
+                if (typeof mostrarCreditosUsuario === "function") mostrarCreditosUsuario();
+                cargarReservasDelDia(fechaStr, "contar");
 
                 //if (calendar) calendar.render();
-                calendar.destroy();
-                inicializarCalendario();
+                //calendar.destroy();
+                //inicializarCalendario();
             } catch (error) {
                 alert("Error al eliminar la reserva.");
                 console.error("Error en anularReserva:", error);
