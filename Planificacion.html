@@ -565,25 +565,27 @@
         const settings = { experimentalForceLongPolling: true, merge: true };
         db.settings(settings);
 
-        function clearCollection(path) {
+        /*function clearCollection(path) {
             const ref = db.collection(path)
             ref.onSnapshot((snapshot) => {
                 snapshot.docs.forEach((doc) => {
                     ref.doc(doc.id).delete()
                 })
             })
-        }
+        }*/
 
         //clearCollection('creditos')
 
         // Tramos horarios como en tu select
         let timeSlots = []; // Inicialmente vacío
 
-        async function cargarTimeSlotsANT() {
-            timeSlots = ["07:30 a 08:50", "08:50 a 10:10", "10:10 a 11:30", "11:30 a 12:50", "12:50 a 14:10", "15:10 a 16:30", "16:30 a 17:50", "17:50 a 19:10", "19:10 a 20:30", "20:30 a 21:50"];
+        async function cargarTimeSlots() {
+            timeSlots = ["07:30 a 08:50", "08:50 a 10:10", "10:10 a 11:30", "11:30 a 12:50", "12:50 a 14:10", "14:10 a 15:10", "15:10 a 16:30", "16:30 a 17:50", "17:50 a 19:10", "19:10 a 20:30", "20:30 a 21:50"];
+            createCalendar();
+            cargarHoras();
         }
 
-        async function cargarTimeSlots() {
+        async function cargarTimeSlotsANT() {
             try {
                 const doc = await db.collection("configuracion").doc("horarios").get();
                 if (doc.exists && Array.isArray(doc.data().slots)) {
@@ -827,7 +829,7 @@
                         reservaElement.dataset.reservaId = reserva.id; // Añade el id
                         reservaElement.dataset.estado = estado;
                         reservaElement.dataset.email = reserva.usuarioEmail || ''; // Si tienes el email                                                   
-                       
+
                         if (estado === 'pendiente' || estado === 'confirmada' || estado === 'examen') {
                             reservaElement.addEventListener('click', function (e) {
                                 e.stopPropagation();
@@ -836,6 +838,10 @@
                         }
 
                         cell.appendChild(reservaElement);
+                    } else {
+                        if (hora == "14:40 a 15:10") {
+                            reservaElement.innerHTML = `<span style="blackground: grey;"></span>`;
+                        }                        
                     }
                 });
 
@@ -966,14 +972,14 @@
                 if (!reservaDoc.exists) throw new Error("Reserva no encontrada");
                 const reservaData = reservaDoc.data();
                 const usuarioId = reservaData.usuarioId;
-                const fechaConfirmada = reservaData.fecha; // Timestamp de Firestore
+                //const fechaConfirmada = reservaData.fecha; // Timestamp de Firestore
 
                 // 3. Busca reservas pendientes del mismo usuario en días anteriores
-                const reservasPendientes = await db.collection("reservas")
+                /*const reservasPendientes = await db.collection("reservas")
                     .where("usuarioId", "==", usuarioId)
                     .where("estado", "==", "pendiente")
                     .where("fecha", "<=", fechaConfirmada)
-                    .get();
+                    .get();*/
 
                 // 4. Construye el array de reservas implicadas
                 const reservasImplicadas = [{
@@ -983,7 +989,7 @@
                 }];
 
                 // 5. Anula todas esas reservas pendientes anteriores y añade al array
-                for (const doc of reservasPendientes.docs) {
+                /*for (const doc of reservasPendientes.docs) {
                     const dataPendiente = doc.data();
                     reservasImplicadas.push({
                         id: doc.id,
@@ -991,7 +997,7 @@
                         hora: dataPendiente.hora
                     });
                     await anularReservaProfesor(doc.id, dataPendiente.usuarioEmail);
-                }
+                }*/
 
                 // 6. Recupera los créditos antes y después de la operación
                 const userQuery = await db.collection("usuarios_registrados")
@@ -999,7 +1005,7 @@
                     .get();
 
                 if (!userQuery.empty) {
-                    const userDocRef = userQuery.docs[0].ref;
+                    //const userDocRef = userQuery.docs[0].ref;
                     const datos = userQuery.docs[0].data();
                     const creditosAntes = typeof datos.creditos === "number" ? datos.creditos : 0;
                     // Como anularReservaProfesor suma 80 por cada reserva anulada,
