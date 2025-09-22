@@ -726,6 +726,10 @@
             const batch = db.batch();
             const reservasImplicadas = [];
             for (const fecha of fechas) {
+                if (!reservasTodas[fecha]) {
+                    reservasTodas[fecha] = { confirmadas: 0, pendientes: 0, examen: 0, reservas: [] };
+                }
+
                 const reservaRef = db.collection('reservas').doc();
 
                 batch.set(reservaRef, {
