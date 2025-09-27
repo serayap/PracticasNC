@@ -342,7 +342,7 @@
         function escucharCreditosUsuarioPorId(uid) {
             console.log("Iniciando listener en docId:", uid);
             return db.collection('usuariosregistrados')
-                .doc(docId)
+                .doc(uid)
                 .onSnapshot(doc => {
                     if (doc.exists) {
                         console.log("Listener datos recibidos:", doc.data());
