@@ -71,6 +71,10 @@
                     document.body.classList.remove("oculto");
 
                     // Iniciar el listener para créditos
+                    if (unsubscribeCreditos) {
+                        unsubscribeCreditos(); // cancelar si existía escuchador
+                    }
+
                     unsubscribeCreditos = escucharCreditosUsuario(usuarioActual.uid);
 
                     if (document.readyState === 'loading') {                        
