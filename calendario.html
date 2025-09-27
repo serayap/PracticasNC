@@ -42,7 +42,6 @@
         const auth = firebase.auth();
         // Inicializa Firestore si no lo has hecho
         const db = firebase.firestore();
-        let unsubscribeCreditos = null;
 
         console.log("Auth state changed triggered");
 
@@ -72,15 +71,7 @@
                         return;
                     }
 
-                    document.body.classList.remove("oculto");
-
-                    // Iniciar el listener para créditos
-                    if (unsubscribeCreditos) {
-                        unsubscribeCreditos(); // cancelar si existía escuchador
-                        console.log("Listener anterior cancelado");
-                    }
-
-                    unsubscribeCreditos = escucharCreditosUsuarioPorId(usuarioActual.uid);
+                    document.body.classList.remove("oculto");                    
 
                     if (document.readyState === 'loading') {                        
                         document.addEventListener('DOMContentLoaded', actualizarUI);
@@ -336,26 +327,7 @@
             const nombre = capitalizarPrimeraLetra(datos.nombre || "");
             document.getElementById("creditosUsuario").textContent = `Clases para reservar de ${nombre}: ${creditos}`;
             if (!datos.info) popupInfo.style.display = 'flex';
-        }
-
-        // escucha los creditos del alumno recibiendo el nuevo creditos si se hubiera cambiado
-        function escucharCreditosUsuarioPorId(uid) {
-            console.log("Iniciando listener en docId:", uid);
-            return db.collection('usuariosregistrados')
-                .doc(uid)
-                .onSnapshot(doc => {
-                    if (doc.exists) {
-                        console.log("Listener datos recibidos:", doc.data());
-                        const datos = doc.data();
-                        document.getElementById('creditosUsuario').textContent = `Clases para reservar de ${datos.nombre}: ${datos.creditos || 0}`;
-                        localStorage.setItem(`usuarioDoc_${uid}`, JSON.stringify(datos));
-                    } else {
-                        console.warn("Documento usuario no existe en listener");
-                    }
-                }, error => {
-                    console.error("Error listener créditos:", error);
-                });
-        }
+        }        
 
 
         // --- Inicializa el calendario fullCalendar sin botones de mes para UI limpia ---
