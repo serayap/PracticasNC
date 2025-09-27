@@ -42,6 +42,7 @@
         const auth = firebase.auth();
         // Inicializa Firestore si no lo has hecho
         const db = firebase.firestore();
+        let unsubscribeCreditos = null;
 
         auth.onAuthStateChanged(async user => {
             if (!user) {
@@ -68,6 +69,9 @@
                     }
 
                     document.body.classList.remove("oculto");
+
+                    // Iniciar el listener para créditos
+                    unsubscribeCreditos = escucharCreditosUsuario(usuarioActual.uid);
 
                     if (document.readyState === 'loading') {                        
                         document.addEventListener('DOMContentLoaded', actualizarUI);
@@ -324,6 +328,21 @@
             document.getElementById("creditosUsuario").textContent = `Clases para reservar de ${nombre}: ${creditos}`;
             if (!datos.info) popupInfo.style.display = 'flex';
         }
+
+        // escucha los creditos del alumno recibiendo el nuevo creditos si se hubiera cambiado
+        function escucharCreditosUsuario(uid) {
+            return db.collection('usuariosregistrados').where('usuarioId', '==', uid)
+                .onSnapshot(snapshot => {
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        const datos = doc.data();
+                        const creditos = datos.creditos != null ? Number(datos.creditos) : 0;
+                        document.getElementById('creditosUsuario').textContent = `Clases para reservar de ${datos.nombre}: ${creditos}`;
+                        localStorage.setItem(`usuarioDoc_${uid}`, JSON.stringify(datos));
+                    }
+                });
+        }
+
 
         // --- Inicializa el calendario fullCalendar sin botones de mes para UI limpia ---
         function inicializarCalendario() {
