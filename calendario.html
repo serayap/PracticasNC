@@ -341,9 +341,12 @@
                         const doc = snapshot.docs[0];
                         const datos = doc.data();
                         const creditos = datos.creditos != null ? Number(datos.creditos) : 0;
+                        console.log("Listener créditos recibido:", creditos);
                         document.getElementById('creditosUsuario').textContent = `Clases para reservar de ${datos.nombre}: ${creditos}`;
                         localStorage.setItem(`usuarioDoc_${uid}`, JSON.stringify(datos));
                     }
+                }, error => {
+                    console.error("Error listener créditos:", error);
                 });
         }
 
