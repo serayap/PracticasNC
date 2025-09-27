@@ -340,7 +340,7 @@
 
         // escucha los creditos del alumno recibiendo el nuevo creditos si se hubiera cambiado
         function escucharCreditosUsuario(uid) {
-            console.log("Listener anterior cancelado");
+            console.log("Iniciando listener en docId:", docId);
             return db.collection('usuariosregistrados').where('usuarioId', '==', uid)
                 .onSnapshot(snapshot => {
                     if (!snapshot.empty) {
