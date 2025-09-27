@@ -80,7 +80,7 @@
                         console.log("Listener anterior cancelado");
                     }
 
-                    unsubscribeCreditos = escucharCreditosUsuarioPorId(usuarioActual.id, usuarioActual.uid);
+                    unsubscribeCreditos = escucharCreditosUsuarioPorId(usuarioActual.uid);
 
                     if (document.readyState === 'loading') {                        
                         document.addEventListener('DOMContentLoaded', actualizarUI);
@@ -339,8 +339,8 @@
         }
 
         // escucha los creditos del alumno recibiendo el nuevo creditos si se hubiera cambiado
-        function escucharCreditosUsuarioPorId(docId, uid) {
-            console.log("Iniciando listener en docId:", docId);
+        function escucharCreditosUsuarioPorId(uid) {
+            console.log("Iniciando listener en docId:", uid);
             return db.collection('usuariosregistrados')
                 .doc(docId)
                 .onSnapshot(doc => {
