@@ -72,13 +72,15 @@
             try {
                 const q = await db.collection('usuarios_registrados')
                     .where('usuarioId', '==', user.uid)
+                    //.where('usuarioId', '==', '')
                     .get();
                 if (!q.empty) {
                     usuarioActual.id = q.docs[0].id;
                     usuarioActual.nombre = q.docs[0].data().nombre;
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
-                    usuarioActual.uid = user.uid;
+                    usuarioActual.uid = user.uid; 
+                    //usuarioActual.uid = '';
                     usuarioActual.creditos = q.docs[0].data().creditos;
                     usuarioActual.info = q.docs[0].data().info;
                     /*console.log("uid: " + usuarioActual.uid);
@@ -315,7 +317,7 @@
         // --- Obtiene el documento del usuario registrado con caché local para evitar lecturas repetidas ---
         // Cachea datos clave para sesión o navegación continua.
         async function getUsuarioRegistradoDoc(uid) {
-            const cacheKey = `usuarioDoc_${uid}`;
+            /*const cacheKey = `usuarioDoc_${uid}`;
             const cacheData = localStorage.getItem(cacheKey);
             if (cacheData) {
                 try {
@@ -324,16 +326,20 @@
                 } catch {
                     localStorage.removeItem(cacheKey);
                 }
+            }*/
+            //console.log(uid);
+            try {
+                const q = await db.collection("usuarios_registrados")
+                    .where("usuarioId", "==", uid)
+                    .get();
+                if (!q.empty) {
+                    return q.docs[0];
+                }
+                return null;
+            } catch (error) {
+                console.error("Error al obtener documento de usuario:", error);
+                return null;
             }
-            const q = await db.collection("usuarios_registrados")
-                .where("usuarioId", "==", uid)
-                .get();
-            if (!q.empty) {
-                const doc = q.docs[0];
-                localStorage.setItem(cacheKey, JSON.stringify(doc.data()));
-                return doc;
-            }
-            return null;
         }
         
         /*async function mostrarCreditosUsuario() {
