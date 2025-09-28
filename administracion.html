@@ -1229,6 +1229,7 @@
                     nombre: nombre,
                     perfil: "alumno",
                     creditos: 0,
+                    habilitado: true,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     info: false
                 });
@@ -1252,6 +1253,7 @@
             try {
                 const snapshot = await db.collection('usuarios_registrados')
                     .where("perfil", "==", "alumno")
+                    .where("habilitado", "==", true)
                     .orderBy("Apellidos")
                     .get();
 
@@ -1301,7 +1303,8 @@
             const confirmar = confirm('¿Seguro que quieres eliminar este alumno?');
             if (confirmar) {
                 try {
-                    await db.collection('usuarios_registrados').doc(id).delete();
+                    //await db.collection('usuarios_registrados').doc(id).delete();
+                    await db.collection('usuarios_registrados').doc(id).update({ habilitado: false });
                     //alert('Alumno eliminado correctamente');
                     cargarListadoAlumnos(); // Recarga la lista
                 } catch (error) {
