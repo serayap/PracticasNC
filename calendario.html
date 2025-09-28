@@ -40,7 +40,7 @@
 
         function escucharCreditosUsuario(docId) {
             console.log("docId: " + docId);
-            return db.collection('usuariosregistrados')
+            return db.collection('usuarios_registrados')
                 .doc(docId)
                 .onSnapshot(doc => {
                     if (doc.exists) {
