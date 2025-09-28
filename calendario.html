@@ -338,7 +338,7 @@
         async function mostrarCreditosUsuario() {
             try {
                 //const doc = await getUsuarioRegistradoDoc(usuarioActual.uid);
-                const doc = await db.collection('usuariosregistrados').doc(usuarioActual.id).get({ source: 'server' });
+                const doc = await db.collection('usuariosregistrados').doc(usuarioActual.uid).get({ source: 'server' });
                 if (!doc.exists) {
                     document.getElementById("creditosUsuario").textContent = "No disponible";
                     return;
