@@ -74,7 +74,7 @@
                     .where('usuarioId', '==', user.uid)
                     .get();
                 if (!q.empty) {
-                    usuarioActual.id = q.docs[0].data().id;
+                    usuarioActual.id = q.docs[0].id;
                     usuarioActual.nombre = q.docs[0].data().nombre;
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
