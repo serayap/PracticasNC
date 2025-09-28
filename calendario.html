@@ -92,7 +92,7 @@
                     document.body.classList.remove("oculto"); 
 
                     if (window.unsubscribeCreditos) window.unsubscribeCreditos();
-                    window.unsubscribeCreditos = escucharCreditosUsuario(usuarioActual.uid);
+                    window.unsubscribeCreditos = escucharCreditosUsuario(usuarioActual.id);
 
                     if (document.readyState === 'loading') {                        
                         document.addEventListener('DOMContentLoaded', actualizarUI);
