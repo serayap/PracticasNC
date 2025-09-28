@@ -63,8 +63,6 @@
         // Inicializa Firestore si no lo has hecho
         const db = firebase.firestore();
 
-        console.log("Auth state changed triggered");
-
         auth.onAuthStateChanged(async user => {
             if (!user) {
                 window.location.href = "index.html";
@@ -81,6 +79,7 @@
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
                     usuarioActual.uid = user.uid;
+                    usuarioActual.creditos = q.docs[0].data().creditos;
                     usuarioActual.info = q.docs[0].data().info;
                     // Control de acceso por perfil
                     if (usuarioActual.perfil !== "alumno") {
@@ -335,7 +334,7 @@
             return null;
         }
         
-        async function mostrarCreditosUsuario() {
+        /*async function mostrarCreditosUsuario() {
             try {
                 //const doc = await getUsuarioRegistradoDoc(usuarioActual.uid);
                 const doc = await db.collection('usuariosregistrados').doc(usuarioActual.uid).get({ source: 'server' });
@@ -354,7 +353,7 @@
                 document.getElementById('creditosUsuario').textContent = 'No disponible';
                 console.error('Error mostrando créditos:', err);
             }
-        }        
+        } */       
 
 
         // --- Inicializa el calendario fullCalendar sin botones de mes para UI limpia ---
@@ -812,7 +811,7 @@
             fechas.forEach(fecha => localStorage.removeItem(`reservasDia_${fecha}`));
             localStorage.removeItem(`usuarioDoc_${usuarioActual.uid}`);
 
-            await mostrarCreditosUsuario();
+            //await mostrarCreditosUsuario();
             //cargarReservas();
 
             await logCredito({
@@ -912,7 +911,7 @@
                 //reservaMsg.innerHTML = `Reserva eliminada correctamente.<br>Se han sumado ${reservasEliminadas} clases a tus créditos.`;
                 reservaMsg.innerHTML = `Reserva eliminada correctamente.<br>Se han sumado una clase a tus créditos.`;
 
-                if (typeof mostrarCreditosUsuario === "function") mostrarCreditosUsuario();
+                //if (typeof mostrarCreditosUsuario === "function") mostrarCreditosUsuario();
                 cargarReservasDelDia(fechaStr, "contar");
 
                 //if (calendar) calendar.render();
