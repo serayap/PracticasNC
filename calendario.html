@@ -21,7 +21,7 @@
         function actualizarUI() {
             document.getElementById('tituloReservas').textContent = `Reservas de prácticas con Carlos`;
 
-            mostrarCreditosUsuario();
+            //mostrarCreditosUsuario();
             cargarTimeSlots();
             cargarDias();
             cargarReservas();
@@ -38,6 +38,26 @@
         }
         const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
 
+        function escucharCreditosUsuario(docId) {
+            return db.collection('usuariosregistrados')
+                .doc(docId)
+                .onSnapshot(doc => {
+                    if (doc.exists) {
+                        const datos = doc.data();
+                        const creditos = datos.creditos != null ? Number(datos.creditos) : 0;
+                        const nombre = capitalizarPrimeraLetra(datos.nombre || "");
+                        document.getElementById("creditosUsuario").textContent =
+                            `Clases para reservar de ${nombre}: ${creditos}`;
+                    } else {
+                        document.getElementById("creditosUsuario").textContent = "No disponible";
+                    }
+                }, error => {
+                    document.getElementById('creditosUsuario').textContent = 'Error';
+                    console.error("Error listener créditos:", error);
+                });
+        }
+
+
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         // Inicializa Firestore si no lo has hecho
@@ -47,11 +67,9 @@
 
         auth.onAuthStateChanged(async user => {
             if (!user) {
-                console.log("No hay usuario autenticado");
                 window.location.href = "index.html";
                 return;
             }
-            console.log("Usuario autenticado:", user.uid);
             
             try {
                 const q = await db.collection('usuarios_registrados')
@@ -64,14 +82,16 @@
                     usuarioActual.perfil = q.docs[0].data().perfil;
                     usuarioActual.uid = user.uid;
                     usuarioActual.info = q.docs[0].data().info;
-                    console.log("Documento usuario actual:", usuarioActual.id);
                     // Control de acceso por perfil
                     if (usuarioActual.perfil !== "alumno") {
                         window.location.href = "index.html";
                         return;
                     }
 
-                    document.body.classList.remove("oculto");                    
+                    document.body.classList.remove("oculto"); 
+
+                    if (window.unsubscribeCreditos) window.unsubscribeCreditos();
+                    window.unsubscribeCreditos = escucharCreditosUsuario(usuarioActual.id);
 
                     if (document.readyState === 'loading') {                        
                         document.addEventListener('DOMContentLoaded', actualizarUI);
@@ -313,20 +333,26 @@
                 return doc;
             }
             return null;
-        }        
-
-        // Muestra créditos del usuario usando la caché anterior.
+        }
+        
         async function mostrarCreditosUsuario() {
-            const doc = await getUsuarioRegistradoDoc(usuarioActual.uid);
-            if (!doc) {
-                document.getElementById("creditosUsuario").textContent = "No disponible";
-                return;
+            try {
+                //const doc = await getUsuarioRegistradoDoc(usuarioActual.uid);
+                const doc = await db.collection('usuariosregistrados').doc(usuarioActual.id).get({ source: 'server' });
+                if (!doc.exists) {
+                    document.getElementById("creditosUsuario").textContent = "No disponible";
+                    return;
+                }
+                const datos = doc.data();
+                const creditos = (datos.creditos != null) ? Number(datos.creditos) : 0;
+                const nombre = capitalizarPrimeraLetra(datos.nombre || "");
+                document.getElementById("creditosUsuario").textContent = `Clases para reservar de ${nombre}: ${creditos}`;
+                localStorage.setItem(`usuarioDoc_${usuarioActual.id}`, JSON.stringify(doc.data()));
+                if (!datos.info) popupInfo.style.display = 'flex';
+            } catch (err) {
+                document.getElementById('creditosUsuario').textContent = 'No disponible';
+                console.error('Error mostrando créditos:', err);
             }
-            const datos = doc.data();
-            const creditos = (datos.creditos != null) ? Number(datos.creditos) : 0;
-            const nombre = capitalizarPrimeraLetra(datos.nombre || "");
-            document.getElementById("creditosUsuario").textContent = `Clases para reservar de ${nombre}: ${creditos}`;
-            if (!datos.info) popupInfo.style.display = 'flex';
         }        
 
 
