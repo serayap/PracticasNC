@@ -46,8 +46,7 @@
                         const datos = doc.data();
                         const creditos = datos.creditos != null ? Number(datos.creditos) : 0;
                         const nombre = capitalizarPrimeraLetra(datos.nombre || "");
-                        document.getElementById("creditosUsuario").textContent =
-                            `Clases para reservar de ${nombre}: ${creditos}`;
+                        document.getElementById("creditosUsuario").textContent = `Clases para reservar de ${nombre}: ${creditos}`;
                     } else {
                         document.getElementById("creditosUsuario").textContent = "No disponible";
                     }
@@ -90,7 +89,7 @@
                     document.body.classList.remove("oculto"); 
 
                     if (window.unsubscribeCreditos) window.unsubscribeCreditos();
-                    window.unsubscribeCreditos = escucharCreditosUsuario(usuarioActual.id);
+                    window.unsubscribeCreditos = escucharCreditosUsuario(usuarioActual.uid);
 
                     if (document.readyState === 'loading') {                        
                         document.addEventListener('DOMContentLoaded', actualizarUI);
