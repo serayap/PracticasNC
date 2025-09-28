@@ -39,7 +39,7 @@
         const firebaseConfig = dct("U2FsdGVkX1/wVoGGAPam24EP2C4b4c5OTPYzVoVmcY3hFxXHl+PfMkhFPUbKc8cRmwTvM44kMrg2sXgyT1mMB5/t3bUiIjIQDe1suqcD2SMvW7RVdJ1jCasaAMGo7a529bxkmCH6zKx+5iysRXw5PIzCKpUh1IGyItrCekPNJjt6zk4g8tP3qDNZizE4u62WVlvG4tp68iHasgwgYWkgzHhuN5/aYc4cRumfEDLPzz1Yf0EbSk3QM5QeGQDGficRCyNbgyaFbqj83wnjHWX4kZQ2iKddEdtNUqqjYHe0Mc0n5YI31rLP5o9dtAONCrrFRadsW0bfVC1ZCQWm5/JoLsi/6Xgxv0Oy3f7b8ncnNbCtsiYZhkgsPn7v2TU+CH/LBm5rUeVTji6lKNh2CYHs+A==");
 
         function escucharCreditosUsuario(docId) {
-            //console.log(docId);
+            console.log("docId: " + docId);
             return db.collection('usuariosregistrados')
                 .doc(docId)
                 .onSnapshot(doc => {
@@ -74,7 +74,7 @@
                     .where('usuarioId', '==', user.uid)
                     .get();
                 if (!q.empty) {
-                    usuarioActual.id = q.docs[0].id;
+                    usuarioActual.id = q.docs[0].data().id;
                     usuarioActual.nombre = q.docs[0].data().nombre;
                     usuarioActual.email = q.docs[0].data().email;
                     usuarioActual.perfil = q.docs[0].data().perfil;
