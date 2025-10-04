@@ -254,11 +254,20 @@
 
         // --- Carga los días laborables para selección de fechas ---
         // No requiere caché, ya que se calcula localmente y es muy eficiente.
-        function cargarDias() {
+        async function cargarDias() {
             const selectDia = document.getElementById('dia');
             selectDia.innerHTML = "";
             const hoy = new Date();
-            for (let i = 1; i < 15; i++) {
+
+            const examen = await db.collection("reservas")
+                .where("usuarioId", "==", usuarioActual.id)
+                .where("estado", "==", "examen")
+                .get();
+            
+            let ndias = 15;
+            if (!examen.empty) ndias = 22;             
+            
+            for (let i = 1; i < ndias; i++) {
                 const fecha = new Date(hoy);
                 fecha.setDate(hoy.getDate() + i);
                 const diaSemana = fecha.getDay();

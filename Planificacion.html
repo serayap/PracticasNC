@@ -666,6 +666,7 @@
             try {
                 const snapshot = await db.collection("usuarios_registrados")
                     .where("perfil", "==", "alumno")
+                    .where("habilitado", "==", true)
                     .orderBy("nombre") // Opcional: ordena por nombre
                     .get();
 
