@@ -2144,7 +2144,7 @@
             try {
                 // Obtiene solo los horarios activados y los ordena por 'orden'
                 const snapshot = await db.collection("horarios")
-                    .where("Activado", "==", true)
+                    .where("Activo", "==", true)
                     .orderBy("orden", "asc")
                     .get();
 

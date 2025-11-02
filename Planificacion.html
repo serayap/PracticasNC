@@ -619,7 +619,7 @@
             try {
                 // Obtiene solo los horarios activados y los ordena por 'orden'
                 const snapshot = await db.collection("horarios")
-                    .where("Activado", "==", true)
+                    .where("Activo", "==", true)
                     .orderBy("orden", "asc")
                     .get();
 
@@ -628,7 +628,7 @@
                 snapshot.forEach(doc => {
                     timeSlots.push(doc.id); // el ID es el tramo, ej: "09:00 a 10:20"
                 });
-
+                
                 if (timeSlots.length > 0) {
                     createCalendar();
                 } else {
