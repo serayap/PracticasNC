@@ -135,10 +135,10 @@
                             <label for="hora">Hora:</label>
                             <select id="hora" required></select>
                         </div>-->
-                        <div class="form-row">
+                        <!--<div class="form-row">
                             <input type="checkbox" id="bloqueSemana" class="block-week">
                             <label for="bloqueSemana">Reservar este horario para 5 dias seguidos</label>
-                        </div>
+                        </div>-->
                         <button type="submit" class="cta-btn-solicitar">Solicitar reserva</button>
                         <div id="addreservaMsg"></div>
                     </form>
@@ -297,13 +297,19 @@
                 }
             }
             try {
-                const doc = await db.collection("configuracion").doc("horarios").get();
-                timeSlots = doc.data().slots;
+                const snapshot = await db.collection("horarios")
+                    .where("Activo", "==", true)
+                    .orderBy("orden", "asc")
+                    .get();
+                timeSlots = [];
+                snapshot.forEach(doc => {
+                    timeSlots.push(doc.id); // el id es el tramo horario
+                });
                 localStorage.setItem(cacheKey, JSON.stringify(timeSlots));
                 cargarOpcionesHorarios();
             } catch (error) {
                 console.error("Error al cargar los tramos horarios:", error);
-                timeSlots = ["07:30 a 08:50", "09:00 a 10:20", "10:30 a 11:50", "12:00 a 13:20", "13:30 a 14:50"];
+                timeSlots = ["07:30 a 08:50", "08:50 a 10:10", "10:10 a 11:30", "11:30 a 12:50", "12:50 a 14:10", "15:10 a 16:30", "16:30 a 17:50", "17:50 a 19:10", "19:10 a 20:30", "20:30 a 21:50"];
                 cargarOpcionesHorarios();
             }
         }
@@ -380,8 +386,10 @@
                 alert("No se encontró el div con id 'calendar'");
                 return;
             }
+
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
+                //initialDate: '2025-10-27', // fecha de prueba
                 locale: 'es',
                 firstDay: 1,
                 aspectRatio: 0.8,
@@ -389,9 +397,9 @@
                 fixedWeekCount: false,
                 expandRows: false,
                 headerToolbar: {
-                    left: '',
+                    left: 'prev',   // botones de mes anterior y siguiente habilitados prev,next
                     center: 'title',
-                    right: ''
+                    right: 'next'
                 },
                 dayCellContent: function (info) {
                     const fechaLocal = new Date(info.date.getTime() - (info.date.getTimezoneOffset() * 60000)).toISOString().slice(0, 10);
@@ -402,10 +410,17 @@
                     if (reservas.confirmadas > 0) dotc = `<span style="display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #4CAF50;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.confirmadas}</span>`;
                     return { html: info.dayNumberText + dote + dotp + dotc };
                 },
-                dateClick: info => cargarReservasDelDia(info.dateStr, "listado")
+                dateClick: info => cargarReservasDelDia(info.dateStr, "listado"),
+                // Ninguna lógica para botones adicionales aquí
+                datesSet: function (info) {
+                    // Aquí puedes colocar otras lógicas que necesites, pero sin botón siguiente
+                }
             });
+
             calendar.render();
-        }     
+        }
+
+     
 
         // --- Carga reservas para un día con caché dual (memoria + localStorage) para ahorro de lecturas ---
         async function cargarReservasDelDia(fechaStr, tipo) {
@@ -422,7 +437,7 @@
                     try {
                         const cacheObj = JSON.parse(cacheRaw);
                         if (Date.now() - cacheObj.timestamp < cacheTTL) {
-                            mostrarReservasEnLista(cacheObj.data);
+                            mostrarReservasEnLista(cacheObj.data, timeSlots);
                             return;
                         } else {
                             localStorage.removeItem(cacheKey);
@@ -464,7 +479,7 @@
                     cacheReservasPorDia[fechaStr] = reservas;
                     localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: reservas }));
 
-                    mostrarReservasEnLista(reservas);
+                    mostrarReservasEnLista(reservas, timeSlots);
                 } catch (error) {
                     console.error("Error:", error);
                     lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
@@ -522,7 +537,7 @@
         }
 
         // --- Muestra la lista de reservas del día en el DOM ---
-        function mostrarReservasEnLista(reservas) {
+        function mostrarReservasEnListaOLD(reservas) {
             const lista = document.getElementById('lista-reservas-dia');
             lista.innerHTML = '';
             reservas.forEach(reserva => {
@@ -536,6 +551,41 @@
                 lista.appendChild(div);
             });
         }
+
+        function mostrarReservasEnLista(reservas, timeSlots) {
+            const lista = document.getElementById('lista-reservas-dia');
+            lista.innerHTML = '';
+            
+            // Crea un mapa rápido con horas ocupadas
+            const horasOcupadas = new Map();
+            reservas.forEach(reserva => {
+                horasOcupadas.set(reserva.hora, reserva);
+            });
+
+            timeSlots.forEach(slotHora => {
+                const div = document.createElement('div');
+
+                if (horasOcupadas.has(slotHora)) {
+                    const reserva = horasOcupadas.get(slotHora);
+                    div.className = `reserva-dia-item ${reserva.estado}`;
+                    div.innerHTML = `
+            <div class="reserva-hora">
+                <span class="hora">${reserva.hora}</span>
+                <span class="estado ${reserva.estado}">${reserva.estado}</span>
+            </div>`;
+                } else {
+                    // Tramo horario libre
+                    if (slotHora != "15:10 a 16:30" && slotHora != "20:30 a 21:50") {
+                        div.className = 'reserva-dia-item libre';
+                        div.innerHTML = `<div class="reserva-hora"> <span class="hora">${slotHora}</span> <span class="estado libre">libre</span> </div>`;
+                        div.style.backgroundColor = '#f0f0f0'; // gris claro
+                    }
+                }
+
+                lista.appendChild(div);
+            });
+        }
+
 
         // --- Muestra sólo reservas activas y futuras del usuario, filtrando y ordenando ---
         function mostrarReservasUsuario() {
@@ -986,7 +1036,7 @@
         <p>Aquí puedes ver todas las reservas solicitadas al profesor de practicas. Verás el numero de clases que te quedan por realizar. Podrás solicitar practicas, anularlas y ver si el profesor las ha confirmado.</p>
         <ul>
             <li><strong>Calendario:</strong> Podrás ver todas las peticiones de reservas al profesor de practicas solicitadas por todos los alumnos, ya esten pendientes de confirmar por él, ó bien ya confirmadas.</li>
-            <li><strong>Nueva solicitud de reserva:</strong> Podrás solicitar una reserva, eligiendo el dia y hora. Si chequeas la opcion de "Reservar este horario para 5 dias seguidos" se haran reserva de 5 dias a partir del dia elegido y a la misma hora.</li>
+            <li><strong>Nueva solicitud de reserva:</strong> Podrás solicitar una reserva, eligiendo el dia y hora.<!--Si chequeas la opcion de "Reservar este horario para 5 dias seguidos" se haran reserva de 5 dias a partir del dia elegido y a la misma hora.</li>-->
             <li><strong>Mis solicitudes de reserva:</strong> Visualizarás un listado con sólo tus solicitudes de reservas de prácticas. En el listado podrás anular las solicitudes, ya estén en el estado de "pendientes" ó "confirmadas" en el propio boton donde se indica su estado. Pero ten en cuenta que las confirmadas tienen un límite para su anulación de hasta 24 horas antes del dia y hora de las reserva.</li>
             <li><strong>Reservas del día:</strong> Si haces clic en una fecha del calendario, visualizaras en este apartado todas las reservas solicitadas por todos los alumnos para ese dia tanto si están pendientes como confirmadas.</li>
         </ul>
