@@ -628,7 +628,7 @@
                 snapshot.forEach(doc => {
                     timeSlots.push(doc.id); // el ID es el tramo, ej: "09:00 a 10:20"
                 });
-                
+                //console.log(timeSlots);
                 if (timeSlots.length > 0) {
                     createCalendar();
                 } else {
@@ -642,6 +642,7 @@
                 timeSlots = ["07:30 a 08:50", "08:50 a 10:10", "10:10 a 11:30", "11:30 a 12:50", "12:50 a 14:10", "15:10 a 16:30", "16:30 a 17:50", "17:50 a 19:10", "19:10 a 20:30", "20:30 a 21:50"];
                 createCalendar();
             }
+            cargarHoras();
         }
 
         // Utilidad: formato YYYY-MM-DD
@@ -679,7 +680,7 @@
 
             // Limpia las opciones anteriores
             selectHora.innerHTML = '';
-
+            
             timeSlots.forEach(timeslot => {
                 const option = document.createElement('option');
                 option.value = timeslot;
