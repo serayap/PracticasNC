@@ -554,10 +554,31 @@
 
         function mostrarReservasEnLista(reservas, timeSlots) {
             const lista = document.getElementById('lista-reservas-dia');
+            let esViernes;
             lista.innerHTML = '';
-            
+
+            if (reservas.length > 0) {
+                const fechaDelDia = reservas[0].fecha || reservas[0].dia;
+
+                let fecha;
+
+                if (fechaDelDia && typeof fechaDelDia === 'object' && fechaDelDia.seconds) {
+                    fecha = new Date(fechaDelDia.seconds * 1000);
+                } else if (fechaDelDia && fechaDelDia.toDate) {
+                    fecha = fechaDelDia.toDate();
+                } else {
+                    fecha = new Date(fechaDelDia);
+                }
+
+                esViernes = fecha.getDay() === 5;
+                //console.log("Es viernes?:", esViernes);
+            }
+
+
+
             // Crea un mapa rápido con horas ocupadas
             const horasOcupadas = new Map();
+            
             reservas.forEach(reserva => {
                 horasOcupadas.set(reserva.hora, reserva);
             });
@@ -574,11 +595,13 @@
                 <span class="estado ${reserva.estado}">${reserva.estado}</span>
             </div>`;
                 } else {
-                    // Tramo horario libre
-                    if (slotHora != "15:10 a 16:30" && slotHora != "20:30 a 21:50") {
-                        div.className = 'reserva-dia-item libre';
-                        div.innerHTML = `<div class="reserva-hora"> <span class="hora">${slotHora}</span> <span class="estado libre">libre</span> </div>`;
-                        div.style.backgroundColor = '#f0f0f0'; // gris claro
+                    if (!esViernes) {
+                        // Tramo horario libre
+                        if (slotHora != "15:10 a 16:30" && slotHora != "20:30 a 21:50") {
+                            div.className = 'reserva-dia-item libre';
+                            div.innerHTML = `<div class="reserva-hora"> <span class="hora">${slotHora}</span> <span class="estado libre">libre</span> </div>`;
+                            div.style.backgroundColor = '#f0f0f0'; // gris claro
+                        }
                     }
                 }
 
