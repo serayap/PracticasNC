@@ -29,7 +29,6 @@
             document.getElementById('formReserva').addEventListener('submit', crearReserva);
             document.getElementById('contenidoAyuda').innerHTML = ayudaCalendario;
             document.getElementById('contenidoInfo').innerHTML = infoNormas;
-            document.getElementById('contenidoHolidays').innerHTML = infoVacaciones;
         }
 
         function dct(e) {
@@ -103,11 +102,11 @@
                     }
                 } else {
                     console.log("No existe documento para ese usuarioId en usuarios_registrados");
-                    window.location.href = "index.html";
+                    //window.location.href = "index.html";
                 }
             } catch (err) {
                 console.log("Error buscando documento de usuario registrado:", err);
-                window.location.href = "index.html";
+                //window.location.href = "index.html";
             }
         });
 
@@ -810,6 +809,10 @@
             const data = vacacionesprofe.docs[0].data();
             const inicioVac = data.fechainivacaciones?.toDate ? data.fechainivacaciones.toDate() : new Date(data.fechainivacaciones);
             const finVac = data.fechafinvacaciones?.toDate ? data.fechafinvacaciones.toDate() : new Date(data.fechafinvacaciones);
+
+            const infoVacaciones = `<h3>Estaré de vacaciones desde el ${inicioVac.toLocaleDateString('es-ES')} hasta el ${finVac.toLocaleDateString('es-ES')}.</h3>`;
+            document.getElementById('contenidoHolidays').innerHTML = infoVacaciones;
+
             const fechaDia = new Date(dia);
             if (fechaDia >= inicioVac && fechaDia <= finVac) {
                 popupHolidays.style.display = 'flex';
@@ -1035,8 +1038,6 @@
         
         const popupHolidays = document.getElementById('popupHolidays');
         const closeVacacionesBtn = document.querySelector('.closeHolidays');
-
-        const infoVacaciones = `<h3>Durante este dia no impartiré clases prácticas por encontrarme de vacaciones</h3>`;
 
         const popupInfo = document.getElementById('popupInfo');
         const btnInfo = document.getElementById('btnInfo');
