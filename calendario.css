@@ -733,10 +733,10 @@ body.oculto {
         border-radius: 15px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
         /* ? TAMAÑO AUMENTADO */
-        max-width: 600px; /* De 400px a 600px */
-        width: 85%; /* Más ancho */
+        max-width: 1000px; /* De 400px a 1000px */
+        width: 90%; /* Más ancho */
         max-height: 85vh; /* Más alto */
-        min-height: 300px; /* Altura mínima mayor */
+        min-height: 600px; /* Altura mínima mayor */
         overflow-y: auto;
     }
 
@@ -748,7 +748,7 @@ body.oculto {
     }
 
     #popupInfo p {
-        font-size: 1.4em; /* Texto más grande */
+        font-size: 1.8em; /* Texto más grande */
         line-height: 1.6;
         margin-bottom: 25px;
         color: #555;
