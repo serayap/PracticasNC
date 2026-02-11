@@ -711,33 +711,79 @@ body.oculto {
             vertical-align: middle;
         }
 
-/* Contenedor padre que cubre toda la pantalla */
+/* Contenedor padre - MÁS GRANDE */
 #popupInfo {
-    display: none; /* Oculto por defecto */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
-    /* ? FLEXBOX para centrar el contenido */
+    background-color: rgba(0, 0, 0, 0.6);
     display: flex;
-    justify-content: center; /* Horizontal */
-    align-items: center; /* Vertical */
+    justify-content: center;
+    align-items: center;
     z-index: 1000;
 }
 
-    /* El contenido del popup */
+    /* Contenido del popup - VENTANA MÁS GRANDE */
     #popupInfo .popup-content {
         background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        max-width: 400px;
-        width: 90%;
-        max-height: 80vh;
+        padding: 40px; /* Más padding interno */
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        /* ? TAMAÑO AUMENTADO */
+        max-width: 600px; /* De 400px a 600px */
+        width: 85%; /* Más ancho */
+        max-height: 85vh; /* Más alto */
+        min-height: 300px; /* Altura mínima mayor */
         overflow-y: auto;
     }
+
+    /* FUENTE MÁS GRANDE */
+    #popupInfo h2 {
+        font-size: 2.2em; /* Título más grande */
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    #popupInfo p {
+        font-size: 1.4em; /* Texto más grande */
+        line-height: 1.6;
+        margin-bottom: 25px;
+        color: #555;
+    }
+
+    /* Botones más grandes */
+    #popupInfo button {
+        font-size: 1.3em; /* Botón más grande */
+        padding: 15px 35px; /* Más padding */
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        background: #007bff;
+        color: white;
+        transition: background 0.3s;
+    }
+
+        #popupInfo button:hover {
+            background: #0056b3;
+        }
+
+    /* Botón cerrar más grande */
+    #popupInfo .close {
+        font-size: 36px; /* Más grande */
+        font-weight: bold;
+        cursor: pointer;
+        color: #999;
+        float: right;
+        margin-bottom: 15px;
+    }
+
+        #popupInfo .close:hover {
+            color: #333;
+        }
+
 
 
 
