@@ -100,6 +100,10 @@
                     } else {
                         actualizarUI();
                     }
+
+                    if(usuarioActual.info === false) {
+                        mostrarPopupInfo();
+                    }
                 } else {
                     console.log("No existe documento para ese usuarioId en usuarios_registrados");
                     //window.location.href = "index.html";
@@ -216,6 +220,10 @@
         let cacheReservasPorDia = {};  // Caché local (memoria) para reservas por día: evita lecturas repetidas
 
         // ====================== UTILIDADES GENERALES ======================
+
+        function mostrarPopupInfo() {
+            document.getElementById('popupInfo').style.display = 'block';
+        }
 
         /**
          * Devuelve la cadena con la primera letra mayúscula en cada palabra.
