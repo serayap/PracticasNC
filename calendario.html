@@ -292,17 +292,18 @@
         // --- Carga tramos horarios con caché local para minimizar lecturas ---
         // Sotene caché en localStorage con JSON. Actualiza solo si no está cacheado.
         async function cargarTimeSlots() {
-            const cacheKey = "timeSlotsCache";
+            /*const cacheKey = "timeSlotsCache";
             const cacheData = localStorage.getItem(cacheKey);
             if (cacheData) {
                 try {
                     timeSlots = JSON.parse(cacheData);
+                    console.log("cachedata");
                     cargarOpcionesHorarios();
                     return;
                 } catch {
                     localStorage.removeItem(cacheKey);
                 }
-            }
+            }*/
             try {
                 const snapshot = await db.collection("horarios")
                     .where("Activo", "==", true)
@@ -312,11 +313,13 @@
                 snapshot.forEach(doc => {
                     timeSlots.push(doc.id); // el id es el tramo horario
                 });
-                localStorage.setItem(cacheKey, JSON.stringify(timeSlots));
+                //localStorage.setItem(cacheKey, JSON.stringify(timeSlots));
+                console.log("localStorage");
                 cargarOpcionesHorarios();
             } catch (error) {
                 console.error("Error al cargar los tramos horarios:", error);
                 timeSlots = ["07:30 a 08:50", "08:50 a 10:10", "10:10 a 11:30", "11:30 a 12:50", "12:50 a 14:10", "15:10 a 16:30", "16:30 a 17:50", "17:50 a 19:10", "19:10 a 20:30", "20:30 a 21:50"];
+                console.log("error");
                 cargarOpcionesHorarios();
             }
         }
