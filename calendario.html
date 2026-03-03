@@ -613,6 +613,14 @@
                             div.style.backgroundColor = '#f0f0f0'; // gris claro
                         }
                     }
+                    if (esViernes) {
+                        // Tramo horario libre
+                        if (slotHora != "15:30 a 16:50" && slotHora != "16:50 a 18:10" && slotHora != "18:10 a 19:30" && slotHora != "19:30 a 20:50" && slotHora != "20:50 a 22:10") {
+                            div.className = 'reserva-dia-item libre';
+                            div.innerHTML = `<div class="reserva-hora"> <span class="hora">${slotHora}</span> <span class="estado libre">libre</span> </div>`;
+                            div.style.backgroundColor = '#f0f0f0'; // gris claro
+                        }
+                    }
                 }
 
                 lista.appendChild(div);
