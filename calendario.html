@@ -438,7 +438,7 @@
                 const lista = document.getElementById('lista-reservas-dia');
                 lista.innerHTML = '<div class="cargando">Cargando...</div>';
 
-                const cacheKey = `reservasDia_${fechaStr}`;
+                /*const cacheKey = `reservasDia_${fechaStr}`;
                 const cacheTTL = 3600 * 1000; // 1 hora
 
                 // Primero revisar caché localStorage con control de caducidad
@@ -455,7 +455,7 @@
                     } catch {
                         localStorage.removeItem(cacheKey);
                     }
-                }
+                }*/
 
                 // No hay caché válida, consulta Firebase
                 try {
@@ -474,8 +474,8 @@
 
                     if (querySnapshot.empty) {
                         lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día</em></div>';
-                        localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: [] }));
-                        cacheReservasPorDia[fechaStr] = [];
+                        //localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: [] }));
+                        //cacheReservasPorDia[fechaStr] = [];
                         return;
                     }
 
@@ -486,8 +486,8 @@
                     });
 
                     reservas.sort((a, b) => horaAminutos(a.hora) - horaAminutos(b.hora));
-                    cacheReservasPorDia[fechaStr] = reservas;
-                    localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: reservas }));
+                    //cacheReservasPorDia[fechaStr] = reservas;
+                    //localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: reservas }));
 
                     mostrarReservasEnLista(reservas, timeSlots);
                 } catch (error) {
