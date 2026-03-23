@@ -250,6 +250,11 @@
             }
         }
 
+        function horaAMinutos(horaStr) {
+            const [horas, minutos] = horaStr.split(':').map(Number);
+            return horas * 60 + minutos;
+        }
+
         // Utilidad de formato local para fechas
         function formatDateForDisplay(date) {
             return date.toLocaleDateString('es-ES', {
@@ -472,12 +477,17 @@
                         .where('estado', 'in', ['confirmada', 'pendiente', 'examen']);
                     const querySnapshot = await q.get();
 
-                    if (querySnapshot.empty) {
+                    /*if (querySnapshot.empty) {
                         lista.innerHTML = '<div class="sin-reservas"><em>No hay reservas este día</em></div>';
                         //localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: [] }));
                         //cacheReservasPorDia[fechaStr] = [];
+                        if (slotHora != "15:30 a 16:50" && slotHora != "16:50 a 18:10" && slotHora != "18:10 a 19:30" && slotHora != "19:30 a 20:50" && slotHora != "20:50 a 22:10") {
+                            div.className = 'reserva-dia-item libre';
+                            div.innerHTML = `<div class="reserva-hora"> <span class="hora">${slotHora}</span> <span class="estado libre">libre</span> </div>`;
+                            div.style.backgroundColor = '#f0f0f0'; // gris claro
+                        }
                         return;
-                    }
+                    }*/
 
                     const reservas = [];
                     querySnapshot.forEach(doc => {
@@ -489,7 +499,7 @@
                     //cacheReservasPorDia[fechaStr] = reservas;
                     //localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: reservas }));
 
-                    mostrarReservasEnLista(reservas, timeSlots);
+                    mostrarReservasEnLista(fechaStr, reservas, timeSlots);
                 } catch (error) {
                     console.error("Error:", error);
                     lista.innerHTML = '<div class="error">Error al cargar reservas</div>';
@@ -562,16 +572,16 @@
             });
         }
 
-        function mostrarReservasEnLista(reservas, timeSlots) {
+        function mostrarReservasEnLista(fechaStr, reservas, timeSlots) {
             const lista = document.getElementById('lista-reservas-dia');
-            let esViernes;
+            let esViernes = false;
             lista.innerHTML = '';
 
+            // 1. Determinar si es viernes
             if (reservas.length > 0) {
                 const fechaDelDia = reservas[0].fecha || reservas[0].dia;
 
                 let fecha;
-
                 if (fechaDelDia && typeof fechaDelDia === 'object' && fechaDelDia.seconds) {
                     fecha = new Date(fechaDelDia.seconds * 1000);
                 } else if (fechaDelDia && fechaDelDia.toDate) {
@@ -581,51 +591,73 @@
                 }
 
                 esViernes = fecha.getDay() === 5;
-                //console.log("Es viernes?:", esViernes);
+                //console.log("Es viernes (con reservas)?:", esViernes);
+            } else {
+                // No hay reservas: usar fechaStr
+                let fecha;
+                if (fechaStr && typeof fechaStr === 'object' && fechaStr.seconds) {
+                    fecha = new Date(fechaStr.seconds * 1000);
+                } else if (fechaStr && fechaStr.toDate) {
+                    fecha = fechaStr.toDate();
+                } else {
+                    fecha = new Date(fechaStr);
+                }
+
+                esViernes = fecha.getDay() === 5;
+                //console.log("No hay reservas, esViernes =", esViernes);
             }
 
-
-
-            // Crea un mapa rápido con horas ocupadas
+            // 2. Construir mapa de horas ocupadas
             const horasOcupadas = new Map();
-            
             reservas.forEach(reserva => {
                 horasOcupadas.set(reserva.hora, reserva);
             });
 
+            // 3. Recorrer todos los timeSlots
             timeSlots.forEach(slotHora => {
                 const div = document.createElement('div');
 
+                // FILTRO VIERNES: usar minutos en lugar de string
+                if (esViernes) {
+                    const inicio = slotHora.split(' a ')[0]; // "7:30"
+                    const minutosInicio = horaAMinutos(inicio);  // 450 minutos (7:30)
+                    const minutosLimite = horaAMinutos("15:30"); // 930 minutos (15:30)
+
+                    if (minutosInicio >= minutosLimite) {
+                        return; // descartar tarde
+                    }
+                }
+
+                // FILTRO LUNES-JUEVES
+                if (!esViernes && (slotHora === "15:10 a 16:30" || slotHora === "20:30 a 21:50")) {
+                    return;
+                }
+
+                // PROCESAR (ocupado o libre)
                 if (horasOcupadas.has(slotHora)) {
                     const reserva = horasOcupadas.get(slotHora);
                     div.className = `reserva-dia-item ${reserva.estado}`;
                     div.innerHTML = `
-            <div class="reserva-hora">
-                <span class="hora">${reserva.hora}</span>
-                <span class="estado ${reserva.estado}">${reserva.estado}</span>
-            </div>`;
+                    <div class="reserva-hora">
+                        <span class="hora">${reserva.hora}</span>
+                        <span class="estado ${reserva.estado}">${reserva.estado}</span>
+                    </div>`;
                 } else {
-                    if (!esViernes) {
-                        // Tramo horario libre
-                        if (slotHora != "15:10 a 16:30" && slotHora != "20:30 a 21:50") {
-                            div.className = 'reserva-dia-item libre';
-                            div.innerHTML = `<div class="reserva-hora"> <span class="hora">${slotHora}</span> <span class="estado libre">libre</span> </div>`;
-                            div.style.backgroundColor = '#f0f0f0'; // gris claro
-                        }
-                    }
-                    if (esViernes) {
-                        // Tramo horario libre
-                        if (slotHora != "15:30 a 16:50" && slotHora != "16:50 a 18:10" && slotHora != "18:10 a 19:30" && slotHora != "19:30 a 20:50" && slotHora != "20:50 a 22:10") {
-                            div.className = 'reserva-dia-item libre';
-                            div.innerHTML = `<div class="reserva-hora"> <span class="hora">${slotHora}</span> <span class="estado libre">libre</span> </div>`;
-                            div.style.backgroundColor = '#f0f0f0'; // gris claro
-                        }
-                    }
+                    div.className = 'reserva-dia-item libre';
+                    div.innerHTML = `
+                    <div class="reserva-hora">
+                        <span class="hora">${slotHora}</span>
+                        <span class="estado libre">libre</span>
+                    </div>`;
+                    div.style.backgroundColor = '#f0f0f0';
                 }
 
                 lista.appendChild(div);
             });
+
         }
+
+
 
 
         // --- Muestra sólo reservas activas y futuras del usuario, filtrando y ordenando ---
