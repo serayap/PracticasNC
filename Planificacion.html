@@ -204,6 +204,11 @@
                 border-color: #4c4c4c;
             }
 
+            .color-box.vehiculo, .reserva.vehiculo {
+                background-color: #fb530d;
+                border-color: #4c4c4c;
+            }
+
         .calendar-grid {
             display: grid;
             grid-template-columns: max-content repeat(5, minmax(50px, 1fr));
@@ -427,6 +432,15 @@
             letter-spacing: 0.4px;
         }
 
+        #reserva-vehiculo {
+            text-align: center;
+            color: #ef63f8;
+            font-size: 0.9em;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 0.4px;
+        }
+
         .selects-row {
             display: flex;
             align-items: center;
@@ -527,6 +541,10 @@
                 <div class="color-box examen"></div>
                 <span>Examen</span>
             </div>
+            <div class="leyenda-item">
+                <div class="color-box vehiculo"></div>
+                <span>Vehiculo</span>
+            </div>
         </div>
         <div class="examen-item">
             <h2 id="reserva-examen">Reservas para exámenes</h2>
@@ -543,7 +561,24 @@
                 <div id="examenMsg"></div>
             </form>
         </div>
-
+        <div class="examen-item">
+            <h2 id="reserva-examen">Reservas para taller</h2>
+            <form id="formTaller">
+                <div class="form-row selects-row">
+                    <label for="Vehiculo">Vehiculo:</label>
+                    <select id="taller" required>
+                        <option id="itv">ITV</option>
+                        <option id="taller">TALLER</option>
+                    </select>
+                    <label for="diat">Día:</label>
+                    <select id="diat" required></select>
+                    <label for="horat">Hora:</label>
+                    <select id="horat" required></select>
+                </div>
+                <button type="submit" class="cta-btn-solicitar">Reservar mantenimiento</button>
+                <div id="tallerMsg"></div>
+            </form>
+        </div>
     </div>
 
     <div class="seccion-derecha">
@@ -653,7 +688,9 @@
         // Cargar días de la semana actual y la siguiente
         function cargarDias() {
             const selectDia = document.getElementById('dia');
+            const selectDiat = document.getElementById('diat');
             selectDia.innerHTML = "";
+            selectDiat.innerHTML = "";
             const hoy = new Date();
             for (let i = 1; i < 15; i++) {
                 const fecha = new Date(hoy);
@@ -662,10 +699,14 @@
                 if (diaSemana !== 0 && diaSemana !== 6) { // Excluye sábados y domingos
                     const fechaISO = toISODate(fecha);
                     const texto = fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
-                    const option = document.createElement('option');
+                    const option = document.createElement('option');                    
                     option.value = fechaISO;
                     option.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
                     selectDia.appendChild(option);
+                    const optiont = document.createElement('option');
+                    optiont.value = fechaISO;
+                    optiont.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+                    selectDiat.appendChild(optiont);
                 }
 
             }
@@ -676,16 +717,24 @@
             //console.table(timeSlots);
             //let timeExams = ["08:00 a 08:30", "08:30 a 09:00", "09:00 a 09:30", "09:30 a 10:00", "10:00 a 10:30", "10:30 a 11:00", "11:00 a 11:30"];
             const selectHora = document.getElementById('hora');
+            const selectHorat = document.getElementById('horat');
             if (!selectHora) return;
+            if (!selectHorat) return;
 
             // Limpia las opciones anteriores
             selectHora.innerHTML = '';
+            selectHorat.innerHTML = '';
             
             timeSlots.forEach(timeslot => {
                 const option = document.createElement('option');
                 option.value = timeslot;
                 option.textContent = timeslot;
                 selectHora.appendChild(option);
+
+                const optiont = document.createElement('option');
+                optiont.value = timeslot;
+                optiont.textContent = timeslot;
+                selectHorat.appendChild(optiont)
             });
         }
 
@@ -818,7 +867,7 @@
                 const q = db.collection("reservas")
                     .where("fecha", ">=", firebase.firestore.Timestamp.fromDate(start))
                     .where("fecha", "<=", firebase.firestore.Timestamp.fromDate(end))
-                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen']) // Solo estos estados
+                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen', 'vehiculo']) // Solo estos estados
                     .orderBy('fecha', 'desc');
 
                 const querySnapshot = await q.get();
@@ -856,7 +905,7 @@
                         reservaElement.dataset.estado = estado;
                         reservaElement.dataset.email = reserva.usuarioEmail || ''; // Si tienes el email                                                   
                        
-                        if (estado === 'pendiente' || estado === 'confirmada' || estado === 'examen') {
+                        if (estado === 'pendiente' || estado === 'confirmada' || estado === 'examen' || estado === 'vehiculo') {
                             reservaElement.addEventListener('click', function (e) {
                                 e.stopPropagation();
                                 mostrarMenuContextual(reserva, reservaElement, estado);
@@ -1158,6 +1207,33 @@
             await createCalendar();
         });
 
+        document.getElementById('formTaller').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const vehiculoId = document.getElementById('taller').value;
+            const diat = document.getElementById('diat').value; // formato YYYY-MM-DD
+            const horat = document.getElementById('horat').value;
+
+            
+            // Convertir el día seleccionado a Timestamp de Firestore
+            const fechaTimestamp = firebase.firestore.Timestamp.fromDate(new Date(diat + "T00:00:00"));
+
+            // Crear la reserva en Firestore
+            await db.collection('reservas').add({
+                usuarioId: vehiculoId,
+                usuarioNombre: vehiculoId,
+                Apellidos: "",
+                fecha: fechaTimestamp, // Ahora es un Timestamp igual que 'timestamp'
+                hora: horat,
+                estado: "vehiculo",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            document.getElementById('tallerMsg').textContent = "Reserva de taller registrada correctamente.";
+            document.getElementById('tallerMsg').style.display = "block";
+            document.getElementById('formTaller').reset();
+            await createCalendar();
+        });
 
     </script>
 </body>
