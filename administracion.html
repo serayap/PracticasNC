@@ -425,6 +425,10 @@
                 border-color: #ef63f8;
             }
 
+            .reserva-dia-item.vehiculo {
+                border-color: #fb530d;
+            }
+
         @media (max-width: 900px) {
             .arriba {
                 flex-direction: column;
@@ -580,6 +584,10 @@
 
         .dot-examen {
             background-color: #ef63f8;
+        }
+
+        .dot-vehiculo {
+            background-color: #fb530d;
         }
 
         .form {
@@ -760,6 +768,11 @@
                     border: 1px solid #757575;
                 }
 
+                .reserva-hora .estado.vehiculo {
+                    background: #fb530d;
+                    color: #ef63f8;
+                    border: 1px solid #757575;
+                }
 
         #lista-reservas-dia, #datosAlumno, .reservasdia {
             display: flex;
@@ -1038,6 +1051,12 @@
             background-color: #ef63f8;
             border-color: #4c4c4c;
             text-align:center;
+        }
+
+        .reserva.vehiculo {
+            background-color: #fb530d;
+            border-color: #4c4c4c;
+            text-align: center;
         }
 
         .cta-btn-parte {
@@ -1386,6 +1405,12 @@
                 color: #7b1fa2 !important;
             }
 
+            #div-pdf .reserva.vehiculo {
+                background-color: #fb530d;
+                border-color: #4c4c4c;
+                text-align: center;
+            }
+
         /* ESPECÍFICO PARA HTML2PDF */
         @media print, screen {
             #div-pdf table {
@@ -1444,6 +1469,7 @@
                     <span class="leyenda-item"><span class="dot dot-pendiente"></span>Pendiente</span>
                     <span class="leyenda-item"><span class="dot dot-confirmada"></span>Confirmada</span>
                     <span class="leyenda-item"><span class="dot dot-examen"></span>Examen</span>
+                    <span class="leyenda-item"><span class="dot dot-vehiculo"></span>Vehiculo</span>
                 </div>
                 <div><button id="descargar-pdf" class="cta-btn-parte">Parte semanal</button></div>
                 <div id="contenedor-pdf"><div class="div-pdf" id="div-pdf"></div></div>
@@ -1930,7 +1956,7 @@
                 const q = db.collection("reservas")
                     .where("fecha", ">=", fechaInicio)
                     .where("fecha", "<=", fechaFin)
-                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen']); // Solo estos estados
+                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen', 'vehiculo']); // Solo estos estados
 
                 const querySnapshot = await q.get();
 
@@ -2123,8 +2149,8 @@
                     const fechaLocal = new Date(info.date.getTime() - (info.date.getTimezoneOffset() * 60000)).toISOString().slice(0, 10); // Formato YYYY-MM-DD local
 
                     // 2. Verifica que la fecha exista en reservasTodas
-                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0, examen: 0 };
-                    let dotp = '', dotc = '', dote = '';
+                    const reservas = reservasTodas[fechaLocal] || { confirmadas: 0, pendientes: 0, examen: 0, vehiculo: 0 };
+                    let dotp = '', dotc = '', dote = '', dotv = '';
                     if (reservas.examen > 0) {
                         dote = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #ef63f8;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.examen}</span>`;
                     }
@@ -2134,7 +2160,10 @@
                     if (reservas.confirmadas > 0) {
                         dotc = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #4CAF50;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.confirmadas}</span>`;
                     }
-                    return { html: info.dayNumberText + dote + dotp + dotc };
+                    if (reservas.vehiculo > 0) {
+                        dotv = `<span style = "display: inline-flex;justify-content: center;align-items: center;width: 18px;height: 18px;border-radius: 50%;background: #fb530d;color: white;font-size: 12px;font-weight: bold;margin-left: 4px;vertical-align: middle;line-height: 1;">${reservas.vehiculo}</span>`;
+                    }
+                    return { html: info.dayNumberText + dote + dotp + dotc + dotv };
                 }
             });
             calendar.render();
@@ -2149,26 +2178,28 @@
                     // Si reservasDelDia tiene la propiedad 'reservas' y es un array:
                     if (reservasDelDia && Array.isArray(reservasDelDia.reservas)) {
                         return reservasDelDia.reservas
-                            .filter(r => ['confirmada', 'pendiente', 'examen'].includes(r.estado)) // Incluye "examen"
+                            .filter(r => ['confirmada', 'pendiente', 'examen', 'vehiculo'].includes(r.estado)) // Incluye "examen"
                             .map(r => ({
                                 start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
                                 backgroundColor:
                                     r.estado === 'confirmada' ? '#4CAF50' :
                                         r.estado === 'examen' ? '#1976d2' : // Color especial para examen
-                                            '#FF9800',
+                                            r.estado === 'vehiculo' ? '#fb530d' :
+                                                '#FF9800',
                                 textColor: '#fff'
                             }));
                     }
                     // Si reservasDelDia ES un array directamente:
                     if (Array.isArray(reservasDelDia)) {
                         return reservasDelDia
-                            .filter(r => ['confirmada', 'pendiente', 'examen'].includes(r.estado))
+                            .filter(r => ['confirmada', 'pendiente', 'examen', 'vehiculo'].includes(r.estado))
                             .map(r => ({
                                 start: r.fecha.toDate ? r.fecha.toDate() : r.fecha,
                                 backgroundColor:
                                     r.estado === 'confirmada' ? '#4CAF50' :
                                         r.estado === 'examen' ? '#1976d2' :
-                                            '#FF9800',
+                                            r.estado === 'vehiculo' ? '#fb530d' :
+                                                '#FF9800',
                                 textColor: '#fff'
                             }));
                     }
@@ -2248,6 +2279,7 @@
                         if (reserva.estado === 'confirmada') reservasTodas[fechaStr].confirmadas++;
                         if (reserva.estado === 'pendiente') reservasTodas[fechaStr].pendientes++;
                         if (reserva.estado === 'examen') reservasTodas[fechaStr].examen++;
+                        if (reserva.estado === 'vehiculo') reservasTodas[fechaStr].vehiculo++;
                         //console.log("Datos cargados (LOCALES):", reservasTodas);
                     } else {
                         console.error("Documento sin campo 'fecha':", doc.id);
@@ -2590,7 +2622,7 @@
                 const q = db.collection("reservas")
                     .where("fecha", ">=", firebase.firestore.Timestamp.fromDate(start))
                     .where("fecha", "<=", firebase.firestore.Timestamp.fromDate(end))
-                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen']) // Solo estos estados
+                    .where('estado', 'in', ['confirmada', 'pendiente', 'examen','vehiculo']) // Solo estos estados
                     .orderBy('fecha', 'desc');
 
                 const querySnapshot = await q.get();
@@ -2629,7 +2661,7 @@
                         reservaElement.dataset.estado = estado;
                         reservaElement.dataset.email = reserva.usuarioEmail || ''; // Si tienes el email
 
-                        if (estado === 'pendiente' || estado === 'confirmada' || estado === 'examen') {
+                        if (estado === 'pendiente' || estado === 'confirmada' || estado === 'examen' || estado === 'vehiculo') {
                             reservaElement.addEventListener('click', function (e) {
                                 e.stopPropagation();
                                 mostrarMenuContextual(reserva, reservaElement, estado);
@@ -2640,6 +2672,7 @@
 
                         if (estado == 'confirmada') clases++;
                         if (estado == 'examen') examenes++;
+                        if (estado == 'vehiculo') vehiculo++;
                     }
 
                 });
@@ -2655,6 +2688,7 @@
             console.log('📅 Rango consultado:', { start: start.toISOString(), end: end.toISOString() });
 
             let examenes = 0;
+            let vehiculos = 0;
             let clases = 0;
 
             // Limpia reservas anteriores
@@ -2665,7 +2699,7 @@
             const q = db.collection('reservas')
                 .where('fecha', '>=', firebase.firestore.Timestamp.fromDate(start))
                 .where('fecha', '<=', firebase.firestore.Timestamp.fromDate(end))
-                .where('estado', 'in', ['confirmada', 'pendiente', 'examen']);
+                .where('estado', 'in', ['confirmada', 'pendiente', 'examen', 'vehiculo']);
 
             console.log('🔍 Consulta Firestore ejecutada...');
             const snapshot = await q.get();
@@ -2674,7 +2708,7 @@
 
             if (snapshot.empty) {
                 console.warn('⚠️  No hay reservas en este rango de fechas');
-                return { examenes: 0, clases: 0 };
+                return { examenes: 0, clases: 0, vehiculos: 0 };
             }
 
             // Lista de TODAS las celdas disponibles en el grid
@@ -2724,6 +2758,7 @@
 
                 if (estado === 'confirmada') clases++;
                 if (estado === 'examen') examenes++;
+                if (estado === 'vehiculo') vehiculos++;
             });
 
             console.log('📈 Totales:', { clases, examenes });
@@ -2860,6 +2895,7 @@
                 <strong style="color: #1976d2 !important;">
                     0 Confirmadas<br>
                     <span style="font-size: 18px;">0 Exámenes</span>
+                     <span style="font-size: 18px;">0 Vehiculos</span>
                 </strong>
             `;
             totalRow.appendChild(totalCell);
@@ -2968,7 +3004,7 @@
             const q = db.collection("reservas")
                 .where("fecha", ">=", fechaInicio)
                 .where("fecha", "<=", fechaFin)
-                .where('estado', 'in', ['confirmada', 'pendiente', 'examen']);
+                .where('estado', 'in', ['confirmada', 'pendiente', 'examen', 'vehiculo']);
 
             const querySnapshot = await q.get();
 
@@ -2976,7 +3012,8 @@
             const conteos = {
                 confirmadas: 0,
                 pendientes: 0,
-                examen: 0
+                examen: 0,
+                vehiculo: 0
             };
 
             if (!querySnapshot.empty) {
@@ -2992,6 +3029,9 @@
                         case 'examen':
                             conteos.examen++;
                             break;
+                        case 'vehiculo':
+                            conteos.vehiculo++;
+                            break;
                     }
                 });
             }
@@ -2999,6 +3039,7 @@
             reservasTodas[fechaStr].confirmadas = conteos.confirmadas;
             reservasTodas[fechaStr].pendientes = conteos.pendientes;
             reservasTodas[fechaStr].examen = conteos.examen;
+            reservasTodas[fechaStr].vehiculo = conteos.vehiculo;
 
             if (calendar) calendar.render();
         }
@@ -3051,12 +3092,13 @@
 
             const reservasConfirmadas = document.querySelectorAll('.reserva.confirmada');
             const reservasExamenes = document.querySelectorAll('.reserva.examen');
+            const reservasVehiculo = document.querySelectorAll('.reserva.vehiculo');
 
             const totalCell = document.getElementById('total-general');
             if (totalCell) {
                 totalCell.innerHTML = `
             <strong style="font-size: 16px;">
-                <span style="font-size: 16px;">${reservasConfirmadas.length} Clases prácticas<br>${reservasExamenes.length} Exámenes</span>
+                <span style="font-size: 16px;">${reservasConfirmadas.length} Clases prácticas<br>${reservasExamenes.length} Exámenes<br>${reservasVehiculo.length} Vehiculo</span>
             </strong>
         `;
                 console.log('✅ TOTALES ACTUALIZADOS:', reservasConfirmadas.length);
