@@ -622,7 +622,7 @@
                     const inicio = slotHora.split(' a ')[0]; // "7:30"
                     const minutosInicio = horaAMinutos(inicio);  // 450 minutos (7:30)
                     const minutosLimite = horaAMinutos("15:30"); // 930 minutos (15:30)
-
+                    
                     if (minutosInicio >= minutosLimite) {
                         return; // descartar tarde
                     }
@@ -821,7 +821,9 @@
                         
             const fechaDiaObj = new Date(dia);
             const esViernes = fechaDiaObj.getDay() === 5;
-            const [horaSolicitada, minutosSolicitados] = hora.split(":").map(Number);
+            const hora1 = hora.split("a");
+            const [horaSolicitada, minutosSolicitados] = hora1[0].split(":").map(Number);
+            //console.log(esViernes + " - " + hora1 + " - " + horaSolicitada + " - " + minutosSolicitados);
             if (esViernes && (horaSolicitada > 15 || (horaSolicitada === 15 && minutosSolicitados > 0))) {
                 reservaMsg.style.color = "#d32f2f";
                 reservaMsg.innerHTML = "No está permitido reservar horas posteriores a las 15:00h los viernes. Selecciona otro horario.";
