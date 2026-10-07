@@ -1405,10 +1405,11 @@
                 color: #7b1fa2 !important;
             }
 
-            #div-pdf .reserva.vehiculo {
-                background-color: #fb530d;
-                border-color: #4c4c4c;
+            div-pdf .reserva.vehiculo {
+                background-color: #fb530d !important;
+                border-color: #4c4c4c !important;
                 text-align: center;
+                color: #fff !important;
             }
 
         /* ESPECÍFICO PARA HTML2PDF */
@@ -1471,7 +1472,10 @@
                     <span class="leyenda-item"><span class="dot dot-examen"></span>Examen</span>
                     <span class="leyenda-item"><span class="dot dot-vehiculo"></span>Vehiculo</span>
                 </div>
-                <div><button id="descargar-pdf" class="cta-btn-parte">Parte semanal</button></div>
+                <div>
+                    <button id="descargar-pdf" class="cta-btn-parte">Parte semanal</button>
+                    <button onclick="abrirAlumnos()" class="cta-btn-parte">alumnos</button>
+                </div>
                 <div id="contenedor-pdf"><div class="div-pdf" id="div-pdf"></div></div>
                 <div class="seccion-derecha">
                     <div class="reservas-dia">
@@ -2424,8 +2428,19 @@
         document.getElementById('descargar-pdf').addEventListener('click', async function () {
             try {
                 // 1) Fecha base SIEMPRE actual
-                const today = new Date();
+                let today = new Date();
                 today.setHours(0, 0, 0, 0);
+
+                // Preguntar al usuario si quiere la semana anterior
+                const usarSemanaAnterior = confirm("¿Quieres descargar la semana anterior?");
+
+                // Si el usuario acepta → restamos 7 días
+                if (usarSemanaAnterior) {
+                    today.setDate(today.getDate() - 7);
+                } else {
+                    today.setDate(today.getDate());
+                }
+
                 const { start, end } = getWeekRange(today);
                 const weekDates = getWeekDatesArray(today);
 
@@ -2486,6 +2501,11 @@
                 alert('Error generando el parte semanal. Revisa la consola.');
             }
         });
+
+        // Escucha del botón Alumnos"
+        function abrirAlumnos() {
+            window.open("alumnos.html", "popupalumnos", "width=900,height=700");
+        }
 
         // Devuelve array de fechas para la UI
         function getWeekDatesArray_ANT(date) {
