@@ -879,6 +879,25 @@
                 querySnapshot.forEach(doc => {
                     const reserva = doc.data();
                     reserva.id = doc.id;
+
+                    // --- Añadir iniciales de los apellidos al nombre ---
+                    if (reserva.usuarioNombre && reserva.usuarioApellidos) {
+
+                        const nombre = reserva.usuarioNombre.trim();
+                        const apellidos = reserva.usuarioApellidos.trim();
+
+                        // Dividir apellidos en palabras
+                        const partes = apellidos.split(" ").filter(p => p.length > 0);
+
+                        if (partes.length >= 2) {
+                            const inicial1 = partes[0][0].toUpperCase();
+                            const inicial2 = partes[1][0].toUpperCase();
+
+                            // Nombre final con iniciales
+                            reserva.usuarioNombre = `${nombre} ${inicial1}${inicial2}`;
+                        }
+                    }
+
                     const fecha = reserva.fecha.toDate();
                     const fechaFormateada = formatDate(fecha);
                     const hora = reserva.hora.trim();
